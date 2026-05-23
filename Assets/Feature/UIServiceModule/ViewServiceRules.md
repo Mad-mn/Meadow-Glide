@@ -49,4 +49,11 @@ _viewService.HideView(ViewType.MainMenu);
 ## 6. Constraints
 - Never reference the Presenter from the View.
 - Never put business logic in the View.
-- Avoid calling `GameObject.SetActive` manually; use `ShowView`/`HideView`.
+## 7. Automation Tools
+### View Module Generator
+Use the editor tool via **Tools -> UI -> Create View Module**.
+- It creates the folder structure: `Assets/Feature/[Name]Module`.
+- It generates the `View` and `Presenter` scripts with proper inheritance and namespaces.
+- **New**: It automatically adds a new entry to the `ViewSettings` asset with the correct `PresenterTypeName` and a default `Address` (matching the view name).
+- **Important**: After generation, you must manually add the new view to the `ViewType` enum and then select it in the `ViewSettings` asset entry.
+

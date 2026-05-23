@@ -1,6 +1,7 @@
 using Feature.AddressableModule.Scripts.Installers;
 using Feature.GameStateModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
+using Feature.UIServiceModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
 
@@ -12,5 +13,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         AddressableModuleInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);
+        UIModuleInstaller.Install(Container);
     }
 }

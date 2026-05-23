@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6176fef4d46ba734f81c10693d388266, type: 3}
   m_Name: ViewSettings
   m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ViewSettings
-  _entries: []
+  _entries:
+  - ViewType: 1
+    Address: MainMenuView
+    PresenterTypeName: Feature.MainMenuViewModule.Scripts.MainMenuPresenter

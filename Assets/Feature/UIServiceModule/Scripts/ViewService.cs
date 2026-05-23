@@ -28,15 +28,8 @@ namespace Feature.UIServiceModule.Scripts {
             _container = container;
         }
 
-        private async UniTask InitializeIfNeeded() {
-            if (_settings != null) return;
-
-            var (root, settings) = await UniTask.WhenAll(_uiRootTask, _settingsTask);
-            
-            _uiRoot = root;
-            _settings = settings;
-            _configs = _settings.Entries.ToDictionary(x => x.ViewType);
-        }
+        public async UniTask Initialize() =>
+            await InitializeIfNeeded();
 
         public void ShowView<T>(ViewType viewType) where T : ViewBase {
             ShowViewTask<T>(viewType).Forget();
@@ -91,6 +84,16 @@ namespace Feature.UIServiceModule.Scripts {
 
         public bool IsViewOpen(ViewType viewType) {
             return _activeViews.ContainsKey(viewType);
+        }
+
+        private async UniTask InitializeIfNeeded() {
+            if (_settings != null) return;
+
+            var (root, settings) = await UniTask.WhenAll(_uiRootTask, _settingsTask);
+            
+            _uiRoot = root;
+            _settings = settings;
+            _configs = _settings.Entries.ToDictionary(x => x.ViewType);
         }
 
         private IPresenter CreatePresenter(ViewSettings.ViewConfigEntry config, ViewBase view) {

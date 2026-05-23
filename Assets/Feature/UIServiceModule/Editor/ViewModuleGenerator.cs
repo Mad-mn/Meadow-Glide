@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using System.IO;
+using System.Linq;
 
 namespace Feature.UIServiceModule.Editor {
     public class ViewModuleGenerator : EditorWindow {
@@ -36,9 +37,14 @@ namespace Feature.UIServiceModule.Editor {
             if (!Directory.Exists(prefabsPath)) Directory.CreateDirectory(prefabsPath);
 
             CreateViewScript(scriptsPath);
-            CreatePresenterScript(scriptsPath);
+            string presenterName = CreatePresenterScript(scriptsPath);
 
             AssetDatabase.Refresh();
+
+            // Note: We might need to wait for compilation to get the types, 
+            // but we can at least add the entry with strings/default values.
+            UpdateViewSettings(presenterName);
+
             EditorUtility.DisplayDialog("Success", $"Module {moduleFolderName} created!", "OK");
         }
 
@@ -54,7 +60,7 @@ namespace Feature.{_viewName}Module.Scripts {{
             File.WriteAllText(Path.Combine(path, $"{_viewName}.cs"), content);
         }
 
-        private void CreatePresenterScript(string path) {
+        private string CreatePresenterScript(string path) {
             string presenterName = _viewName.EndsWith("View") 
                 ? _viewName.Replace("View", "Presenter") 
                 : $"{_viewName}Presenter";
@@ -71,6 +77,44 @@ namespace Feature.{_viewName}Module.Scripts {{
     }}
 }}";
             File.WriteAllText(Path.Combine(path, $"{presenterName}.cs"), content);
+            return presenterName;
+        }
+
+        private void UpdateViewSettings(string presenterName) {
+            var guids = AssetDatabase.FindAssets("t:ViewSettings");
+            if (guids.Length == 0) {
+                Debug.LogWarning("ViewSettings asset not found. Please create one manually.");
+                return;
+            }
+
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var settings = AssetDatabase.LoadAssetAtPath<Scripts.ViewSettings>(path);
+
+            if (settings == null) return;
+
+            // Since we can't easily add to Enum via script without re-compilation,
+            // we just add a new entry to the list if possible.
+            // Note: You might need to manually update ViewType enum first.
+            
+            Undo.RecordObject(settings, "Add View Config");
+            
+            // We use reflection or a helper to add to the private list if needed, 
+            // but let's assume we can add to a public list or handle serialized property.
+            var serializedObject = new SerializedObject(settings);
+            var entriesProp = serializedObject.FindProperty("_entries");
+            
+            if (entriesProp != null) {
+                entriesProp.InsertArrayElementAtIndex(entriesProp.arraySize);
+                var element = entriesProp.GetArrayElementAtIndex(entriesProp.arraySize - 1);
+                
+                // Set default values. ViewType will be 0 (first value).
+                element.FindPropertyRelative("Address").stringValue = _viewName; 
+                element.FindPropertyRelative("PresenterTypeName").stringValue = $"Feature.{_viewName}Module.Scripts.{presenterName}";
+                
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(settings);
+                AssetDatabase.SaveAssets();
+            }
         }
     }
 }
