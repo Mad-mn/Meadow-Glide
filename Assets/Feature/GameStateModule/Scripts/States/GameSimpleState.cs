@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Feature.StateModule.Scripts.Base;
 
 namespace Feature.GameStateModule.Scripts.States {
@@ -11,7 +12,7 @@ namespace Feature.GameStateModule.Scripts.States {
         }
 
         public void Enter() {
-            _sceneLoadService.LoadSceneAsync(SceneType.GameSimple);
+            _sceneLoadService.LoadSceneAsync(SceneType.GameSimple).Forget();
         }
 
         public void Exit() { }

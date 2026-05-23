@@ -25,14 +25,7 @@ namespace Feature.GameStateModule.Scripts.States {
         }
 
         private async UniTaskVoid LoadMainMenuScene() {
-            _sceneLoadService.OnSceneLoadedAsync += OnLoadMainMenuScene;
-            _sceneLoadService.LoadSceneAsync(SceneType.MainMenu);
-        }
-
-        private void OnLoadMainMenuScene(SceneType sceneType) {
-            if(sceneType != SceneType.MainMenu)
-                return;
-            _sceneLoadService.OnSceneLoadedAsync -= OnLoadMainMenuScene;
+            await _sceneLoadService.LoadSceneAsync(SceneType.MainMenu);
             _viewService.ShowView<MainMenuView>(ViewType.MainMenu);
         }
     }
