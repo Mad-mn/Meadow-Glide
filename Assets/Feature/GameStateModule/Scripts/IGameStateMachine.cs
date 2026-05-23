@@ -1,7 +1,7 @@
-using Feature.StateModule.Scripts.Base;
+using System;
 
 namespace Feature.GameStateModule.Scripts {
     public interface IGameStateMachine {
-        void EnterState<T>() where T : IState;
+        void EnterState(Type stateType);
     }
 }

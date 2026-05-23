@@ -17,18 +17,25 @@ namespace Feature.GameStateModule.Scripts {
         }
 
         public void Initialize() {
-            EnterState<BootstrapState>();
+            EnterState(typeof(BootstrapState));
         }
 
-        public void EnterState<T>() where T : IState {
-            if (!_states.TryGetValue(typeof(T), out IState state))
+        public void EnterState(Type stateType){
+            if (!_states.TryGetValue(stateType, out IState state))
                 return;
             
             if(_currentState == state) return;
             
             _currentState?.Exit();
             _currentState = state;
+            _currentState.ChangeState += OnCompleteState;
+
             _currentState.Enter();
+        }
+
+        private void OnCompleteState(Type nextStateType) {
+            _currentState.ChangeState -= OnCompleteState;
+            EnterState(nextStateType);
         }
     }
 }
