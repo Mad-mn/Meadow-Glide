@@ -1,3 +1,4 @@
+using Feature.AddressableModule.Scripts.Installers;
 using Feature.GameStateModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
 {
     public override void InstallBindings()
     {
+        AddressableModuleInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);
     }
