@@ -13,6 +13,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<CircleColorProvider>(AddressConstants.CircleColorProvider);
             Container.BindAddressableAsset<LevelConfigProvider>(AddressConstants.LevelConfigProvider);
             Container.BindAddressableAsset<ViewSettings>(AddressConstants.ViewSettings);
+            Container.BindAddressableAsset<CircleParamsConfig>(AddressConstants.CircleParamsConfig);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             

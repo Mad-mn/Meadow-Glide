@@ -3,6 +3,7 @@ public static class AddressConstants
 {
     public const string Assets_Feature_CircleModule_Prefabs_CircleSegmentPrefab_prefab = "Assets/Feature/CircleModule/Prefabs/CircleSegmentPrefab.prefab";
     public const string CircleColorProvider = "CircleColorProvider";
+    public const string CircleParamsConfig = "CircleParamsConfig";
     public const string GircleModule = "GircleModule";
     public const string LevelConfigProvider = "LevelConfigProvider";
     public const string MainMenuView = "MainMenuView";

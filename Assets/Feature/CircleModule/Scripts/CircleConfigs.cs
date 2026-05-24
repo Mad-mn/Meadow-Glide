@@ -9,7 +9,6 @@ namespace Feature.CircleModule.Scripts
     public class CircleConfig : ScriptableObject
     {
         public int segmentCount = 4;
-        public float radius = 2f;
         public List<SegmentConfig> segments = new List<SegmentConfig>();
     }
 

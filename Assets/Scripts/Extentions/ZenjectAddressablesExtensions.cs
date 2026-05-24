@@ -12,7 +12,7 @@ public static class ZenjectAddressablesExtensions
     public static void BindAddressableAsset<T>(this DiContainer container, string addressKey)
     {
         container.Bind<UniTask<T>>()
-            .FromMethod(ctx => ctx.Container.Resolve<IAddressableService>().GetAsset<T>(addressKey))
+            .FromMethod(ctx => ctx.Container.Resolve<IAddressableService>().GetAsset<T>(addressKey).Preserve())
             .AsSingle();
 
         container.Bind<T>()
@@ -28,11 +28,15 @@ public static class ZenjectAddressablesExtensions
     public static void BindAddressableComponent<T>(this DiContainer container, string addressKey) where T : Component
     {
         container.Bind<UniTask<T>>()
-            .FromMethod(async ctx =>
+            .FromMethod(ctx =>
             {
-                var service = ctx.Container.Resolve<IAddressableService>();
-                var instance = await service.InstantiateAsync(addressKey);
-                return instance != null ? instance.GetComponent<T>() : null;
+                async UniTask<T> GetTask()
+                {
+                    var service = ctx.Container.Resolve<IAddressableService>();
+                    var instance = await service.InstantiateAsync(addressKey);
+                    return instance != null ? instance.GetComponent<T>() : null;
+                }
+                return GetTask().Preserve();
             })
             .AsSingle();
 
@@ -53,11 +57,15 @@ public static class ZenjectAddressablesExtensions
     public static void BindAddressablePrefabComponent<T>(this DiContainer container, string addressKey) where T : Component
     {
         container.Bind<UniTask<T>>()
-            .FromMethod(async ctx =>
+            .FromMethod(ctx =>
             {
-                var service = ctx.Container.Resolve<IAddressableService>();
-                var go = await service.GetAsset<GameObject>(addressKey);
-                return go != null ? go.GetComponent<T>() : null;
+                async UniTask<T> GetTask()
+                {
+                    var service = ctx.Container.Resolve<IAddressableService>();
+                    var go = await service.GetAsset<GameObject>(addressKey);
+                    return go != null ? go.GetComponent<T>() : null;
+                }
+                return GetTask().Preserve();
             })
             .AsSingle();
     }

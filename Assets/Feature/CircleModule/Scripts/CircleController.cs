@@ -12,14 +12,19 @@ namespace Feature.CircleModule.Scripts {
 
         private CircleConfig _currentConfig;
         private ICircleColorService _circleColorService;
+        private float _calculatedRadius;
+
+        public float Radius => _calculatedRadius;
+        public int SegmentCount => _currentConfig != null ? _currentConfig.segmentCount : 0;
 
         [Inject]
         public void InjectDependencies(ICircleColorService colorService) {
             _circleColorService = colorService;
         }
 
-        public void Setup(CircleConfig config) {
+        public void Setup(CircleConfig config, float radius) {
             _currentConfig = config;
+            _calculatedRadius = radius;
             BuildCircle();
         }
 
@@ -36,19 +41,22 @@ namespace Feature.CircleModule.Scripts {
             for (int i = 0; i < _currentConfig.segmentCount; i++) {
                 SegmentConfig segData;
                 if (_currentConfig.segments != null && i < _currentConfig.segments.Count) {
-                    segData = _currentConfig.segments[i];
-                }
-                else {
-                    // Fallback to default segment data based on circle config
+                    // Create a copy to avoid modifying the ScriptableObject data if we change radius
+                    var originalSeg = _currentConfig.segments[i];
                     segData = new SegmentConfig {
-                        radius = _currentConfig.radius, angle = anglePerSegment, colorType = CircleColorType.White
+                        colorType = originalSeg.colorType,
+                        radius = _calculatedRadius, // Force calculated radius
+                        angle = anglePerSegment
                     };
                 }
-
-                if (segData.radius <= 0)
-                    segData.radius = _currentConfig.radius;
-
-                segData.angle = anglePerSegment;
+                else {
+                    // Fallback to default segment data
+                    segData = new SegmentConfig {
+                        radius = _calculatedRadius, 
+                        angle = anglePerSegment, 
+                        colorType = CircleColorType.White
+                    };
+                }
 
                 float rotationAngle = i * anglePerSegment;
 

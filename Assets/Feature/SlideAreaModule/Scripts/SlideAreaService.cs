@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Feature.CircleModule.Scripts;
 using Feature.LevelModule.Scripts;
 using UnityEngine;
 using Zenject;
@@ -10,17 +11,22 @@ namespace Feature.SlideAreaModule.Scripts {
         
         private readonly DiContainer _container;
         private readonly UniTask<SlideArea> _slideAreaTask;
+        private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
+        private CircleParamsConfig _circleParamsConfig;
         
         private readonly List<SlideArea> _spawnedAreas = new List<SlideArea>();
         private SlideArea _slideAreaPrefab;
 
-        public SlideAreaService(DiContainer container, UniTask<SlideArea> slideAreaTask) {
+        public SlideAreaService(DiContainer container, UniTask<SlideArea> slideAreaTask, UniTask<CircleParamsConfig> circleParamsConfigTask) {
             _container = container;
             _slideAreaTask = slideAreaTask;
+            _circleParamsConfigTask = circleParamsConfigTask;
         }
 
         public async UniTask Initialize() {
+            //(_slideAreaPrefab, _circleParamsConfig) = await UniTask.WhenAll(_slideAreaTask, _circleParamsConfigTask);
             _slideAreaPrefab = await _slideAreaTask;
+            _circleParamsConfig = await _circleParamsConfigTask;
         }
 
         public void SpawnSlideAreas(LevelConfig levelConfig) {
@@ -35,8 +41,8 @@ namespace Feature.SlideAreaModule.Scripts {
                     continue;
                 }
 
-                float innerRadius = levelConfig.CircleConfigs[config.startCircleIndex].radius;
-                float outerRadius = levelConfig.CircleConfigs[config.endCircleIndex].radius+OUTER_POINT_OFFSET;
+                float innerRadius = _circleParamsConfig.GetRadius(config.startCircleIndex);
+                float outerRadius = _circleParamsConfig.GetRadius(config.endCircleIndex) + OUTER_POINT_OFFSET;
                 
                 SlideArea slideArea = _container.InstantiatePrefabForComponent<SlideArea>(_slideAreaPrefab);
                 slideArea.transform.position = Vector3.zero;

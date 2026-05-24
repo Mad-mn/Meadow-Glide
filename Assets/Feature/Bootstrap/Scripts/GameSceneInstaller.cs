@@ -1,5 +1,4 @@
-using Feature.LevelInitializeModule.Scripts.Installers;
-using Feature.SlideAreaModule.Scripts.Installers;
+using Feature.CircleModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
 

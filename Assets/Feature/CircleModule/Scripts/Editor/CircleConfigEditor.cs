@@ -51,7 +51,6 @@ namespace Feature.CircleModule.Scripts.Editor
             {
                 config.segments.Add(new SegmentConfig
                 {
-                    radius = config.radius,
                     angle = anglePerSegment,
                     colorType = CircleColorType.White
                 });
