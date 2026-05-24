@@ -1,5 +1,9 @@
 using Feature.AddressableModule.Scripts.Installers;
+using Feature.AssetBindingModule.Scripts.Installers;
+using Feature.ColorServiceModule.Scripts.Installers;
 using Feature.GameStateModule.Scripts.Installers;
+using Feature.LevelInitializeModule.Scripts.Installers;
+using Feature.LevelModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
 using UnityEngine;
@@ -11,8 +15,12 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
     public override void InstallBindings()
     {
         AddressableModuleInstaller.Install(Container);
+        AssetBindingModuleInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);
         UIModuleInstaller.Install(Container);
+        CircleColorModuleInstaller.Install(Container);
+        LevelModuleInstaller.Install(Container);
+        LevelInitializeModuleInstaller.Install(Container);
     }
 }

@@ -47,10 +47,18 @@ public static class ZenjectAddressablesExtensions
     }
 
     /// <summary>
-    /// Метод для зворотної сумісності. Використовуйте BindAddressableComponent для нових біндінгів.
+    /// Біндить компонент з префабу Addressables як префаб для подальшого інстанціювання (не створює екземпляр відразу).
+    /// Використовувати, коли потрібно ін'єктувати T як префаб для DiContainer.InstantiatePrefabForComponent.
     /// </summary>
-    public static void BindFromAddressablePrefab<T>(this DiContainer container, string addressKey) where T : Component
+    public static void BindAddressablePrefabComponent<T>(this DiContainer container, string addressKey) where T : Component
     {
-        container.BindAddressableComponent<T>(addressKey);
+        container.Bind<UniTask<T>>()
+            .FromMethod(async ctx =>
+            {
+                var service = ctx.Container.Resolve<IAddressableService>();
+                var go = await service.GetAsset<GameObject>(addressKey);
+                return go != null ? go.GetComponent<T>() : null;
+            })
+            .AsSingle();
     }
 }

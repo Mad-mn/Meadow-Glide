@@ -15,7 +15,7 @@ namespace Feature.ColorServiceModule.Scripts {
 
         public Color GetColor(CircleColorType type)
         {
-            if (_initialized) {
+            if (!_initialized) {
                 Debug.LogError("Service not initialized");
                 return Color.white;
             }

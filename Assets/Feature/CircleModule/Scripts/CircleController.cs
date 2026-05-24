@@ -19,7 +19,7 @@ namespace Feature.CircleModule.Scripts {
         }
 
         public void Setup(CircleConfig config) {
-            this._currentConfig = config;
+            _currentConfig = config;
             BuildCircle();
         }
 

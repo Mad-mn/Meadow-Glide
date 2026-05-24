@@ -5,6 +5,8 @@ namespace Feature.CircleModule.Scripts
     [RequireComponent(typeof(LineRenderer))]
     public class CircleSegment : MonoBehaviour
     {
+        [SerializeField] private GameObject _trigger;
+        
         private LineRenderer _lineRenderer;
         private const int SegmentsPerArc = 40;
 

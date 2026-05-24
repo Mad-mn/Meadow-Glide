@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: UI
   m_GUID: c2cc154410beb834c84b9e1d0c275557
   m_SerializeEntries:
+  - m_GUID: 3688563366627f14397b6a4e1dfbe407
+    m_Address: Assets/Feature/CircleModule/Prefabs/CircleSegmentPrefab.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3b46d21cf1f10f1459d12c437620fa44
     m_Address: UIRoot
     m_ReadOnly: 0
