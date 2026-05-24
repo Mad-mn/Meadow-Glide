@@ -1,4 +1,5 @@
 using Feature.LevelInitializeModule.Scripts.Installers;
+using Feature.SlideAreaModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
 
@@ -7,7 +8,6 @@ namespace Feature.Bootstrap.Scripts {
     public class GameSceneInstaller : ScriptableObjectInstaller<GameSceneInstaller>
     {
         public override void InstallBindings() {
-            LevelInitializeModuleInstaller.Install(Container);
         }
     }
 }

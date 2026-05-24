@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks.Triggers;
 using UnityEngine;
 
 namespace Feature.CircleModule.Scripts
@@ -20,6 +21,15 @@ namespace Feature.CircleModule.Scripts
             _lineRenderer.endColor = color;
             
             DrawArc(config.radius, config.angle);
+
+            SetupTriggerPosition(config);
+        }
+
+        private void SetupTriggerPosition(SegmentConfig config) {
+            if (_trigger != null)
+            {
+                _trigger.transform.localPosition = new Vector3(config.radius, 0, 0);
+            }
         }
 
         private void DrawArc(float radius, float angle)

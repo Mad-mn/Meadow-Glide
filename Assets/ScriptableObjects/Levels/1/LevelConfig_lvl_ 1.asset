@@ -16,3 +16,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 932456819a698594991bfe2f5c79a5f4, type: 2}
   - {fileID: 11400000, guid: 0fcff33cfbbb7ab4a861785d4dca7901, type: 2}
   - {fileID: 11400000, guid: 14607589d4cd2494593ee7294cd0606d, type: 2}
+  _slideAreaConfigs:
+  - startCircleIndex: 0
+    endCircleIndex: 2
+    sectorIndex: 1
+    totalSegments: 5
