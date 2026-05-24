@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Configurations
   m_GUID: ca0d636a35058ee4dad23e492e540579
   m_SerializeEntries:
+  - m_GUID: 0204c60f602acbd4e995edbb9aeea799
+    m_Address: CircleColorProvider
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6b4e9f12cbb6a0b46a4b43409d7ec88e
     m_Address: ViewSettings
     m_ReadOnly: 0
