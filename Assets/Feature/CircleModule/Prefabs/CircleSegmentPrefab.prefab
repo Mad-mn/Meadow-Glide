@@ -234,3 +234,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.CircleSegment
   _trigger: {fileID: 6586106479114405459}
+  _lineRenderer: {fileID: 3054488843259033014}
+  _currentConfig:
+    colorType: 0
+    radius: 0
+    angle: 0

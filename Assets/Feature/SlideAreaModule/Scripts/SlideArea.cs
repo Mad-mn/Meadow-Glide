@@ -5,12 +5,15 @@ namespace Feature.SlideAreaModule.Scripts {
     [RequireComponent(typeof(PolygonCollider2D))]
     public class SlideArea : MonoBehaviour {
         [SerializeField] private PolygonCollider2D _polygonCollider;
+        
+        public int SectorIndex { get; private set; }
 
         private void Reset() {
             _polygonCollider = GetComponent<PolygonCollider2D>();
         }
 
         public void Initialize(SlideAreaConfig config, float innerRadius, float outerRadius) {
+            SectorIndex = config.sectorIndex;
             if (_polygonCollider == null)
                 _polygonCollider = GetComponent<PolygonCollider2D>();
 

@@ -5,5 +5,6 @@ namespace Feature.SlideAreaModule.Scripts {
     public interface ISlideAreaService {
         UniTask Initialize();
         void SpawnSlideAreas(LevelConfig levelConfig);
+        bool IsSliding { get; }
     }
 }

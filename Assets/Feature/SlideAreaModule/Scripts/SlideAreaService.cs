@@ -17,6 +17,9 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly List<SlideArea> _spawnedAreas = new List<SlideArea>();
         private SlideArea _slideAreaPrefab;
 
+        public bool IsSliding { get; set; }
+        public IReadOnlyList<SlideArea> SpawnedAreas => _spawnedAreas;
+
         public SlideAreaService(DiContainer container, UniTask<SlideArea> slideAreaTask, UniTask<CircleParamsConfig> circleParamsConfigTask) {
             _container = container;
             _slideAreaTask = slideAreaTask;

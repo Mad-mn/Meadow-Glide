@@ -7,22 +7,35 @@ namespace Feature.CircleModule.Scripts
     public class CircleSegment : MonoBehaviour
     {
         [SerializeField] private GameObject _trigger;
+        [SerializeField] private LineRenderer _lineRenderer;
         
-        private LineRenderer _lineRenderer;
         private const int SegmentsPerArc = 40;
+        [SerializeField] private SegmentConfig _currentConfig;
+
+        public float Radius => _currentConfig != null ? _currentConfig.radius : 0;
 
         public void Initialize(SegmentConfig config, Color color)
         {
-            _lineRenderer = GetComponent<LineRenderer>();
+            _currentConfig = config;
+            if (_lineRenderer == null) _lineRenderer = GetComponent<LineRenderer>();
             
             // Set visuals
             _lineRenderer.useWorldSpace = false;
             _lineRenderer.startColor = color;
             _lineRenderer.endColor = color;
+            _lineRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             
             DrawArc(config.radius, config.angle);
 
             SetupTriggerPosition(config);
+        }
+
+        public void SetRadius(float radius) {
+            if (_currentConfig == null) return;
+            _currentConfig.radius = radius;
+            if (_lineRenderer == null) _lineRenderer = GetComponent<LineRenderer>();
+            DrawArc(radius, _currentConfig.angle);
+            SetupTriggerPosition(_currentConfig);
         }
 
         private void SetupTriggerPosition(SegmentConfig config) {

@@ -3,21 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Feature.InputModule.Scripts;
+using Feature.SlideAreaModule.Scripts;
 using UnityEngine;
 using Zenject;
 
 namespace Feature.CircleModule.Scripts {
     public class CircleRotationService : ICircleRotationService, ITickable, IInitializable, IDisposable {
         private readonly IInputService _inputService;
+        private readonly IInteractionStateService _interactionState;
         private readonly List<CircleController> _circles = new List<CircleController>();
         
         private CircleController _activeCircle;
         private float _startAngle;
         private float _initialCircleRotation;
         private const float RadiusThreshold = 0.2f;
+        private const float RotationAngleThreshold = 2.0f; // Threshold in degrees
+        
+        private bool _isDragging;
+        private float _accumulatedAngleDelta;
 
-        public CircleRotationService(IInputService inputService) {
+        public bool IsInteracting => _activeCircle != null && _isDragging;
+
+        public CircleRotationService(IInputService inputService, IInteractionStateService interactionState) {
             _inputService = inputService;
+            _interactionState = interactionState;
         }
 
         public void Initialize() {
@@ -39,6 +48,10 @@ namespace Feature.CircleModule.Scripts {
         }
 
         private void OnPointerDown() {
+            if (_interactionState.IsSlideActive) {
+                return;
+            }
+
             Vector2 screenPos = _inputService.PointerPosition;
             var camera = Camera.main;
             
@@ -46,13 +59,15 @@ namespace Feature.CircleModule.Scripts {
                 camera = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
             }
 
-            if (camera == null) return;
+            if (camera == null) {
+                return;
+            }
             
             Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -camera.transform.position.z));
             worldPos.z = 0;
             
             float distToCenter = worldPos.magnitude;
-            
+
             _activeCircle = _circles
                 .OrderBy(c => Mathf.Abs(c.Radius - distToCenter))
                 .FirstOrDefault(c => Mathf.Abs(c.Radius - distToCenter) < RadiusThreshold);
@@ -60,33 +75,47 @@ namespace Feature.CircleModule.Scripts {
             if (_activeCircle != null) {
                 _startAngle = Mathf.Atan2(worldPos.y, worldPos.x) * Mathf.Rad2Deg;
                 _initialCircleRotation = _activeCircle.transform.eulerAngles.z;
+                _isDragging = false;
+                _accumulatedAngleDelta = 0;
             }
         }
 
         private void OnPointerUp() {
             if (_activeCircle != null) {
-                SnapCircle(_activeCircle).Forget();
+                if (_isDragging) {
+                    SnapCircle(_activeCircle).Forget();
+                }
                 _activeCircle = null;
             }
+            _isDragging = false;
+            _interactionState.IsRotationActive = false;
         }
 
         public void Tick() {
             if (_activeCircle == null) return;
+            if (_interactionState.IsSlideActive) {
+                return;
+            }
 
             Vector2 screenPos = _inputService.PointerPosition;
-            var camera = Camera.main;
-            if (camera == null) {
-                camera = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
-            }
-            
+            var camera = Camera.main ?? GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
             if (camera == null) return;
 
             Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -camera.transform.position.z));
             worldPos.z = 0;
 
             float currentAngle = Mathf.Atan2(worldPos.y, worldPos.x) * Mathf.Rad2Deg;
-            float angleDelta = currentAngle - _startAngle;
+            float totalDelta = Mathf.Abs(Mathf.DeltaAngle(_startAngle, currentAngle));
+
+            if (!_isDragging) {
+                if (totalDelta > RotationAngleThreshold) {
+                    _isDragging = true;
+                    _interactionState.IsRotationActive = true;
+                }
+                return;
+            }
             
+            float angleDelta = Mathf.DeltaAngle(_startAngle, currentAngle);
             _activeCircle.transform.rotation = Quaternion.Euler(0, 0, _initialCircleRotation + angleDelta);
         }
 
