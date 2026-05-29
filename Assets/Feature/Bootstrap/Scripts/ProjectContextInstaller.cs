@@ -1,5 +1,6 @@
 using Feature.AddressableModule.Scripts.Installers;
 using Feature.AssetBindingModule.Scripts.Installers;
+using Feature.CameraServiceModule.Scripts.Installers;
 using Feature.CircleModule.Scripts.Installers;
 using Feature.ColorServiceModule.Scripts.Installers;
 using Feature.GameStateModule.Scripts.Installers;
@@ -19,6 +20,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
     {
         AddressableModuleInstaller.Install(Container);
         AssetBindingModuleInstaller.Install(Container);
+        CameraServiceModuleInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);
         UIModuleInstaller.Install(Container);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
 using UnityEngine;
@@ -12,28 +13,36 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly IInputService _inputService;
         private readonly ISlideAreaService _slideAreaService;
         private readonly IInteractionStateService _interactionState;
+        private readonly ICameraService _cameraService;
         private readonly List<CircleController> _circles = new List<CircleController>();
         
+        private Camera _mainCamera;
         private SlideArea _activeArea;
         private float _startRadius;
-        private List<CircleSegment> _activeSegments = new List<CircleSegment>();
-        private List<float> _baseRadii = new List<float>();
-        private List<CircleSegment> _ghosts = new List<CircleSegment>();
+        private readonly List<CircleSegment> _activeSegments = new List<CircleSegment>();
+        private readonly List<float> _baseRadii = new List<float>();
+        private readonly List<CircleSegment> _ghosts = new List<CircleSegment>();
+        private List<CircleController> _sortedCircles = new List<CircleController>();
+
+        private float _minR, _maxR, _step, _totalSpan;
 
         public bool IsSliding => _activeArea != null;
 
         public SlideSegmentService(
             IInputService inputService, 
             ISlideAreaService slideAreaService,
-            IInteractionStateService interactionState) {
+            IInteractionStateService interactionState,
+            ICameraService cameraService) {
             _inputService = inputService;
             _slideAreaService = slideAreaService;
             _interactionState = interactionState;
+            _cameraService = cameraService;
         }
 
         public void Initialize() {
             _inputService.PointerDown += OnPointerDown;
             _inputService.PointerUp += OnPointerUp;
+            _mainCamera = _cameraService.CameraObject;
         }
 
         public void Dispose() {
@@ -44,10 +53,12 @@ namespace Feature.SlideAreaModule.Scripts {
 
         public void RegisterCircle(CircleController circle) {
             _circles.Add(circle);
+            _sortedCircles = _circles.OrderBy(c => c.Radius).ToList();
         }
 
         public void Clear() {
             _circles.Clear();
+            _sortedCircles.Clear();
             ClearGhosts();
         }
 
@@ -63,13 +74,20 @@ namespace Feature.SlideAreaModule.Scripts {
                 return;
             }
 
-            Vector2 screenPos = _inputService.PointerPosition;
-            var camera = Camera.main ?? GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
-            if (camera == null) {
-                return;
+            if (_mainCamera == null) {
+                _mainCamera = Camera.main;
+            }
+            if (_mainCamera == null) {
+                Debug.LogError(1);
+                _mainCamera = Camera.main ?? GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
             }
 
-            Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -camera.transform.position.z));
+            if (_mainCamera == null) {
+                Debug.LogError(2);
+            }
+
+            Vector2 screenPos = _inputService.PointerPosition;
+            Vector3 worldPos = _mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -_mainCamera.transform.position.z));
             worldPos.z = 0;
 
             _activeArea = FindSlideArea(worldPos);
@@ -78,13 +96,12 @@ namespace Feature.SlideAreaModule.Scripts {
                 _interactionState.IsSlideActive = true;
                 _startRadius = worldPos.magnitude;
                 PrepareSegments(_activeArea.SectorIndex);
-                ((SlideAreaService)_slideAreaService).IsSliding = true;
+                _slideAreaService.IsSliding = true;
             }
         }
 
         private SlideArea FindSlideArea(Vector3 worldPos) {
-            var slideAreaService = (SlideAreaService)_slideAreaService;
-            foreach (var area in slideAreaService.SpawnedAreas) {
+            foreach (var area in _slideAreaService.SpawnedAreas) {
                 var collider = area.GetComponent<PolygonCollider2D>();
                 if (collider.OverlapPoint(worldPos)) {
                     return area;
@@ -98,9 +115,7 @@ namespace Feature.SlideAreaModule.Scripts {
             _baseRadii.Clear();
             ClearGhosts();
             
-            var sortedCircles = _circles.OrderBy(c => c.Radius).ToList();
-            
-            foreach (var circle in sortedCircles) {
+            foreach (var circle in _sortedCircles) {
                 float anglePerSegment = 360f / circle.SegmentCount;
                 float worldSectorAngle = sectorIndex * anglePerSegment;
                 
@@ -111,20 +126,27 @@ namespace Feature.SlideAreaModule.Scripts {
                     
                     var ghost = UnityEngine.Object.Instantiate(segment, segment.transform.parent);
                     ghost.gameObject.name = segment.gameObject.name + "_Ghost";
-                    ghost.SetRadius(-100); 
+                    ghost.SetVisible(false);
                     _ghosts.Add(ghost);
                 }
+            }
+
+            if (_baseRadii.Count > 0) {
+                _minR = _baseRadii[0];
+                _maxR = _baseRadii[^1]; // Assuming sorted
+                _step = _baseRadii.Count > 1 ? (_baseRadii[1] - _baseRadii[0]) : 1.0f;
+                _totalSpan = _maxR - _minR + _step;
             }
         }
 
         public void Tick() {
             if (_activeArea == null) return;
 
-            Vector2 screenPos = _inputService.PointerPosition;
-            var camera = Camera.main ?? GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
-            if (camera == null) return;
+            if (_mainCamera == null) _mainCamera = Camera.main;
+            if (_mainCamera == null) return;
 
-            Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -camera.transform.position.z));
+            Vector2 screenPos = _inputService.PointerPosition;
+            Vector3 worldPos = _mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -_mainCamera.transform.position.z));
             worldPos.z = 0;
 
             float currentRadius = worldPos.magnitude;
@@ -134,27 +156,24 @@ namespace Feature.SlideAreaModule.Scripts {
         }
 
         private void UpdateSegmentsVisuals(float delta) {
-            if (_activeSegments.Count == 0) return;
+            int count = _activeSegments.Count;
+            if (count == 0) return;
 
-            float minR = _baseRadii.Min();
-            float maxR = _baseRadii.Max();
-            float step = _baseRadii.Count > 1 ? (_baseRadii[1] - _baseRadii[0]) : 1.0f; 
-            float totalSpan = maxR - minR + step;
+            float midR = (_minR + _maxR) / 2f;
 
-            for (int i = 0; i < _activeSegments.Count; i++) {
+            for (int i = 0; i < count; i++) {
                 float virtualR = _baseRadii[i] + delta;
+                float wrappedR = _minR + Mathf.Repeat(virtualR - _minR, _totalSpan);
                 
-                float wrappedR = minR + Mathf.Repeat(virtualR - minR, totalSpan);
-                _activeSegments[i].SetRadius(wrappedR);
+                var segment = _activeSegments[i];
+                segment.SetRadius(wrappedR);
                 
-                float ghostR;
-                if (wrappedR > (minR + maxR) / 2f) {
-                    ghostR = wrappedR - totalSpan;
-                } else {
-                    ghostR = wrappedR + totalSpan;
-                }
-                _ghosts[i].SetRadius(ghostR);
-                _ghosts[i].transform.localRotation = _activeSegments[i].transform.localRotation;
+                float ghostR = wrappedR > midR ? wrappedR - _totalSpan : wrappedR + _totalSpan;
+                
+                var ghost = _ghosts[i];
+                ghost.SetRadius(ghostR);
+                ghost.SetVisible(true);
+                ghost.transform.localRotation = segment.transform.localRotation;
             }
         }
 
@@ -162,40 +181,35 @@ namespace Feature.SlideAreaModule.Scripts {
             if (_activeArea != null) {
                 SnapSegments().Forget();
                 _activeArea = null;
-                ((SlideAreaService)_slideAreaService).IsSliding = false;
+                _slideAreaService.IsSliding = false;
             }
             _interactionState.IsSlideActive = false;
         }
 
         private async UniTaskVoid SnapSegments() {
-            if (_activeSegments.Count == 0) return;
-
-            float minR = _baseRadii.Min();
-            float maxR = _baseRadii.Max();
-            float step = _baseRadii.Count > 1 ? (_baseRadii[1] - _baseRadii[0]) : 1.0f;
-            float totalSpan = maxR - minR + step;
+            int count = _activeSegments.Count;
+            if (count == 0) return;
 
             float firstSegCurrentR = _activeSegments[0].Radius;
             float rawDelta = firstSegCurrentR - _baseRadii[0];
             
-            float normalizedDelta = ((rawDelta % totalSpan) + totalSpan) % totalSpan;
-            if (normalizedDelta > totalSpan / 2f) normalizedDelta -= totalSpan;
+            float normalizedDelta = ((rawDelta % _totalSpan) + _totalSpan) % _totalSpan;
+            if (normalizedDelta > _totalSpan / 2f) normalizedDelta -= _totalSpan;
 
-            int shift = Mathf.RoundToInt(normalizedDelta / step);
+            int shift = Mathf.RoundToInt(normalizedDelta / _step);
             
             ApplyShift(shift);
 
             float duration = 0.2f;
             float elapsed = 0;
             
-            int count = _activeSegments.Count;
-            List<float> startRadii = _activeSegments.Select(s => s.Radius).ToList();
-            var sortedCircles = _circles.OrderBy(c => c.Radius).ToList();
-            
-            List<float> targetRadii = new List<float>(count);
+            float[] startRadii = new float[count];
+            float[] targetRadii = new float[count];
+
             for (int i = 0; i < count; i++) {
-                int targetCircleIndex = ((i + shift) % count + count) % count;
-                targetRadii.Add(sortedCircles[targetCircleIndex].Radius);
+                startRadii[i] = _activeSegments[i].Radius;
+                targetRadii[i] = _sortedCircles[i].Radius;
+                _ghosts[i].SetVisible(false);
             }
 
             while (elapsed < duration) {
@@ -204,10 +218,10 @@ namespace Feature.SlideAreaModule.Scripts {
                 t = 1f - Mathf.Pow(1f - t, 3);
 
                 for (int i = 0; i < count; i++) {
-                    if (_activeSegments[i] == null) continue;
+                    var seg = _activeSegments[i];
+                    if (seg == null) continue;
                     float r = Mathf.Lerp(startRadii[i], targetRadii[i], t);
-                    _activeSegments[i].SetRadius(r);
-                    _ghosts[i].SetRadius(-100);
+                    seg.SetRadius(r);
                 }
                 await UniTask.Yield();
             }
@@ -223,13 +237,9 @@ namespace Feature.SlideAreaModule.Scripts {
         }
 
         private void ApplyShift(int shift) {
-            if (shift == 0) {
-                return;
-            }
+            if (shift == 0) return;
             
-            var sortedCircles = _circles.OrderBy(c => c.Radius).ToList();
             int count = _activeSegments.Count;
-            
             var shiftedSegments = new CircleSegment[count];
             for (int i = 0; i < count; i++) {
                 int newIndex = ((i + shift) % count + count) % count;
@@ -237,11 +247,13 @@ namespace Feature.SlideAreaModule.Scripts {
             }
 
             for (int i = 0; i < count; i++) {
-                var targetCircle = sortedCircles[i];
+                var targetCircle = _sortedCircles[i];
                 var segment = shiftedSegments[i];
                 
-                foreach (var circle in _circles) {
-                    circle.RemoveSegment(segment);
+                // Optimized removal: segment knows its parent
+                if (segment.transform.parent != null) {
+                    var oldCircle = segment.transform.parent.GetComponent<CircleController>();
+                    if (oldCircle != null) oldCircle.RemoveSegment(segment);
                 }
                 
                 targetCircle.AddSegment(segment);
@@ -251,6 +263,9 @@ namespace Feature.SlideAreaModule.Scripts {
                 
                 float targetLocalAngle = Mathf.DeltaAngle(targetCircle.transform.eulerAngles.z, worldSectorAngle);
                 segment.transform.localRotation = Quaternion.Euler(0, 0, targetLocalAngle);
+                
+                // Update our active segments tracking to match the new ownership
+                _activeSegments[i] = segment;
             }
         }
     }

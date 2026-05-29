@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Feature.CameraServiceModule.Scripts;
 using UnityEngine;
 using Zenject;
 
@@ -11,6 +12,7 @@ namespace Feature.UIServiceModule.Scripts {
         private readonly UniTask<UIRoot> _uiRootTask;
         private readonly UniTask<ViewSettings> _settingsTask;
         private readonly DiContainer _container;
+        private readonly ICameraService _cameraService;
 
         private UIRoot _uiRoot;
         private ViewSettings _settings;
@@ -21,11 +23,12 @@ namespace Feature.UIServiceModule.Scripts {
             IAddressableService addressableService, 
             UniTask<UIRoot> uiRootTask, 
             UniTask<ViewSettings> settingsTask,
-            DiContainer container) {
+            DiContainer container, ICameraService cameraService) {
             _addressableService = addressableService;
             _uiRootTask = uiRootTask;
             _settingsTask = settingsTask;
             _container = container;
+            _cameraService = cameraService;
         }
 
         public async UniTask Initialize() =>
@@ -92,6 +95,7 @@ namespace Feature.UIServiceModule.Scripts {
             var (root, settings) = await UniTask.WhenAll(_uiRootTask, _settingsTask);
             
             _uiRoot = root;
+            _uiRoot.SetupCamera(_cameraService.CameraObject);
             _settings = settings;
             _configs = _settings.Entries.ToDictionary(x => x.ViewType);
         }

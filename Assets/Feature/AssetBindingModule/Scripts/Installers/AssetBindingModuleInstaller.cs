@@ -17,6 +17,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             
+            Container.BindAddressablePrefabComponent<Camera>(AddressConstants.Camera);
             Container.BindAddressablePrefabComponent<CircleController>(AddressConstants.GircleModule);
             Container.BindAddressablePrefabComponent<SlideArea>(AddressConstants.SlideArea);
             Container.BindAddressablePrefabComponent<SpriteMask>(AddressConstants.Mask);

@@ -12,30 +12,45 @@ namespace Feature.CircleModule.Scripts
         private const int SegmentsPerArc = 40;
         [SerializeField] private SegmentConfig _currentConfig;
 
+        private LineRenderer _cachedLineRenderer;
+        private Vector3[] _unitArcPositions;
+        private float _lastPrecalculatedAngle = -1f;
+
         public float Radius => _currentConfig != null ? _currentConfig.radius : 0;
 
         public void Initialize(SegmentConfig config, Color color)
         {
             _currentConfig = config;
-            if (_lineRenderer == null) _lineRenderer = GetComponent<LineRenderer>();
+            EnsureLineRenderer();
             
             // Set visuals
-            _lineRenderer.useWorldSpace = false;
-            _lineRenderer.startColor = color;
-            _lineRenderer.endColor = color;
-            _lineRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            _cachedLineRenderer.useWorldSpace = false;
+            _cachedLineRenderer.startColor = color;
+            _cachedLineRenderer.endColor = color;
+            _cachedLineRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             
             DrawArc(config.radius, config.angle);
 
             SetupTriggerPosition(config);
         }
 
+        private void EnsureLineRenderer() {
+            if (_cachedLineRenderer == null) {
+                _cachedLineRenderer = _lineRenderer != null ? _lineRenderer : GetComponent<LineRenderer>();
+            }
+        }
+
         public void SetRadius(float radius) {
             if (_currentConfig == null) return;
             _currentConfig.radius = radius;
-            if (_lineRenderer == null) _lineRenderer = GetComponent<LineRenderer>();
             DrawArc(radius, _currentConfig.angle);
             SetupTriggerPosition(_currentConfig);
+        }
+
+        public void SetVisible(bool visible) {
+            EnsureLineRenderer();
+            _cachedLineRenderer.enabled = visible;
+            if (_trigger != null) _trigger.SetActive(visible);
         }
 
         private void SetupTriggerPosition(SegmentConfig config) {
@@ -47,19 +62,27 @@ namespace Feature.CircleModule.Scripts
 
         private void DrawArc(float radius, float angle)
         {
-            _lineRenderer.positionCount = SegmentsPerArc + 1;
+            EnsureLineRenderer();
+            _cachedLineRenderer.positionCount = SegmentsPerArc + 1;
+
+            if (Mathf.Abs(_lastPrecalculatedAngle - angle) > 0.001f) {
+                PrecalculateUnitArc(angle);
+            }
             
             for (int i = 0; i <= SegmentsPerArc; i++)
             {
-                float progress = (float)i / SegmentsPerArc;
-                // Center the arc around the zero point of rotation
-                float currentAngle = (progress * angle - angle / 2f) * Mathf.Deg2Rad;
-                
-                float x = Mathf.Cos(currentAngle) * radius;
-                float y = Mathf.Sin(currentAngle) * radius;
-                
-                _lineRenderer.SetPosition(i, new Vector3(x, y, 0));
+                _cachedLineRenderer.SetPosition(i, _unitArcPositions[i] * radius);
             }
+        }
+
+        private void PrecalculateUnitArc(float angle) {
+            _unitArcPositions = new Vector3[SegmentsPerArc + 1];
+            for (int i = 0; i <= SegmentsPerArc; i++) {
+                float progress = (float)i / SegmentsPerArc;
+                float currentAngle = (progress * angle - angle / 2f) * Mathf.Deg2Rad;
+                _unitArcPositions[i] = new Vector3(Mathf.Cos(currentAngle), Mathf.Sin(currentAngle), 0);
+            }
+            _lastPrecalculatedAngle = angle;
         }
     }
 }

@@ -9,18 +9,18 @@ using Zenject;
 
 namespace Feature.CircleModule.Scripts {
     public class CircleRotationService : ICircleRotationService, ITickable, IInitializable, IDisposable {
+        private const float RADIUS_THRESHOLD = 0.2f;
+        private const float ROTATION_ANGLE_THRESHOLD = 2.0f; // Threshold in degrees
+        
         private readonly IInputService _inputService;
         private readonly IInteractionStateService _interactionState;
         private readonly List<CircleController> _circles = new List<CircleController>();
-        
+
         private CircleController _activeCircle;
         private float _startAngle;
         private float _initialCircleRotation;
-        private const float RadiusThreshold = 0.2f;
-        private const float RotationAngleThreshold = 2.0f; // Threshold in degrees
-        
+
         private bool _isDragging;
-        private float _accumulatedAngleDelta;
 
         public bool IsInteracting => _activeCircle != null && _isDragging;
 
@@ -70,13 +70,12 @@ namespace Feature.CircleModule.Scripts {
 
             _activeCircle = _circles
                 .OrderBy(c => Mathf.Abs(c.Radius - distToCenter))
-                .FirstOrDefault(c => Mathf.Abs(c.Radius - distToCenter) < RadiusThreshold);
+                .FirstOrDefault(c => Mathf.Abs(c.Radius - distToCenter) < RADIUS_THRESHOLD);
 
             if (_activeCircle != null) {
                 _startAngle = Mathf.Atan2(worldPos.y, worldPos.x) * Mathf.Rad2Deg;
                 _initialCircleRotation = _activeCircle.transform.eulerAngles.z;
                 _isDragging = false;
-                _accumulatedAngleDelta = 0;
             }
         }
 
@@ -108,7 +107,7 @@ namespace Feature.CircleModule.Scripts {
             float totalDelta = Mathf.Abs(Mathf.DeltaAngle(_startAngle, currentAngle));
 
             if (!_isDragging) {
-                if (totalDelta > RotationAngleThreshold) {
+                if (totalDelta > ROTATION_ANGLE_THRESHOLD) {
                     _isDragging = true;
                     _interactionState.IsRotationActive = true;
                 }
