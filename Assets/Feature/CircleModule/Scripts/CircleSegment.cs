@@ -29,7 +29,6 @@ namespace Feature.CircleModule.Scripts
             _cachedLineRenderer.endColor = color;
             _cachedLineRenderer.startWidth = width;
             _cachedLineRenderer.endWidth = width;
-            _cachedLineRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             
             DrawArc(config.radius, config.angle);
 
@@ -59,6 +58,16 @@ namespace Feature.CircleModule.Scripts
             EnsureLineRenderer();
             _cachedLineRenderer.enabled = visible;
             if (_trigger != null) _trigger.SetActive(visible);
+        }
+
+        public void SetSortingOrder(int order) {
+            EnsureLineRenderer();
+            _cachedLineRenderer.sortingOrder = order;
+        }
+
+        public int GetSortingOrder() {
+            EnsureLineRenderer();
+            return _cachedLineRenderer.sortingOrder;
         }
 
         private void SetupTriggerPosition(SegmentConfig config) {

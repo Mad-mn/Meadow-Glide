@@ -20,8 +20,6 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressablePrefabComponent<Camera>(AddressConstants.Camera);
             Container.BindAddressablePrefabComponent<CircleController>(AddressConstants.GircleModule);
             Container.BindAddressablePrefabComponent<SlideArea>(AddressConstants.SlideArea);
-            Container.BindAddressablePrefabComponent<SpriteMask>(AddressConstants.Mask);
-            Container.BindAddressablePrefabComponent<Transform>(AddressConstants.Center);
         }
     }
 }

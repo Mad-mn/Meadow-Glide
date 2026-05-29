@@ -9,6 +9,8 @@ namespace Feature.SlideAreaModule.Scripts {
         [SerializeField] private LineRenderer _rightRail;
         
         public int SectorIndex { get; private set; }
+        public int StartCircleIndex { get; private set; }
+        public int EndCircleIndex { get; private set; }
 
         private void Reset() {
             _polygonCollider = GetComponent<PolygonCollider2D>();
@@ -16,8 +18,10 @@ namespace Feature.SlideAreaModule.Scripts {
 
         public void Initialize(SlideAreaConfig config, float innerRadius, float outerRadius) {
             SectorIndex = config.sectorIndex;
+            StartCircleIndex = config.startCircleIndex;
+            EndCircleIndex = config.endCircleIndex;
             if (_polygonCollider == null)
-                _polygonCollider = GetComponent<PolygonCollider2D>();
+_polygonCollider = GetComponent<PolygonCollider2D>();
 
             float anglePerSegment = 360f / config.totalSegments;
             float centerAngle = config.sectorIndex * anglePerSegment;

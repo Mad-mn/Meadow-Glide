@@ -21,8 +21,9 @@ namespace Feature.SlideAreaModule.Scripts {
         private Camera _mainCamera;
         private SlideArea _activeArea;
         private float _startRadius;
+        private Vector3 _slideDirection;
         private readonly List<CircleSegment> _activeSegments = new List<CircleSegment>();
-        private readonly List<float> _baseIndices = new List<float>();
+private readonly List<float> _baseIndices = new List<float>();
         private readonly List<CircleSegment> _ghosts = new List<CircleSegment>();
         private List<CircleController> _sortedCircles = new List<CircleController>();
 
@@ -88,11 +89,12 @@ namespace Feature.SlideAreaModule.Scripts {
 
             if (_activeArea != null) {
                 _interactionState.IsSlideActive = true;
-                _startRadius = worldPos.magnitude;
-                PrepareSegments(_activeArea.SectorIndex);
+                _slideDirection = worldPos.sqrMagnitude > 0.0001f ? worldPos.normalized : Vector3.up;
+                _startRadius = Vector3.Dot(worldPos, _slideDirection);
+                PrepareSegments(_activeArea);
                 _slideAreaService.IsSliding = true;
             }
-        }
+}
 
         private SlideArea FindSlideArea(Vector3 worldPos) {
             foreach (var area in _slideAreaService.SpawnedAreas) {
@@ -104,15 +106,20 @@ namespace Feature.SlideAreaModule.Scripts {
             return null;
         }
 
-        private void PrepareSegments(int sectorIndex) {
+        private void PrepareSegments(SlideArea area) {
             _activeSegments.Clear();
             _baseIndices.Clear();
             ClearGhosts();
             
-            for (int i = 0; i < _sortedCircles.Count; i++) {
+            int start = area.StartCircleIndex;
+            int end = area.EndCircleIndex;
+
+            for (int i = start; i <= end; i++) {
+                if (i >= _sortedCircles.Count) break;
+                
                 var circle = _sortedCircles[i];
                 float anglePerSegment = 360f / circle.SegmentCount;
-                float worldSectorAngle = sectorIndex * anglePerSegment;
+                float worldSectorAngle = area.SectorIndex * anglePerSegment;
                 
                 var segment = circle.GetSegmentAtAngle(worldSectorAngle);
                 if (segment != null) {
@@ -122,8 +129,9 @@ namespace Feature.SlideAreaModule.Scripts {
                     var ghost = UnityEngine.Object.Instantiate(segment, segment.transform.parent);
                     ghost.gameObject.name = segment.gameObject.name + "_Ghost";
                     ghost.SetVisible(false);
+                    ghost.SetSortingOrder(segment.GetSortingOrder() - 1);
                     _ghosts.Add(ghost);
-                }
+}
             }
         }
 
@@ -136,8 +144,8 @@ namespace Feature.SlideAreaModule.Scripts {
             Vector2 screenPos = _inputService.PointerPosition;
             Vector3 worldPos = _mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -_mainCamera.transform.position.z));
             worldPos.z = 0;
-
-            float currentRadius = worldPos.magnitude;
+            
+            float currentRadius = Vector3.Dot(worldPos, _slideDirection);
             UpdateSegmentsVisuals(currentRadius);
         }
 
@@ -145,76 +153,108 @@ namespace Feature.SlideAreaModule.Scripts {
             int count = _activeSegments.Count;
             if (count == 0 || _circleParamsConfig == null) return;
 
-            int circleCount = _sortedCircles.Count;
-            float startIndex = _circleParamsConfig.GetVirtualIndex(_startRadius);
-            float currentIndex = _circleParamsConfig.GetVirtualIndex(currentRadius);
-            float deltaIndex = currentIndex - startIndex;
+            int subsetCount = count;
+            int startIdx = _activeArea.StartCircleIndex;
+            int endIdx = startIdx + subsetCount - 1;
+
+            float rStart = _circleParamsConfig.GetRadius(startIdx);
+            float rEnd = _circleParamsConfig.GetRadius(endIdx);
+            float rLimIn = (rStart + _circleParamsConfig.GetRadius(startIdx - 1)) / 2f;
+            float rLimOut = (rEnd + _circleParamsConfig.GetRadius(endIdx + 1)) / 2f;
+
+            float startVirtualIdx = _circleParamsConfig.GetVirtualIndex(_startRadius);
+            float currentVirtualIdx = _circleParamsConfig.GetVirtualIndex(currentRadius);
+            float deltaIndex = currentVirtualIdx - startVirtualIdx;
 
             for (int i = 0; i < count; i++) {
-                float virtualIndex = _baseIndices[i] + deltaIndex;
-                float wrappedIndex = Mathf.Repeat(virtualIndex, circleCount);
+                // i is the index in the active subset (0 to subsetCount - 1)
+                float virtualSubsetIdx = i + deltaIndex;
+                float wrappedSubsetIdx = Mathf.Repeat(virtualSubsetIdx, subsetCount);
                 
+                // Main segment
                 var segment = _activeSegments[i];
-                float r = Mathf.Max(0, _circleParamsConfig.GetRadius(wrappedIndex));
+                float finalCircleIdx = startIdx + wrappedSubsetIdx;
+                float r = Mathf.Max(0, _circleParamsConfig.GetRadius(finalCircleIdx));
                 segment.SetRadius(r);
-                segment.SetWidth(_circleParamsConfig.GetWidth(wrappedIndex));
                 
-                float midIndex = circleCount / 2f;
-                float ghostIndex = wrappedIndex > midIndex ? wrappedIndex - circleCount : wrappedIndex + circleCount;
+                float baseWidth = _circleParamsConfig.GetWidth(finalCircleIdx);
+                float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
+                segment.SetWidth(baseWidth * fade);
+                
+                // Ghost segment
+                float mid = subsetCount / 2f;
+                float ghostSubsetIdx = wrappedSubsetIdx > mid ? wrappedSubsetIdx - subsetCount : wrappedSubsetIdx + subsetCount;
+                float finalGhostCircleIdx = startIdx + ghostSubsetIdx;
+                float gr = Mathf.Max(0, _circleParamsConfig.GetRadius(finalGhostCircleIdx));
+                
+                float ghostFade = GetGeometricFade(gr, rStart, rEnd, rLimIn, rLimOut);
                 
                 var ghost = _ghosts[i];
-                float gr = Mathf.Max(0, _circleParamsConfig.GetRadius(ghostIndex));
                 ghost.SetRadius(gr);
-                ghost.SetWidth(_circleParamsConfig.GetWidth(ghostIndex));
-                ghost.SetVisible(true);
+                ghost.SetWidth(_circleParamsConfig.GetWidth(finalGhostCircleIdx) * ghostFade);
+                ghost.SetVisible(ghostFade > 0.01f);
                 ghost.transform.localRotation = segment.transform.localRotation;
             }
         }
 
+        private float GetGeometricFade(float radius, float rStart, float rEnd, float rLimIn, float rLimOut) {
+            if (radius < rStart) return Mathf.InverseLerp(rLimIn, rStart, radius);
+            if (radius > rEnd) return Mathf.InverseLerp(rLimOut, rEnd, radius);
+            return 1.0f;
+        }
+
         private void OnPointerUp() {
+SlideArea areaToSnap = _activeArea; // Cache it because SnapSegments uses it and OnPointerUp clears it
             if (_activeArea != null) {
-                SnapSegments().Forget();
+                SnapSegments(areaToSnap).Forget();
                 _activeArea = null;
                 _slideAreaService.IsSliding = false;
             }
             _interactionState.IsSlideActive = false;
         }
 
-        private async UniTaskVoid SnapSegments() {
+        private async UniTaskVoid SnapSegments(SlideArea area) {
             int count = _activeSegments.Count;
             if (count == 0 || _circleParamsConfig == null) return;
 
+            int startIdx = area.StartCircleIndex;
+            int subsetCount = count;
+
             float firstSegCurrentR = _activeSegments[0].Radius;
-            float rawDeltaIndex = _circleParamsConfig.GetVirtualIndex(firstSegCurrentR) - _baseIndices[0];
+            float currentVirtualIdx = _circleParamsConfig.GetVirtualIndex(firstSegCurrentR);
+            float rawDeltaIndex = currentVirtualIdx - _baseIndices[0];
             
-            int circleCount = _sortedCircles.Count;
-            float normalizedDeltaIndex = ((rawDeltaIndex % circleCount) + circleCount) % circleCount;
-            if (normalizedDeltaIndex > circleCount / 2f) normalizedDeltaIndex -= circleCount;
+            float normalizedDeltaIndex = ((rawDeltaIndex % subsetCount) + subsetCount) % subsetCount;
+            if (normalizedDeltaIndex > subsetCount / 2f) normalizedDeltaIndex -= subsetCount;
 
             int shift = Mathf.RoundToInt(normalizedDeltaIndex);
             
-            ApplyShift(shift);
+            ApplyShift(area, shift);
 
             float duration = 0.2f;
             float elapsed = 0;
             
-            float[] startIndices = new float[count];
-            float[] targetIndices = new float[count];
+            float[] currentVirtualIndices = new float[count];
+            float[] targetVirtualIndices = new float[count];
 
             for (int i = 0; i < count; i++) {
-                float startIdx = _circleParamsConfig.GetVirtualIndex(_activeSegments[i].Radius);
-                float targetIdx = i;
+                float currentIdx = _circleParamsConfig.GetVirtualIndex(_activeSegments[i].Radius);
+                float targetIdx = startIdx + i;
 
-                // Shortest path logic: 
-                // If the segment has to travel more than half the circle count, 
-                // it's better to wrap it to the other side to avoid "flying" across the whole board.
-                if (startIdx - targetIdx > circleCount / 2f) startIdx -= circleCount;
-                else if (targetIdx - startIdx > circleCount / 2f) startIdx += circleCount;
+                // Wrap startIdx to be closest to targetIdx for smooth lerp within subset wrapping
+                if (currentIdx - targetIdx > subsetCount / 2f) currentIdx -= subsetCount;
+                else if (targetIdx - currentIdx > subsetCount / 2f) currentIdx += subsetCount;
 
-                startIndices[i] = startIdx;
-                targetIndices[i] = targetIdx;
+                currentVirtualIndices[i] = currentIdx;
+                targetVirtualIndices[i] = targetIdx;
                 _ghosts[i].SetVisible(false);
             }
+
+            int endIdx = startIdx + subsetCount - 1;
+            float rStart = _circleParamsConfig.GetRadius(startIdx);
+            float rEnd = _circleParamsConfig.GetRadius(endIdx);
+            float rLimIn = (rStart + _circleParamsConfig.GetRadius(startIdx - 1)) / 2f;
+            float rLimOut = (rEnd + _circleParamsConfig.GetRadius(endIdx + 1)) / 2f;
 
             while (elapsed < duration) {
                 elapsed += Time.deltaTime;
@@ -224,29 +264,37 @@ namespace Feature.SlideAreaModule.Scripts {
                 for (int i = 0; i < count; i++) {
                     var seg = _activeSegments[i];
                     if (seg == null) continue;
-                    float idx = Mathf.Lerp(startIndices[i], targetIndices[i], t);
-                    seg.SetRadius(Mathf.Max(0, _circleParamsConfig.GetRadius(idx)));
-                    seg.SetWidth(_circleParamsConfig.GetWidth(idx));
+                    float idx = Mathf.Lerp(currentVirtualIndices[i], targetVirtualIndices[i], t);
+                    float r = Mathf.Max(0, _circleParamsConfig.GetRadius(idx));
+                    
+                    float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
+                    float clampedR = Mathf.Clamp(r, rLimIn, rLimOut);
+                    
+                    seg.SetRadius(clampedR);
+                    float baseWidth = _circleParamsConfig.GetWidth(idx);
+                    seg.SetWidth(baseWidth * fade);
                 }
-                await UniTask.Yield();
+await UniTask.Yield();
             }
 
             for (int i = 0; i < count; i++) {
                 if (_activeSegments[i] != null) {
-                    _activeSegments[i].SetRadius(_circleParamsConfig.GetRadius(i));
-                    _activeSegments[i].SetWidth(_circleParamsConfig.GetWidth(i));
+                    float finalIdx = startIdx + i;
+                    _activeSegments[i].SetRadius(_circleParamsConfig.GetRadius(finalIdx));
+                    _activeSegments[i].SetWidth(_circleParamsConfig.GetWidth(finalIdx)); // Fade factor is 1.0 at finalIdx
                 }
             }
-            
+
             ClearGhosts();
             _activeSegments.Clear();
             _baseIndices.Clear();
         }
 
-        private void ApplyShift(int shift) {
+        private void ApplyShift(SlideArea area, int shift) {
             if (shift == 0) return;
             
             int count = _activeSegments.Count;
+            int startIdx = area.StartCircleIndex;
             var shiftedSegments = new CircleSegment[count];
             for (int i = 0; i < count; i++) {
                 int newIndex = ((i + shift) % count + count) % count;
@@ -254,7 +302,7 @@ namespace Feature.SlideAreaModule.Scripts {
             }
 
             for (int i = 0; i < count; i++) {
-                var targetCircle = _sortedCircles[i];
+                var targetCircle = _sortedCircles[startIdx + i];
                 var segment = shiftedSegments[i];
                 
                 if (segment.transform.parent != null) {
@@ -265,7 +313,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 targetCircle.AddSegment(segment);
                 
                 float anglePerSegment = 360f / targetCircle.SegmentCount;
-                float worldSectorAngle = _activeArea.SectorIndex * anglePerSegment;
+                float worldSectorAngle = area.SectorIndex * anglePerSegment;
                 
                 float targetLocalAngle = Mathf.DeltaAngle(targetCircle.transform.eulerAngles.z, worldSectorAngle);
                 segment.transform.localRotation = Quaternion.Euler(0, 0, targetLocalAngle);
@@ -273,5 +321,5 @@ namespace Feature.SlideAreaModule.Scripts {
                 _activeSegments[i] = segment;
             }
         }
-    }
+}
 }

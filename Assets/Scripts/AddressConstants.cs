@@ -3,14 +3,11 @@ public static class AddressConstants
 {
     public const string Assets_Feature_CircleModule_Prefabs_CircleSegmentPrefab_prefab = "Assets/Feature/CircleModule/Prefabs/CircleSegmentPrefab.prefab";
     public const string Camera = "Camera";
-    public const string Center = "Center";
     public const string CircleColorProvider = "CircleColorProvider";
     public const string CircleParamsConfig = "CircleParamsConfig";
-    public const string GameMask = "GameMask";
     public const string GircleModule = "GircleModule";
     public const string LevelConfigProvider = "LevelConfigProvider";
     public const string MainMenuView = "MainMenuView";
-    public const string Mask = "Mask";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_GeometryPool_GeometryPoolKernels_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/GeometryPool/GeometryPoolKernels.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_Utilities_CopyBuffer_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/Utilities/CopyBuffer.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_bit_histogram_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/bit_histogram.compute";
