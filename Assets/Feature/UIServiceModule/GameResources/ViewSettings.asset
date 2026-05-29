@@ -19,3 +19,6 @@ MonoBehaviour:
   - ViewType: 3
     Address: GameView
     PresenterTypeName: Feature.GameViewModule.Scripts.GamePresenter
+  - ViewType: 4
+    Address: LoadingView
+    PresenterTypeName: Feature.LoadingViewModule.Scripts.LoadingPresenter

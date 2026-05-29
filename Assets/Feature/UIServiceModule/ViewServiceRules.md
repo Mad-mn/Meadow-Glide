@@ -41,6 +41,14 @@ var mainView = await _viewService.ShowView<MainMenuView>(ViewType.MainMenu);
 _viewService.HideView(ViewType.MainMenu);
 ```
 
+### Prewarming a View
+To avoid loading delays, you can pre-instantiate a view:
+```csharp
+// Loads asset, instantiates, injects, and initializes presenter, but keeps view hidden.
+await _viewService.PrewarmView<MainMenuView>(ViewType.MainMenu);
+```
+When `ShowView` is called later, it will appear instantly.
+
 ## 5. Lifecycle Rules
 - **DestroyOnClose**: If `_destroyOnClose` is `true` in the View, the object is destroyed and the Presenter is disposed when `HideView` is called.
 - **Dependency Injection**: Use `[Inject]` in the View only for UI-specific dependencies. Business logic dependencies should be injected into the **Presenter** constructor.
@@ -54,6 +62,6 @@ _viewService.HideView(ViewType.MainMenu);
 Use the editor tool via **Tools -> UI -> Create View Module**.
 - It creates the folder structure: `Assets/Feature/[Name]Module`.
 - It generates the `View` and `Presenter` scripts with proper inheritance and namespaces.
-- **New**: It automatically adds a new entry to the `ViewSettings` asset with the correct `PresenterTypeName` and a default `Address` (matching the view name).
-- **Important**: After generation, you must manually add the new view to the `ViewType` enum and then select it in the `ViewSettings` asset entry.
+- **New**: It automatically adds a new entry to the `ViewType` enum and the `ViewSettings` asset.
+- **Note**: After generation, Unity will recompile. Once compiled, you can assign the new `ViewType` in the `ViewSettings` entry if it wasn't automatically linked.
 

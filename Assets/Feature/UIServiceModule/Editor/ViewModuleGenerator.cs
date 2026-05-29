@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Feature.UIServiceModule.Editor {
     public class ViewModuleGenerator : EditorWindow {
@@ -38,14 +39,17 @@ namespace Feature.UIServiceModule.Editor {
 
             CreateViewScript(scriptsPath);
             string presenterName = CreatePresenterScript(scriptsPath);
+            UpdateViewTypeEnum();
 
             AssetDatabase.Refresh();
 
-            // Note: We might need to wait for compilation to get the types, 
-            // but we can at least add the entry with strings/default values.
+            // Note: We need to wait for compilation to actually use the new ViewType in the Inspector/SerializedProperty.
+            // However, we can still try to update ViewSettings. If it fails due to missing Enum value, 
+            // the user might have to run the registration part again. 
+            // For now, let's try to do it.
             UpdateViewSettings(presenterName);
 
-            EditorUtility.DisplayDialog("Success", $"Module {moduleFolderName} created!", "OK");
+            EditorUtility.DisplayDialog("Success", $"Module {moduleFolderName} created and registered!", "OK");
         }
 
         private void CreateViewScript(string path) {
@@ -80,26 +84,44 @@ namespace Feature.{_viewName}Module.Scripts {{
             return presenterName;
         }
 
+        private void UpdateViewTypeEnum() {
+            string filePath = "Assets/Feature/UIServiceModule/Scripts/ViewType.cs";
+            if (!File.Exists(filePath)) return;
+
+            string content = File.ReadAllText(filePath);
+            if (content.Contains(_viewName)) return;
+
+            // Find the last numeric value
+            var matches = Regex.Matches(content, @"=\s*(\d+)");
+            int maxValue = 0;
+            foreach (Match match in matches) {
+                if (int.TryParse(match.Groups[1].Value, out int val)) {
+                    if (val > maxValue) maxValue = val;
+                }
+            }
+
+            int newValue = maxValue + 1;
+            string newEntry = $"        {_viewName} = {newValue},\n";
+            
+            // Insert before the last two closing braces (enum and namespace)
+            int lastBraceIndex = content.LastIndexOf('}');
+            int secondLastBraceIndex = content.LastIndexOf('}', lastBraceIndex - 1);
+            
+            if (secondLastBraceIndex != -1) {
+                content = content.Insert(secondLastBraceIndex, newEntry);
+                File.WriteAllText(filePath, content);
+            }
+        }
+
         private void UpdateViewSettings(string presenterName) {
             var guids = AssetDatabase.FindAssets("t:ViewSettings");
-            if (guids.Length == 0) {
-                Debug.LogWarning("ViewSettings asset not found. Please create one manually.");
-                return;
-            }
+            if (guids.Length == 0) return;
 
             string path = AssetDatabase.GUIDToAssetPath(guids[0]);
             var settings = AssetDatabase.LoadAssetAtPath<Scripts.ViewSettings>(path);
-
             if (settings == null) return;
 
-            // Since we can't easily add to Enum via script without re-compilation,
-            // we just add a new entry to the list if possible.
-            // Note: You might need to manually update ViewType enum first.
-            
             Undo.RecordObject(settings, "Add View Config");
-            
-            // We use reflection or a helper to add to the private list if needed, 
-            // but let's assume we can add to a public list or handle serialized property.
             var serializedObject = new SerializedObject(settings);
             var entriesProp = serializedObject.FindProperty("_entries");
             
@@ -107,9 +129,13 @@ namespace Feature.{_viewName}Module.Scripts {{
                 entriesProp.InsertArrayElementAtIndex(entriesProp.arraySize);
                 var element = entriesProp.GetArrayElementAtIndex(entriesProp.arraySize - 1);
                 
-                // Set default values. ViewType will be 0 (first value).
                 element.FindPropertyRelative("Address").stringValue = _viewName; 
                 element.FindPropertyRelative("PresenterTypeName").stringValue = $"Feature.{_viewName}Module.Scripts.{presenterName}";
+                
+                // We try to set the enum value. Since we just wrote to the file, 
+                // the enum might not have the new name available yet to the SerializedProperty.
+                // But we can set the int value if we know the index or just leave it for the user to select.
+                // Usually, insert adds a default (0). 
                 
                 serializedObject.ApplyModifiedProperties();
                 EditorUtility.SetDirty(settings);

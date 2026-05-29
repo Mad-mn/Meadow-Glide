@@ -1,6 +1,9 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Feature.CameraServiceModule.Scripts;
+using Feature.GameViewModule.Scripts;
+using Feature.LoadingViewModule.Scripts;
+using Feature.MainMenuViewModule.Scripts;
 using Feature.StateModule.Scripts.Base;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
@@ -24,6 +27,9 @@ namespace Feature.GameStateModule.Scripts.States {
         private async UniTaskVoid Initialize() {
             await _cameraService.Initialize();
             await _viewService.Initialize();
+            _viewService.ShowView<LoadingView>(ViewType.LoadingView);
+            await _viewService.PrewarmView<MainMenuView>(ViewType.MainMenu);
+            await _viewService.PrewarmView<GameView>(ViewType.GameView);
             ChangeState?.Invoke(typeof(MainMenuState));
         }
     }

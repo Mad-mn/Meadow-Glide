@@ -38,6 +38,15 @@ namespace Feature.UIServiceModule.Scripts {
             ShowViewTask<T>(viewType).Forget();
         }
 
+        public async UniTask<T> PrewarmView<T>(ViewType viewType) where T : ViewBase {
+            await InitializeIfNeeded();
+            T view = await GetOrInitializeView<T>(viewType);
+            if (view != null) {
+                view.Hide();
+            }
+            return view;
+        }
+
         private async UniTaskVoid ShowViewTask<T>(ViewType viewType) where T : ViewBase {
             await InitializeIfNeeded();
 
@@ -46,22 +55,33 @@ namespace Feature.UIServiceModule.Scripts {
                 return;
             }
 
+            T view = await GetOrInitializeView<T>(viewType);
+            if (view != null) {
+                view.Show();
+            }
+        }
+
+        private async UniTask<T> GetOrInitializeView<T>(ViewType viewType) where T : ViewBase {
+            if (_activeViews.TryGetValue(viewType, out var active)) {
+                return (T)active.view;
+            }
+
             if (!_configs.TryGetValue(viewType, out var config)) {
                 Debug.LogError($"No config found for {viewType}");
-                return;
+                return null;
             }
 
             GameObject instance = await _addressableService.InstantiateAsync(config.Address, _uiRoot.CanvasRoot);
             
             if (instance == null) {
                 Debug.LogError($"Failed to load view prefab for {viewType} at address {config.Address}");
-                return;
+                return null;
             }
 
             T view = instance.GetComponent<T>();
             if (view == null) {
                 Debug.LogError($"Prefab at {config.Address} does not have component {typeof(T).Name}");
-                return;
+                return null;
             }
 
             _container.Inject(view);
@@ -70,7 +90,7 @@ namespace Feature.UIServiceModule.Scripts {
             presenter?.Initialize();
 
             _activeViews.Add(viewType, (view, presenter));
-            view.Show();
+            return view;
         }
 
         public void HideView(ViewType viewType) {

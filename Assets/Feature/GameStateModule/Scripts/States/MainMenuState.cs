@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Feature.LoadingViewModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
 using Feature.StateModule.Scripts.Base;
 using Feature.UIServiceModule.Scripts;
@@ -21,12 +22,14 @@ namespace Feature.GameStateModule.Scripts.States {
         }
 
         public void Exit() {
+            _viewService.ShowView<LoadingView>(ViewType.LoadingView);
             _viewService.HideView(ViewType.MainMenu);
         }
 
         private async UniTaskVoid LoadMainMenuScene() {
             await _sceneLoadService.LoadSceneAsync(SceneType.MainMenu);
             _viewService.ShowView<MainMenuView>(ViewType.MainMenu);
+            _viewService.HideView(ViewType.LoadingView);
         }
     }
 }

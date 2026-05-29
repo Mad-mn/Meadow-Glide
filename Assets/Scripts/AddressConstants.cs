@@ -8,6 +8,7 @@ public static class AddressConstants
     public const string GameView = "GameView";
     public const string GircleModule = "GircleModule";
     public const string LevelConfigProvider = "LevelConfigProvider";
+    public const string LoadingView = "LoadingView";
     public const string MainMenuView = "MainMenuView";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_GeometryPool_GeometryPoolKernels_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/GeometryPool/GeometryPoolKernels.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_Utilities_CopyBuffer_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/Utilities/CopyBuffer.compute";
