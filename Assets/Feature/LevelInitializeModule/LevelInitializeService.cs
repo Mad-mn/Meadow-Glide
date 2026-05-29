@@ -54,6 +54,10 @@ namespace Feature.LevelInitializeModule {
             
             float minRadius = _circleParamsConfig.GetRadius(0);
             float maxRadius = _circleParamsConfig.GetRadius(levelData.LevelConfig.CircleConfigs.Count - 1);
+            float radiusDiff = 1f;
+            if (levelData.LevelConfig.CircleConfigs.Count > 1) {
+                radiusDiff = _circleParamsConfig.GetRadius(1) - _circleParamsConfig.GetRadius(0);
+            }
             
             // Get line width from the segment prefab's LineRenderer
             float lineWidth = 0.35f; // Default
@@ -67,15 +71,15 @@ namespace Feature.LevelInitializeModule {
             // Spawn outer mask
             var mask = _container.InstantiatePrefabForComponent<SpriteMask>(maskPrefab);
             mask.transform.position = Vector3.zero;
-            // Formula: radius + width / 2. Scale is diameter.
-            float maskRadius = maxRadius + lineWidth / 2f;
+            // Formula: radius + width / 2 + diff / 2. Scale is diameter.
+            float maskRadius = maxRadius + lineWidth / 2f + radiusDiff / 2f;
             mask.transform.localScale = Vector3.one * maskRadius * 2f;
 
             // Spawn inner center mask/cover
             var centerCover = _container.InstantiatePrefab(centerPrefab);
             centerCover.transform.position = Vector3.zero;
-            // Formula: inner edge of the first circle (minRadius - width / 2)
-            float centerRadius = minRadius - lineWidth / 2f;
+            // Formula: inner edge of the first circle (minRadius - width / 2 - diff / 2)
+            float centerRadius = minRadius - lineWidth / 2f - radiusDiff / 2f;
             centerCover.transform.localScale = Vector3.one * centerRadius * 2f;
             
             // Ensure center cover is visible on top

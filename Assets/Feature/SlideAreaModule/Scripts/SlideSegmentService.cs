@@ -42,7 +42,6 @@ namespace Feature.SlideAreaModule.Scripts {
         public void Initialize() {
             _inputService.PointerDown += OnPointerDown;
             _inputService.PointerUp += OnPointerUp;
-            _mainCamera = _cameraService.CameraObject;
         }
 
         public void Dispose() {
@@ -75,15 +74,7 @@ namespace Feature.SlideAreaModule.Scripts {
             }
 
             if (_mainCamera == null) {
-                _mainCamera = Camera.main;
-            }
-            if (_mainCamera == null) {
-                Debug.LogError(1);
-                _mainCamera = Camera.main ?? GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
-            }
-
-            if (_mainCamera == null) {
-                Debug.LogError(2);
+                _mainCamera = _cameraService.CameraObject;
             }
 
             Vector2 screenPos = _inputService.PointerPosition;
@@ -159,7 +150,7 @@ namespace Feature.SlideAreaModule.Scripts {
             int count = _activeSegments.Count;
             if (count == 0) return;
 
-            float midR = (_minR + _maxR) / 2f;
+            float midR = _minR + _totalSpan / 2f;
 
             for (int i = 0; i < count; i++) {
                 float virtualR = _baseRadii[i] + delta;
@@ -250,7 +241,6 @@ namespace Feature.SlideAreaModule.Scripts {
                 var targetCircle = _sortedCircles[i];
                 var segment = shiftedSegments[i];
                 
-                // Optimized removal: segment knows its parent
                 if (segment.transform.parent != null) {
                     var oldCircle = segment.transform.parent.GetComponent<CircleController>();
                     if (oldCircle != null) oldCircle.RemoveSegment(segment);
@@ -264,7 +254,6 @@ namespace Feature.SlideAreaModule.Scripts {
                 float targetLocalAngle = Mathf.DeltaAngle(targetCircle.transform.eulerAngles.z, worldSectorAngle);
                 segment.transform.localRotation = Quaternion.Euler(0, 0, targetLocalAngle);
                 
-                // Update our active segments tracking to match the new ownership
                 _activeSegments[i] = segment;
             }
         }
