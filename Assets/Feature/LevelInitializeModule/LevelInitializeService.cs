@@ -54,32 +54,23 @@ namespace Feature.LevelInitializeModule {
             
             float minRadius = _circleParamsConfig.GetRadius(0);
             float maxRadius = _circleParamsConfig.GetRadius(levelData.LevelConfig.CircleConfigs.Count - 1);
-            float radiusDiff = 1f;
-            if (levelData.LevelConfig.CircleConfigs.Count > 1) {
-                radiusDiff = _circleParamsConfig.GetRadius(1) - _circleParamsConfig.GetRadius(0);
-            }
             
-            // Get line width from the segment prefab's LineRenderer
-            float lineWidth = 0.35f; // Default
-            if (circleControllerPrefab.SegmentPrefab != null) {
-                var lineRenderer = circleControllerPrefab.SegmentPrefab.GetComponent<UnityEngine.LineRenderer>();
-                if (lineRenderer != null) {
-                    lineWidth = lineRenderer.widthMultiplier * lineRenderer.widthCurve.Evaluate(0);
-                }
-            }
-
+            float minWidth = _circleParamsConfig.GetWidth(0);
+            float maxWidth = _circleParamsConfig.GetWidth(levelData.LevelConfig.CircleConfigs.Count - 1);
+            float distance = _circleParamsConfig.DistanceBetweenCircles;
+            
             // Spawn outer mask
             var mask = _container.InstantiatePrefabForComponent<SpriteMask>(maskPrefab);
             mask.transform.position = Vector3.zero;
-            // Formula: radius + width / 2 + diff / 2. Scale is diameter.
-            float maskRadius = maxRadius + lineWidth / 2f + radiusDiff / 2f;
+            // Formula: edge of the segment (maxRadius + maxWidth/2) + half distance
+            float maskRadius = maxRadius + maxWidth / 2f + distance / 2f; 
             mask.transform.localScale = Vector3.one * maskRadius * 2f;
 
             // Spawn inner center mask/cover
             var centerCover = _container.InstantiatePrefab(centerPrefab);
             centerCover.transform.position = Vector3.zero;
-            // Formula: inner edge of the first circle (minRadius - width / 2 - diff / 2)
-            float centerRadius = minRadius - lineWidth / 2f - radiusDiff / 2f;
+            // Formula: inner edge (minRadius - minWidth/2) - half distance
+            float centerRadius = minRadius - minWidth / 2f - distance / 2f;
             centerCover.transform.localScale = Vector3.one * centerRadius * 2f;
             
             // Ensure center cover is visible on top
@@ -103,7 +94,8 @@ namespace Feature.LevelInitializeModule {
                 _circleController.transform.position = Vector3.zero;
                 
                 float radius = _circleParamsConfig.GetRadius(i);
-                _circleController.Setup(config, radius);
+                float width = _circleParamsConfig.GetWidth(i);
+                _circleController.Setup(config, radius, width);
                 
                 _circleRotationService.Register(_circleController);
                 _slideSegmentService.RegisterCircle(_circleController);

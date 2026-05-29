@@ -15,6 +15,7 @@ namespace Feature.CircleModule.Scripts {
         private CircleConfig _currentConfig;
         private ICircleColorService _circleColorService;
         private float _calculatedRadius;
+        private float _segmentWidth;
 
         public float Radius => _calculatedRadius;
         public int SegmentCount => _currentConfig != null ? _currentConfig.segmentCount : 0;
@@ -61,11 +62,13 @@ namespace Feature.CircleModule.Scripts {
         public void AddSegment(CircleSegment segment) {
             segment.transform.SetParent(transform);
             _spawnedSegments.Add(segment);
+            segment.SetWidth(_segmentWidth);
         }
 
-        public void Setup(CircleConfig config, float radius) {
+        public void Setup(CircleConfig config, float radius, float width) {
             _currentConfig = config;
             _calculatedRadius = radius;
+            _segmentWidth = width;
             BuildCircle();
         }
 
@@ -105,7 +108,7 @@ namespace Feature.CircleModule.Scripts {
                 segment.transform.localRotation = Quaternion.Euler(0, 0, rotationAngle);
 
                 Color color = _circleColorService.GetColor(segData.colorType);
-                segment.Initialize(segData, color);
+                segment.Initialize(segData, color, _segmentWidth);
 
                 _spawnedSegments.Add(segment);
             }

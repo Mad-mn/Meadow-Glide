@@ -18,7 +18,7 @@ namespace Feature.CircleModule.Scripts
 
         public float Radius => _currentConfig != null ? _currentConfig.radius : 0;
 
-        public void Initialize(SegmentConfig config, Color color)
+        public void Initialize(SegmentConfig config, Color color, float width)
         {
             _currentConfig = config;
             EnsureLineRenderer();
@@ -27,11 +27,19 @@ namespace Feature.CircleModule.Scripts
             _cachedLineRenderer.useWorldSpace = false;
             _cachedLineRenderer.startColor = color;
             _cachedLineRenderer.endColor = color;
+            _cachedLineRenderer.startWidth = width;
+            _cachedLineRenderer.endWidth = width;
             _cachedLineRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             
             DrawArc(config.radius, config.angle);
 
             SetupTriggerPosition(config);
+        }
+
+        public void SetWidth(float width) {
+            EnsureLineRenderer();
+            _cachedLineRenderer.startWidth = width;
+            _cachedLineRenderer.endWidth = width;
         }
 
         private void EnsureLineRenderer() {
