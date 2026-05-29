@@ -44,12 +44,18 @@ namespace Feature.SlideAreaModule.Scripts {
                     continue;
                 }
 
-                float innerRadius = _circleParamsConfig.GetRadius(config.startCircleIndex);
-                float outerRadius = _circleParamsConfig.GetRadius(config.endCircleIndex) + OUTER_POINT_OFFSET;
+                float startR = _circleParamsConfig.GetRadius(config.startCircleIndex);
+                float startW = _circleParamsConfig.GetWidth(config.startCircleIndex);
+                float endR = _circleParamsConfig.GetRadius(config.endCircleIndex);
+                float endW = _circleParamsConfig.GetWidth(config.endCircleIndex);
+                float dist = _circleParamsConfig.DistanceBetweenCircles;
+
+                float innerBoundary = startR - startW / 2f - dist / 2f;
+                float outerBoundary = endR + endW / 2f + dist / 2f;
                 
                 SlideArea slideArea = _container.InstantiatePrefabForComponent<SlideArea>(_slideAreaPrefab);
                 slideArea.transform.position = Vector3.zero;
-                slideArea.Initialize(config, innerRadius, outerRadius);
+                slideArea.Initialize(config, innerBoundary, outerBoundary);
                 
                 _spawnedAreas.Add(slideArea);
             }
