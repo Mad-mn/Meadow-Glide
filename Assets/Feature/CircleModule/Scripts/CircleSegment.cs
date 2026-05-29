@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks.Triggers;
+using Feature.ColorServiceModule.Scripts;
 using UnityEngine;
 
 namespace Feature.CircleModule.Scripts
@@ -17,6 +18,8 @@ namespace Feature.CircleModule.Scripts
         private float _lastPrecalculatedAngle = -1f;
 
         public float Radius => _currentConfig != null ? _currentConfig.radius : 0;
+        public CircleColorType ColorType =>
+            _currentConfig.colorType;
 
         public void Initialize(SegmentConfig config, Color color, float width)
         {

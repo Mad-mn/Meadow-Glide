@@ -15,6 +15,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly IInteractionStateService _interactionState;
         private readonly ICameraService _cameraService;
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
+        private readonly GameCircleModel _circleModel;
         private CircleParamsConfig _circleParamsConfig;
         private readonly List<CircleController> _circles = new List<CircleController>();
         
@@ -34,12 +35,14 @@ private readonly List<float> _baseIndices = new List<float>();
             ISlideAreaService slideAreaService,
             IInteractionStateService interactionState,
             ICameraService cameraService,
-            UniTask<CircleParamsConfig> circleParamsConfigTask) {
+            UniTask<CircleParamsConfig> circleParamsConfigTask,
+            GameCircleModel circleModel) {
             _inputService = inputService;
             _slideAreaService = slideAreaService;
             _interactionState = interactionState;
             _cameraService = cameraService;
             _circleParamsConfigTask = circleParamsConfigTask;
+            _circleModel = circleModel;
         }
 
         public async void Initialize() {
@@ -274,7 +277,7 @@ SlideArea areaToSnap = _activeArea; // Cache it because SnapSegments uses it and
                     float baseWidth = _circleParamsConfig.GetWidth(idx);
                     seg.SetWidth(baseWidth * fade);
                 }
-await UniTask.Yield();
+                await UniTask.Yield();
             }
 
             for (int i = 0; i < count; i++) {
@@ -285,6 +288,7 @@ await UniTask.Yield();
                 }
             }
 
+            _circleModel.SegmentsChanged();
             ClearGhosts();
             _activeSegments.Clear();
             _baseIndices.Clear();

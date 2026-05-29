@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Feature.ColorServiceModule.Scripts;
 using UnityEngine;
@@ -7,8 +8,6 @@ using Zenject;
 namespace Feature.CircleModule.Scripts {
     public class CircleController : MonoBehaviour {
         [SerializeField] private CircleSegment _segmentPrefab;
-
-        public CircleSegment SegmentPrefab => _segmentPrefab;
 
         private readonly List<CircleSegment> _spawnedSegments = new List<CircleSegment>();
 
@@ -23,7 +22,7 @@ namespace Feature.CircleModule.Scripts {
         public IReadOnlyList<CircleSegment> SpawnedSegments => _spawnedSegments;
 
         [Inject]
-        public void InjectDependencies(ICircleColorService colorService) {
+        public void InjectDependencies(ICircleColorService colorService, GameCircleModel circleModel) {
             _circleColorService = colorService;
         }
 

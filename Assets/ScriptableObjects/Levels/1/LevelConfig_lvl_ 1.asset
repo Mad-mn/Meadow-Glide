@@ -21,3 +21,7 @@ MonoBehaviour:
     endCircleIndex: 1
     sectorIndex: 1
     totalSegments: 5
+  - startCircleIndex: 1
+    endCircleIndex: 2
+    sectorIndex: 2
+    totalSegments: 5
