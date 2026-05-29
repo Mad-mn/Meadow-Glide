@@ -14,6 +14,10 @@ namespace Feature.CircleModule.Scripts {
             _circleModel = circleModel;
         }
 
+        public void Reset() {
+            _filledCircles.Clear();
+        }
+
         public void Initialize() {
             _circleModel.OnSegmentsChanged += OnCircleSegmentChanged;
         }

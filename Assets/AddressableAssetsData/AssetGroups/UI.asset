@@ -16,7 +16,7 @@ MonoBehaviour:
   m_GUID: c2cc154410beb834c84b9e1d0c275557
   m_SerializeEntries:
   - m_GUID: 3688563366627f14397b6a4e1dfbe407
-    m_Address: Assets/Feature/CircleModule/Prefabs/CircleSegmentPrefab.prefab
+    m_Address: CircleSegmentPrefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -27,6 +27,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 41a9d34341db48e4d92dfe87314813ea
     m_Address: MainMenuView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dffce7d5a67075748bd1f016f288b706
+    m_Address: GameView
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

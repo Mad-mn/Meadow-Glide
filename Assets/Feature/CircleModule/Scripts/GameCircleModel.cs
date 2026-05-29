@@ -25,6 +25,10 @@ namespace Feature.CircleModule.Scripts {
                 _circles.Remove(circle);
         }
 
+        public void Clear() {
+            _circles.Clear();
+        }
+
         public void SegmentsChanged() {
             OnSegmentsChanged?.Invoke();
         }

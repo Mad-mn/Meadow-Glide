@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5d8a937fd4e49a43b9d2858088a050a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.MainMenuViewModule.Scripts.MainMenuView
-  _destroyOnClose: 0
+  _destroyOnClose: 1
   _playButton: {fileID: 2836863030489839168}
 --- !u!1 &820902426659593273
 GameObject:

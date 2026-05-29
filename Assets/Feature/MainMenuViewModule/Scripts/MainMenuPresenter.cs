@@ -1,6 +1,7 @@
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.UIServiceModule.Scripts;
+using UnityEngine;
 
 namespace Feature.MainMenuViewModule.Scripts {
     public class MainMenuPresenter : PresenterBase<MainMenuView> {
@@ -11,15 +12,10 @@ namespace Feature.MainMenuViewModule.Scripts {
 
         public override void Initialize() {
             View.PlayButton.onClick.AddListener(StartSimpleGame);
-        }
-
-        public override void Dispose() {
-            base.Dispose();
-            View.PlayButton.onClick.RemoveListener(StartSimpleGame);
+        
         }
 
         private void StartSimpleGame() {
-            View.PlayButton.onClick.RemoveListener(StartSimpleGame);
             _gameStateMachine.EnterState(typeof(GameSimpleState));
         }
     }

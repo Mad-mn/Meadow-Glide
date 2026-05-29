@@ -25,7 +25,10 @@ namespace Feature.GameStateModule.Scripts.States {
             GameInitFlow().Forget();
         }
 
-        public void Exit() { }
+        public void Exit() {
+            _sceneLoadService.OnSceneLoaded -= OnLoadGameScene;
+            _levelInitializeService.Dispose().Forget();
+        }
 
         private async UniTaskVoid GameInitFlow() {
             await _levelInitializeService.Initialize();

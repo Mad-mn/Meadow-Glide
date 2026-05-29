@@ -16,3 +16,6 @@ MonoBehaviour:
   - ViewType: 1
     Address: MainMenuView
     PresenterTypeName: Feature.MainMenuViewModule.Scripts.MainMenuPresenter
+  - ViewType: 3
+    Address: GameView
+    PresenterTypeName: Feature.GameViewModule.Scripts.GamePresenter

@@ -33,7 +33,7 @@ namespace Feature.SlideAreaModule.Scripts {
         }
 
         public void SpawnSlideAreas(LevelConfig levelConfig) {
-            ClearSlideAreas();
+            Clear();
 
             if (levelConfig.SlideAreaConfigs == null) return;
 
@@ -61,7 +61,7 @@ namespace Feature.SlideAreaModule.Scripts {
             }
         }
 
-        private void ClearSlideAreas() {
+        public void Clear() {
             foreach (var area in _spawnedAreas) {
                 if (area != null) {
                     Object.Destroy(area.gameObject);
