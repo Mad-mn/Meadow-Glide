@@ -1,21 +1,21 @@
 using System;
 using System.Collections.Generic;
 using Feature.ColorServiceModule.Scripts;
+using Feature.UIServiceModule.Scripts;
+using Feature.WinLevelModule.Scripts;
 using UnityEngine;
 using Zenject;
 
 namespace Feature.CircleModule.Scripts {
     public class CircleControllerService : ICircleControllerService, IInitializable, IDisposable {
         private readonly GameCircleModel _circleModel;
+        private readonly IViewService _viewService;
 
         private List<CircleController> _filledCircles = new List<CircleController>();
 
-        public CircleControllerService(GameCircleModel circleModel) {
+        public CircleControllerService(GameCircleModel circleModel, IViewService viewService) {
             _circleModel = circleModel;
-        }
-
-        public void Reset() {
-            _filledCircles.Clear();
+            _viewService = viewService;
         }
 
         public void Initialize() {
@@ -24,6 +24,10 @@ namespace Feature.CircleModule.Scripts {
 
         public void Dispose() {
             _circleModel.OnSegmentsChanged -= OnCircleSegmentChanged;
+        }
+
+        public void Reset() {
+            _filledCircles.Clear();
         }
 
         private void OnCircleSegmentChanged() {
@@ -37,7 +41,7 @@ namespace Feature.CircleModule.Scripts {
 
         private void CheckForWin() {
             if (_filledCircles.Count == _circleModel.Circles.Count && _circleModel.Circles.Count > 0) {
-                Debug.LogError("win");
+                _viewService.ShowView<WinLevel>(ViewType.WinLevel);
             }
         }
 

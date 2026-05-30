@@ -22,3 +22,6 @@ MonoBehaviour:
   - ViewType: 4
     Address: LoadingView
     PresenterTypeName: Feature.LoadingViewModule.Scripts.LoadingPresenter
+  - ViewType: 5
+    Address: WinLevel
+    PresenterTypeName: Feature.WinLevelModule.Scripts.WinLevelPresenter

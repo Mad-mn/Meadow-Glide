@@ -5,6 +5,7 @@ using Feature.GameViewModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
 using Feature.UIServiceModule.Scripts;
+using Feature.WinLevelModule.Scripts;
 using UnityEngine;
 using Zenject;
 
@@ -49,6 +50,7 @@ namespace Feature.LevelInitializeModule {
         }
         
         public async UniTask Initialize() {
+            _viewService.PrewarmView<WinLevel>(ViewType.WinLevel);
             _viewService.ShowView<GameView>(ViewType.GameView);
 
             CircleController circleControllerPrefab = await _circleControllerTask;
@@ -65,6 +67,7 @@ namespace Feature.LevelInitializeModule {
         }
 
         public async UniTask Dispose() {
+            _viewService.ReleasePrewarmedView(ViewType.WinLevel);
             _viewService.HideView(ViewType.GameView);
             _circleRotationService.Clear();
             _slideSegmentService.Clear();

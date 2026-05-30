@@ -30,6 +30,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79cff393eca8e364aaad30cf4bc42aac
+    m_Address: WinLevelView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dffce7d5a67075748bd1f016f288b706
     m_Address: GameView
     m_ReadOnly: 0

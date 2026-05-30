@@ -18,6 +18,7 @@ namespace Feature.UIServiceModule.Scripts {
         private ViewSettings _settings;
         private Dictionary<ViewType, ViewSettings.ViewConfigEntry> _configs;
         private readonly Dictionary<ViewType, (ViewBase view, IPresenter presenter)> _activeViews = new();
+        private readonly List<ViewType> _prewarmedViews = new();
 
         public ViewService(
             IAddressableService addressableService, 
@@ -42,9 +43,24 @@ namespace Feature.UIServiceModule.Scripts {
             await InitializeIfNeeded();
             T view = await GetOrInitializeView<T>(viewType);
             if (view != null) {
+                _prewarmedViews.Add(viewType);
                 view.Hide();
             }
             return view;
+        }
+
+        public void ReleasePrewarmedView(ViewType viewType) {
+            if(!_prewarmedViews.Contains(viewType))
+                return;
+            
+            if (!_activeViews.TryGetValue(viewType, out var active)) return;
+
+            active.view.Hide();
+
+            active.presenter?.Dispose();
+            _addressableService.ReleaseInstance(active.view.gameObject);
+            _activeViews.Remove(viewType);
+            _prewarmedViews.Remove(viewType);
         }
 
         private async UniTaskVoid ShowViewTask<T>(ViewType viewType) where T : ViewBase {
