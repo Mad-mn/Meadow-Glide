@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Feature.ColorServiceModule.Scripts;
+using Feature.SaveDataModule.Scripts;
+using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
 using UnityEngine;
@@ -10,12 +12,17 @@ namespace Feature.CircleModule.Scripts {
     public class CircleControllerService : ICircleControllerService, IInitializable, IDisposable {
         private readonly GameCircleModel _circleModel;
         private readonly IViewService _viewService;
+        private readonly ISaveDataModel _saveDataModel;
+        private readonly ISaveDataService _saveDataService;
 
         private List<CircleController> _filledCircles = new List<CircleController>();
 
-        public CircleControllerService(GameCircleModel circleModel, IViewService viewService) {
+        public CircleControllerService(GameCircleModel circleModel, IViewService viewService,
+            ISaveDataModel saveDataModel, ISaveDataService saveDataService) {
             _circleModel = circleModel;
             _viewService = viewService;
+            _saveDataModel = saveDataModel;
+            _saveDataService = saveDataService;
         }
 
         public void Initialize() {
@@ -41,8 +48,16 @@ namespace Feature.CircleModule.Scripts {
 
         private void CheckForWin() {
             if (_filledCircles.Count == _circleModel.Circles.Count && _circleModel.Circles.Count > 0) {
-                _viewService.ShowView<WinLevel>(ViewType.WinLevel);
+                ApplyWin();
             }
+        }
+
+        private void ApplyWin() {
+            _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
+                .Level++;
+            _saveDataService.Save(SaveDataType.PlayerProgress);
+            _viewService.ShowView<WinLevel>(ViewType.WinLevel);
+            
         }
 
         private void UpdateCirclesStates() {

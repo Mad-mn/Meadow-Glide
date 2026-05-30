@@ -17,3 +17,5 @@ MonoBehaviour:
     LevelConfig: {fileID: 11400000, guid: b6e8935324d905f45b02fdf6ac910c22, type: 2}
   - LevelID: 1
     LevelConfig: {fileID: 11400000, guid: b6e8935324d905f45b02fdf6ac910c22, type: 2}
+  - LevelID: 2
+    LevelConfig: {fileID: 11400000, guid: a9d7e32a73873af429923752ba8dc5e4, type: 2}

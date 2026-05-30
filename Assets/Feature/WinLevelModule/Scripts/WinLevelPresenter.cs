@@ -19,7 +19,7 @@ namespace Feature.WinLevelModule.Scripts {
         }
 
         private void OnNextButtonClick() {
-            
+            _gameStateMachine.EnterState(typeof(GameSimpleState));
         }
     }
 }

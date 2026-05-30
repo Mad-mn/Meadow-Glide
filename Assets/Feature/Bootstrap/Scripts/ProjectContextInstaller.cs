@@ -7,6 +7,7 @@ using Feature.GameStateModule.Scripts.Installers;
 using Feature.InputModule.Scripts.Installers;
 using Feature.LevelInitializeModule.Scripts.Installers;
 using Feature.LevelModule.Scripts.Installers;
+using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.SlideAreaModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
@@ -22,6 +23,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         AssetBindingModuleInstaller.Install(Container);
         CameraServiceModuleInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);
+        SaveDataModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);
         UIModuleInstaller.Install(Container);
         CircleColorModuleInstaller.Install(Container);

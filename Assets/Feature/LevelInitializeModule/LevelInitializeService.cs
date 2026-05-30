@@ -3,6 +3,8 @@ using Cysharp.Threading.Tasks;
 using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.SaveDataModule.Scripts;
+using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SlideAreaModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
@@ -15,6 +17,8 @@ namespace Feature.LevelInitializeModule {
         private readonly UniTask<LevelConfigProvider> _levelConfigProviderTask;
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
         private readonly IViewService _viewService;
+        private readonly ISaveDataService _saveDataService;
+        private readonly ISaveDataModel _saveDataModel;
         private readonly DiContainer _container;
         private readonly ISlideAreaService _slideAreaService;
         private readonly ICircleRotationService _circleRotationService;
@@ -36,7 +40,9 @@ namespace Feature.LevelInitializeModule {
             ICircleControllerService circleControllerService,
             GameCircleModel circleModel,
             UniTask<CircleParamsConfig> circleParamsConfigTask,
-            IViewService viewService) {
+            IViewService viewService,
+            ISaveDataService saveDataService,
+            ISaveDataModel saveDataModel) {
             _circleControllerTask = circleControllerTask;
             _container = container;
             _levelConfigProviderTask = levelConfigProviderTask;
@@ -47,18 +53,19 @@ namespace Feature.LevelInitializeModule {
             _circleModel = circleModel;
             _circleParamsConfigTask = circleParamsConfigTask;
             _viewService = viewService;
+            _saveDataService = saveDataService;
+            _saveDataModel = saveDataModel;
         }
         
         public async UniTask Initialize() {
-            _viewService.PrewarmView<WinLevel>(ViewType.WinLevel);
             _viewService.ShowView<GameView>(ViewType.GameView);
 
             CircleController circleControllerPrefab = await _circleControllerTask;
             _levelConfigProvider = await _levelConfigProviderTask;
             _circleParamsConfig = await _circleParamsConfigTask;
-            
+            PlayerProgressData playerProgressData = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
 
-            LevelData levelData = _levelConfigProvider.LevelDatas[1];
+            LevelData levelData = _levelConfigProvider.LevelDatas[playerProgressData.Level];
             
             await _slideAreaService.Initialize();
             
@@ -67,7 +74,6 @@ namespace Feature.LevelInitializeModule {
         }
 
         public async UniTask Dispose() {
-            _viewService.ReleasePrewarmedView(ViewType.WinLevel);
             _viewService.HideView(ViewType.GameView);
             _circleRotationService.Clear();
             _slideSegmentService.Clear();

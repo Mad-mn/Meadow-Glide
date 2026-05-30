@@ -1,0 +1,9 @@
+namespace Feature.SaveDataModule.Scripts
+{
+    public enum SaveDataType
+    {
+        PlayerProgress = 1,
+        Settings = 2,
+        Statistics = 3
+    }
+}
