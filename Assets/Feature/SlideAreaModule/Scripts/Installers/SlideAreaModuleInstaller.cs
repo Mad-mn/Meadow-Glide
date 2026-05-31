@@ -5,6 +5,9 @@ namespace Feature.SlideAreaModule.Scripts.Installers {
         public override void InstallBindings() {
             Container.BindInterfacesAndSelfTo<SlideAreaService>()
                 .AsSingle();
+
+            Container.BindInterfacesAndSelfTo<SlideAreaModel>()
+                .AsSingle();
         }
     }
 }
