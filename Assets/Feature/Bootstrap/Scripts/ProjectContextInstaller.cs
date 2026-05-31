@@ -10,6 +10,7 @@ using Feature.LevelModule.Scripts.Installers;
 using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.SlideAreaModule.Scripts.Installers;
+using Feature.StatusModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
@@ -32,6 +33,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         SlideAreaModuleInstaller.Install(Container);
         InputModuleInstaller.Install(Container);
         CircleModuleInstaller.Install(Container);
+        StatusModuleInstaller.Install(Container);
 
     }
 }

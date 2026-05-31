@@ -12,20 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e50abfa8606c324f9dc01423e49b57e, type: 3}
   m_Name: 2
   m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleConfig
-  segmentCount: 5
-  segments:
-  - colorType: 2
-    radius: 1.5
-    angle: 72
-  - colorType: 3
-    radius: 1.5
-    angle: 72
-  - colorType: 2
-    radius: 1.5
-    angle: 72
-  - colorType: 2
-    radius: 1.5
-    angle: 72
-  - colorType: 3
-    radius: 1.5
-    angle: 72
+  SegmentCount: 4
+  Segments:
+  - ColorType: 3
+    Radius: 0
+    Angle: 90
+    SegmentStatus: 0
+  - ColorType: 2
+    Radius: 0
+    Angle: 90
+    SegmentStatus: 0
+  - ColorType: 3
+    Radius: 0
+    Angle: 90
+    SegmentStatus: 0
+  - ColorType: 3
+    Radius: 0
+    Angle: 90
+    SegmentStatus: 0

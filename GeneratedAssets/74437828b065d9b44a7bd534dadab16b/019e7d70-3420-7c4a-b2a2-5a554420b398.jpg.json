@@ -1,0 +1,38 @@
+{
+    "asset": "74437828b065d9b44a7bd534dadab16b",
+    "fileName": "019e7d70-3420-7c4a-b2a2-5a554420b398.jpg",
+    "prompt": "Remove the fixators (bolts/pins) from the corners of the rounded square frame. Keep only the fixators located in the middle of each of the four edges. Increase the size of these middle edge fixators to be twice as large as they currently are. Maintain the minimalist white UI style on a transparent background.",
+    "negativePrompt": "",
+    "model": "flux-2-pro",
+    "modelName": "Flux 2 (Pro)",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": [
+            {
+                "doodleReferenceType": 7,
+                "doodle": [],
+                "label": "Image",
+                "strength": 0.25,
+                "invertStrength": false,
+                "assetReferenceGuid": "74437828b065d9b44a7bd534dadab16b",
+                "unlabeledIndex": -1
+            }
+        ]
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

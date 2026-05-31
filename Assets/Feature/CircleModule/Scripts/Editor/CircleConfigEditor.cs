@@ -30,29 +30,29 @@ namespace Feature.CircleModule.Scripts.Editor
             Undo.RecordObject(config, "Generate Circle Segments");
 
             // Logic: Clear and refill the list
-            if (config.segments == null)
+            if (config.Segments == null)
             {
-                config.segments = new List<SegmentConfig>();
+                config.Segments = new List<SegmentConfig>();
             }
             else
             {
-                config.segments.Clear();
+                config.Segments.Clear();
             }
 
-            if (config.segmentCount <= 0)
+            if (config.SegmentCount <= 0)
             {
                 Debug.LogWarning("Segment count must be greater than 0!");
                 return;
             }
 
-            float anglePerSegment = 360f / config.segmentCount;
+            float anglePerSegment = 360f / config.SegmentCount;
 
-            for (int i = 0; i < config.segmentCount; i++)
+            for (int i = 0; i < config.SegmentCount; i++)
             {
-                config.segments.Add(new SegmentConfig
+                config.Segments.Add(new SegmentConfig
                 {
-                    angle = anglePerSegment,
-                    colorType = CircleColorType.White
+                    Angle = anglePerSegment,
+                    ColorType = CircleColorType.White
                 });
             }
 
@@ -61,7 +61,7 @@ namespace Feature.CircleModule.Scripts.Editor
             // Save the asset changes to disk
             AssetDatabase.SaveAssets();
             
-            Debug.Log($"Generated {config.segmentCount} segments for {config.name}");
+            Debug.Log($"Generated {config.SegmentCount} segments for {config.name}");
         }
     }
 }

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks.Triggers;
 using Feature.ColorServiceModule.Scripts;
+using Feature.StatusModule.Scripts;
 using UnityEngine;
 
 namespace Feature.CircleModule.Scripts
@@ -9,23 +10,36 @@ namespace Feature.CircleModule.Scripts
     {
         [SerializeField] private GameObject _trigger;
         [SerializeField] private LineRenderer _lineRenderer;
-        
+        [SerializeField] private SpriteRenderer _statusIcon;
+        [SerializeField] private SegmentStatusAnimator _statusAnimator;
+        [SerializeField] private float _weightCoefficient = 0.5f;
+
         private const int SegmentsPerArc = 40;
         [SerializeField] private SegmentConfig _currentConfig;
+        private ISegmentStatusVisualDataProvider _visualDataProvider;
 
         private LineRenderer _cachedLineRenderer;
-        private Vector3[] _unitArcPositions;
+private Vector3[] _unitArcPositions;
         private float _lastPrecalculatedAngle = -1f;
 
-        public float Radius => _currentConfig != null ? _currentConfig.radius : 0;
+        public float Radius => _currentConfig != null ? _currentConfig.Radius : 0;
         public CircleColorType ColorType =>
-            _currentConfig.colorType;
+            _currentConfig.ColorType;
 
-        public void Initialize(SegmentConfig config, Color color, float width)
+        public bool IsBlocked => _currentConfig != null && _currentConfig.SegmentStatus == SegmentStatus.Blocked;
+
+        public void Initialize(SegmentConfig config, Color color, float width, ISegmentStatusVisualDataProvider visualDataProvider)
         {
             _currentConfig = config;
+            _visualDataProvider = visualDataProvider;
             EnsureLineRenderer();
             
+            if (_statusAnimator == null)
+                _statusAnimator = GetComponentInChildren<SegmentStatusAnimator>();
+            
+            if (_statusAnimator != null && _statusIcon != null)
+                _statusAnimator.SetTarget(_statusIcon.transform);
+
             // Set visuals
             _cachedLineRenderer.useWorldSpace = false;
             _cachedLineRenderer.startColor = color;
@@ -33,15 +47,77 @@ namespace Feature.CircleModule.Scripts
             _cachedLineRenderer.startWidth = width;
             _cachedLineRenderer.endWidth = width;
             
-            DrawArc(config.radius, config.angle);
+            DrawArc(config.Radius, config.Angle);
 
             SetupTriggerPosition(config);
+            UpdateStatusIcon();
+        }
+
+        public void TriggerBlockedAnimation()
+        {
+            if (_statusAnimator != null)
+                _statusAnimator.PlayShake().Forget();
         }
 
         public void SetWidth(float width) {
             EnsureLineRenderer();
             _cachedLineRenderer.startWidth = width;
             _cachedLineRenderer.endWidth = width;
+            UpdateStatusIcon();
+        }
+
+        public void SetStatus(SegmentStatus status)
+        {
+            if (_currentConfig == null) return;
+            _currentConfig.SegmentStatus = status;
+            UpdateStatusIcon();
+        }
+
+        private void UpdateStatusIcon()
+        {
+            if (_statusIcon == null || _visualDataProvider == null) return;
+
+            if (_currentConfig == null || _currentConfig.SegmentStatus == SegmentStatus.Default)
+            {
+                _statusIcon.gameObject.SetActive(false);
+                return;
+            }
+
+            var visualData = _visualDataProvider.GetVisualDataByStatus(_currentConfig.SegmentStatus);
+            if (visualData == null)
+            {
+                _statusIcon.gameObject.SetActive(false);
+                return;
+            }
+
+            _statusIcon.gameObject.SetActive(true);
+            _statusIcon.sprite = visualData.StatusIcon;
+            
+            float radius = _currentConfig.Radius;
+            EnsureLineRenderer();
+            float width = _cachedLineRenderer.startWidth;
+            
+            // Position at the middle of the arc
+            _statusIcon.transform.localPosition = new Vector3(radius, 0, 0);
+            
+            // Rotation: bottom to center
+            _statusIcon.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+            
+            // Scale: width * WightCoeffiecient
+            float targetSize = width * visualData.WightCoeffiecient;
+            if (_statusIcon.sprite != null)
+            {
+                float spriteSize = _statusIcon.sprite.bounds.size.x;
+                if (spriteSize > 0)
+                {
+                    float s = targetSize / spriteSize;
+                    _statusIcon.transform.localScale = new Vector3(s, s, 1f);
+                }
+            }
+            else
+            {
+                _statusIcon.transform.localScale = new Vector3(targetSize, targetSize, 1f);
+            }
         }
 
         private void EnsureLineRenderer() {
@@ -52,9 +128,10 @@ namespace Feature.CircleModule.Scripts
 
         public void SetRadius(float radius) {
             if (_currentConfig == null) return;
-            _currentConfig.radius = radius;
-            DrawArc(radius, _currentConfig.angle);
+            _currentConfig.Radius = radius;
+            DrawArc(radius, _currentConfig.Angle);
             SetupTriggerPosition(_currentConfig);
+            UpdateStatusIcon();
         }
 
         public void SetVisible(bool visible) {
@@ -76,7 +153,7 @@ namespace Feature.CircleModule.Scripts
         private void SetupTriggerPosition(SegmentConfig config) {
             if (_trigger != null)
             {
-                _trigger.transform.localPosition = new Vector3(config.radius, 0, 0);
+                _trigger.transform.localPosition = new Vector3(config.Radius, 0, 0);
             }
         }
 

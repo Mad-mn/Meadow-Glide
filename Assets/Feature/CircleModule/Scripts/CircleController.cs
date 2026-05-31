@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Feature.ColorServiceModule.Scripts;
+using Feature.StatusModule.Scripts;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Zenject;
@@ -13,23 +14,25 @@ namespace Feature.CircleModule.Scripts {
 
         private CircleConfig _currentConfig;
         private ICircleColorService _circleColorService;
+        private ISegmentStatusVisualDataProvider _statusVisualDataProvider;
         private float _calculatedRadius;
         private float _segmentWidth;
 
         public float Radius => _calculatedRadius;
-        public int SegmentCount => _currentConfig != null ? _currentConfig.segmentCount : 0;
+        public int SegmentCount => _currentConfig != null ? _currentConfig.SegmentCount : 0;
 
         public IReadOnlyList<CircleSegment> SpawnedSegments => _spawnedSegments;
 
         [Inject]
-        public void InjectDependencies(ICircleColorService colorService, GameCircleModel circleModel) {
+        public void InjectDependencies(ICircleColorService colorService, ISegmentStatusVisualDataProvider statusVisualDataProvider, GameCircleModel circleModel) {
             _circleColorService = colorService;
+            _statusVisualDataProvider = statusVisualDataProvider;
         }
 
         public CircleSegment GetSegmentAtAngle(float worldAngle) {
             if (_spawnedSegments.Count == 0) return null;
             
-            float anglePerSegment = 360f / _currentConfig.segmentCount;
+            float anglePerSegment = 360f / _currentConfig.SegmentCount;
             // Normalize world angle to [0, 360)
             float normalizedWorldAngle = (worldAngle % 360 + 360) % 360;
             
@@ -79,25 +82,27 @@ namespace Feature.CircleModule.Scripts {
                 return;
             }
 
-            float anglePerSegment = 360f / _currentConfig.segmentCount;
+            float anglePerSegment = 360f / _currentConfig.SegmentCount;
 
-            for (int i = 0; i < _currentConfig.segmentCount; i++) {
+            for (int i = 0; i < _currentConfig.SegmentCount; i++) {
                 SegmentConfig segData;
-                if (_currentConfig.segments != null && i < _currentConfig.segments.Count) {
+                if (_currentConfig.Segments != null && i < _currentConfig.Segments.Count) {
                     // Create a copy to avoid modifying the ScriptableObject data if we change radius
-                    var originalSeg = _currentConfig.segments[i];
+                    var originalSeg = _currentConfig.Segments[i];
                     segData = new SegmentConfig {
-                        colorType = originalSeg.colorType,
-                        radius = _calculatedRadius, // Force calculated radius
-                        angle = anglePerSegment
+                        ColorType = originalSeg.ColorType,
+                        Radius = _calculatedRadius, // Force calculated radius
+                        Angle = anglePerSegment,
+                        SegmentStatus = originalSeg.SegmentStatus
                     };
                 }
                 else {
                     // Fallback to default segment data
                     segData = new SegmentConfig {
-                        radius = _calculatedRadius, 
-                        angle = anglePerSegment, 
-                        colorType = CircleColorType.White
+                        Radius = _calculatedRadius, 
+                        Angle = anglePerSegment, 
+                        ColorType = CircleColorType.White,
+                        SegmentStatus = SegmentStatus.Default
                     };
                 }
 
@@ -106,8 +111,8 @@ namespace Feature.CircleModule.Scripts {
                 CircleSegment segment = Instantiate(_segmentPrefab, transform);
                 segment.transform.localRotation = Quaternion.Euler(0, 0, rotationAngle);
 
-                Color color = _circleColorService.GetColor(segData.colorType);
-                segment.Initialize(segData, color, _segmentWidth);
+                Color color = _circleColorService.GetColor(segData.ColorType);
+                segment.Initialize(segData, color, _segmentWidth, _statusVisualDataProvider);
 
                 _spawnedSegments.Add(segment);
             }

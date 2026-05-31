@@ -1,0 +1,28 @@
+{
+    "asset": "f3ed42bd5c08261439d07514b9ec3506",
+    "fileName": "019e7d53-fb53-7f87-b1f1-a0963e97f3dd.jpg",
+    "prompt": "A minimalist flat UI sprite of a horizontal line segment with mechanical metal bolts or locking pins at both ends. The pins look like they are securing the segment in place. White line on a transparent background, clean vector style, game asset.",
+    "negativePrompt": "",
+    "model": "flux-2-pro",
+    "modelName": "Flux 2 (Pro)",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

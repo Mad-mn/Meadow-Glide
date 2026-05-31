@@ -24,8 +24,9 @@ namespace Feature.SlideAreaModule.Scripts {
         private SlideArea _activeArea;
         private float _startRadius;
         private Vector3 _slideDirection;
+        private bool _isBlockedByStatus;
         private readonly List<CircleSegment> _activeSegments = new List<CircleSegment>();
-        private readonly List<float> _baseIndices = new List<float>();
+private readonly List<float> _baseIndices = new List<float>();
         private readonly List<CircleSegment> _ghosts = new List<CircleSegment>();
         private List<CircleController> _sortedCircles = new List<CircleController>();
 
@@ -120,6 +121,7 @@ namespace Feature.SlideAreaModule.Scripts {
             _activeSegments.Clear();
             _baseIndices.Clear();
             ClearGhosts();
+            _isBlockedByStatus = false;
 
             int start = area.StartCircleIndex;
             int end = area.EndCircleIndex;
@@ -136,6 +138,9 @@ namespace Feature.SlideAreaModule.Scripts {
                 if (segment != null) {
                     _activeSegments.Add(segment);
                     _baseIndices.Add(i);
+
+                    if (segment.IsBlocked)
+                        _isBlockedByStatus = true;
 
                     var ghost = UnityEngine.Object.Instantiate(segment, segment.transform.parent);
                     ghost.gameObject.name = segment.gameObject.name + "_Ghost";
@@ -162,6 +167,19 @@ namespace Feature.SlideAreaModule.Scripts {
             worldPos.z = 0;
 
             float currentRadius = Vector3.Dot(worldPos, _slideDirection);
+            
+            if (_isBlockedByStatus) {
+                // If the user tries to move significantly, trigger the shake
+                if (Mathf.Abs(currentRadius - _startRadius) > 0.05f) {
+                    foreach (var segment in _activeSegments) {
+                        if (segment.IsBlocked) {
+                            segment.TriggerBlockedAnimation();
+                        }
+                    }
+                }
+                return;
+            }
+
             UpdateSegmentsVisuals(currentRadius);
         }
 
@@ -242,8 +260,11 @@ namespace Feature.SlideAreaModule.Scripts {
 
         private async UniTaskVoid SnapSegments(SlideArea area) {
             int count = _activeSegments.Count;
-            if (count == 0 || _circleParamsConfig == null) {
+            if (count == 0 || _circleParamsConfig == null || _isBlockedByStatus) {
                 _slideAreaModel.ChangeSlideState(false);
+                ClearGhosts();
+                _activeSegments.Clear();
+                _baseIndices.Clear();
                 return;
             }
 

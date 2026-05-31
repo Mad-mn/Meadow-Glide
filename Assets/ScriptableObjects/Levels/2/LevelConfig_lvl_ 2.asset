@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: LevelConfig_lvl_ 2
   m_EditorClassIdentifier: Assembly-CSharp::Feature.LevelModule.Scripts.LevelConfig
   _circleConfigs:
-  - {fileID: 11400000, guid: 932456819a698594991bfe2f5c79a5f4, type: 2}
-  - {fileID: 11400000, guid: 0fcff33cfbbb7ab4a861785d4dca7901, type: 2}
+  - {fileID: 11400000, guid: 9475b59966916324fb52b4e2132273da, type: 2}
+  - {fileID: 11400000, guid: 55bf8c6495e0ae340947320e132e82e4, type: 2}
   - {fileID: 11400000, guid: 080e37941425ddb4583fcb46b5fe45c9, type: 2}
   _slideAreaConfigs:
   - startCircleIndex: 0
