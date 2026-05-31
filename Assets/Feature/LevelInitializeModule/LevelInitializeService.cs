@@ -91,6 +91,12 @@ namespace Feature.LevelInitializeModule {
             await UniTask.CompletedTask;
         }
 
+        public async UniTask LoadNextLevel() {
+            _viewService.HideView(ViewType.WinLevel);
+            await Dispose();
+            await Initialize();
+        }
+
         private void SpawnCircles(LevelData levelData, CircleController circleControllerPrefab) {
             _circleRotationService.Clear();
             _slideSegmentService.Clear();
