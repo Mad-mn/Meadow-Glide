@@ -14,6 +14,7 @@ namespace Feature.CircleModule.Scripts {
         
         private readonly IInputService _inputService;
         private readonly IInteractionStateService _interactionState;
+        private readonly GameCircleModel _circleModel;
         private readonly List<CircleController> _circles = new List<CircleController>();
 
         private CircleController _activeCircle;
@@ -24,9 +25,11 @@ namespace Feature.CircleModule.Scripts {
 
         public bool IsInteracting => _activeCircle != null && _isDragging;
 
-        public CircleRotationService(IInputService inputService, IInteractionStateService interactionState) {
+        public CircleRotationService(IInputService inputService, IInteractionStateService interactionState,
+            GameCircleModel circleModel) {
             _inputService = inputService;
             _interactionState = interactionState;
+            _circleModel = circleModel;
         }
 
         public void Initialize() {
@@ -76,6 +79,7 @@ namespace Feature.CircleModule.Scripts {
                 _startAngle = Mathf.Atan2(worldPos.y, worldPos.x) * Mathf.Rad2Deg;
                 _initialCircleRotation = _activeCircle.transform.eulerAngles.z;
                 _isDragging = false;
+                _circleModel.CircleRotationStatusChanges(_activeCircle, true);
             }
         }
 
@@ -145,6 +149,8 @@ namespace Feature.CircleModule.Scripts {
             if (circle != null) {
                 circle.transform.rotation = Quaternion.Euler(0, 0, targetRot);
             }
+            
+            _circleModel.CircleRotationStatusChanges(circle, false);
         }
     }
 }

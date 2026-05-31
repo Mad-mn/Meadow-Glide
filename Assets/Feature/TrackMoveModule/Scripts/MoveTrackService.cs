@@ -8,19 +8,33 @@ using Zenject;
 namespace Feature.TrackMoveModule.Scripts {
     public class MoveTrackService : IMoveTrackService, IInitializable, IDisposable {
         private readonly SlideAreaModel _slideAreaModel;
-        
-        private Dictionary<CircleSegment, float> _cachedSegmentsRadius = new Dictionary<CircleSegment, float>();
+        private readonly GameCircleModel _gameCircleModel;
 
-        public MoveTrackService(SlideAreaModel slideAreaModel) {
+        private Dictionary<CircleSegment, float> _cachedSegmentsRadius = new Dictionary<CircleSegment, float>();
+        private float _circleRotation;
+
+        public MoveTrackService(SlideAreaModel slideAreaModel, GameCircleModel gameCircleModel) {
             _slideAreaModel = slideAreaModel;
+            _gameCircleModel = gameCircleModel;
         }
 
         public void Initialize() {
             _slideAreaModel.OnChangeSlideState += OnChangeSlideState;
+            _gameCircleModel.OnCircleRotationStatusChanged += OnCircleRotationStatusChanged;
         }
 
         public void Dispose() {
             _slideAreaModel.OnChangeSlideState -= OnChangeSlideState;
+            _gameCircleModel.OnCircleRotationStatusChanged -= OnCircleRotationStatusChanged;
+        }
+
+        private void OnCircleRotationStatusChanged(CircleController circle, bool isRotating) {
+            if (isRotating) {
+                _circleRotation = circle.transform.rotation.z % 360;
+            }
+            else {
+                CheckForSpendByRotation(circle);
+            }
         }
 
         private void OnChangeSlideState(bool slideState) {
@@ -29,6 +43,13 @@ namespace Feature.TrackMoveModule.Scripts {
             }
             else {
                 CheckForSpendStepBySlide();
+            }
+        }
+
+        private void CheckForSpendByRotation(CircleController circle) {
+            float currentRotation = circle.transform.rotation.z % 360;
+            if (!Mathf.Approximately(currentRotation, _circleRotation)) {
+                Debug.LogError("MoveSpend");
             }
         }
 

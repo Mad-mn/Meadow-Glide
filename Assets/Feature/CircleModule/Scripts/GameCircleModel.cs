@@ -7,6 +7,7 @@ namespace Feature.CircleModule.Scripts {
         private List<CircleController> _circles = new List<CircleController>();
         
         public event Action OnSegmentsChanged;
+        public event Action<CircleController, bool> OnCircleRotationStatusChanged;
         
         public IReadOnlyList<CircleController> Circles => _circles;
 
@@ -27,6 +28,10 @@ namespace Feature.CircleModule.Scripts {
 
         public void Clear() {
             _circles.Clear();
+        }
+
+        public void CircleRotationStatusChanges(CircleController circle, bool isRotating) {
+            OnCircleRotationStatusChanged?.Invoke(circle, isRotating);
         }
 
         public void SegmentsChanged() {
