@@ -64,9 +64,9 @@ _polygonCollider = GetComponent<PolygonCollider2D>();
             rail.SetPosition(0, startPos);
             rail.SetPosition(1, endPos);
 
-            // Visual styling: thin neon cyan line
+            /*// Visual styling: thin neon cyan line
             rail.startWidth = 0.05f;
-            rail.endWidth = 0.05f;
+            rail.endWidth = 0.05f;*/
             
             /*Color neonColor = new Color(0f, 1f, 1f, 0.5f); // Cyan with alpha
             rail.startColor = neonColor;

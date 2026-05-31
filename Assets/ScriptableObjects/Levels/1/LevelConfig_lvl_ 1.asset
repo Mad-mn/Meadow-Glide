@@ -19,4 +19,4 @@ MonoBehaviour:
   - startCircleIndex: 0
     endCircleIndex: 1
     sectorIndex: 1
-    totalSegments: 5
+    totalSegments: 4
