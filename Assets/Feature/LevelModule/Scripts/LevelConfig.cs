@@ -13,6 +13,11 @@ namespace Feature.LevelModule.Scripts {
 
         public IReadOnlyList<CircleConfig> CircleConfigs => _circleConfigs;
         public IReadOnlyList<SlideAreaConfig> SlideAreaConfigs => _slideAreaConfigs;
+
+        public void SetConfigs(List<CircleConfig> circles, List<SlideAreaConfig> areas) {
+            _circleConfigs = circles;
+            _slideAreaConfigs = areas;
+        }
     }
 
     [Serializable]
