@@ -162,6 +162,7 @@ GameObject:
   - component: {fileID: 5307408875775674837}
   - component: {fileID: 7602664768278356216}
   - component: {fileID: 1146832955943792054}
+  - component: {fileID: 8763742885128990812}
   m_Layer: 0
   m_Name: SlideArea
   m_TagString: Untagged
@@ -250,6 +251,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.SlideAreaModule.Scripts.SlideArea
   _polygonCollider: {fileID: 7602664768278356216}
+  _leftRail: {fileID: 2189439455768479421}
+  _rightRail: {fileID: 303197809534973730}
+  _slideAreaAnimation: {fileID: 8763742885128990812}
+--- !u!114 &8763742885128990812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7387068453376799226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39c81d23e166493a96fe8c6977ed736f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.SlideAreaModule.Scripts.SlideAreaAnimationController
   _leftRail: {fileID: 2189439455768479421}
   _rightRail: {fileID: 303197809534973730}
 --- !u!1 &8782362963964208887

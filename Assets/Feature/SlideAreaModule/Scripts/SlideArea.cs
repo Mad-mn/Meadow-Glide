@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Feature.ColorServiceModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.StatusModule.Scripts.SlideAreas;
@@ -11,6 +12,7 @@ namespace Feature.SlideAreaModule.Scripts {
         [SerializeField] private PolygonCollider2D _polygonCollider;
         [SerializeField] private LineRenderer _leftRail;
         [SerializeField] private LineRenderer _rightRail;
+        [SerializeField] private SlideAreaAnimationController _slideAreaAnimation;
         
         private SlideAreaData _slideAreaData;
         private ICircleColorService _colorService;
@@ -20,9 +22,18 @@ namespace Feature.SlideAreaModule.Scripts {
         public int StartCircleIndex { get; private set; }
         public int EndCircleIndex { get; private set; }
 
+        public SlideAreaStatus Status => _slideAreaData?.SlideAreaStatus ?? SlideAreaStatus.Default;
+        public List<CircleColorType> FilterColors => _colors;
+
+        private bool _isAnimating;
+
         [Inject]
         private void InjectDependencies(ICircleColorService colorService) {
             _colorService = colorService;
+        }
+
+        public void TriggerBlockedAnimation() {
+          _slideAreaAnimation.PlayBlockedAnimation();
         }
 
         private void Reset() {

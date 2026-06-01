@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
+using Feature.StatusModule.Scripts.SlideAreas;
 using UnityEngine;
 using Zenject;
 
@@ -126,6 +127,9 @@ private readonly List<float> _baseIndices = new List<float>();
             int start = area.StartCircleIndex;
             int end = area.EndCircleIndex;
 
+            bool isFilterColors = area.Status == SlideAreaStatus.FilterColors;
+            var filterColors = area.FilterColors;
+
             for (int i = start; i <= end; i++) {
                 if (i >= _sortedCircles.Count)
                     break;
@@ -142,8 +146,14 @@ private readonly List<float> _baseIndices = new List<float>();
                     if (segment.IsBlocked)
                         _isBlockedByStatus = true;
 
+                    if (isFilterColors) {
+                        if (filterColors == null || !filterColors.Contains(segment.ColorType)) {
+                            _isBlockedByStatus = true;
+                        }
+                    }
+
                     var ghost = UnityEngine.Object.Instantiate(segment, segment.transform.parent);
-                    ghost.gameObject.name = segment.gameObject.name + "_Ghost";
+ghost.gameObject.name = segment.gameObject.name + "_Ghost";
                     ghost.SetVisible(false);
                     ghost.SetSortingOrder(segment.GetSortingOrder() - 1);
                     _ghosts.Add(ghost);
@@ -175,6 +185,10 @@ private readonly List<float> _baseIndices = new List<float>();
                         if (segment.IsBlocked) {
                             segment.TriggerBlockedAnimation();
                         }
+                    }
+
+                    if (_activeArea != null && _activeArea.Status == SlideAreaStatus.FilterColors) {
+                        _activeArea.TriggerBlockedAnimation();
                     }
                 }
                 return;
