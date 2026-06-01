@@ -21,6 +21,7 @@ public static class AddressConstants
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_scatter_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/scatter.compute";
     public const string SegmentStatusVisualConfig = "SegmentStatusVisualConfig";
     public const string SlideArea = "SlideArea";
+    public const string SlideAreaStatusDataConfig = "SlideAreaStatusDataConfig";
     public const string UIRoot = "UIRoot";
     public const string ViewSettings = "ViewSettings";
     public const string WinLevel = "WinLevel";

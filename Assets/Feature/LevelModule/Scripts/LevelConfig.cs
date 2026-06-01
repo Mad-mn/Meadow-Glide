@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Feature.CircleModule.Scripts;
+using Feature.ColorServiceModule.Scripts;
+using Feature.StatusModule.Scripts.SlideAreas;
 using UnityEngine;
 
 namespace Feature.LevelModule.Scripts {
@@ -19,5 +21,7 @@ namespace Feature.LevelModule.Scripts {
         public int endCircleIndex;
         public int sectorIndex;
         public int totalSegments;
+        public SlideAreaStatus SlideAreaStatus;
+        public List<CircleColorType> Colors;
     }
 }

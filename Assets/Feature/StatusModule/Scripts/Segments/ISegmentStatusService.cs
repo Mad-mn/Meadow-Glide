@@ -1,4 +1,4 @@
-namespace Feature.StatusModule.Scripts {
+namespace Feature.StatusModule.Scripts.Segments {
     public interface ISegmentStatusService {
         
     }

@@ -1,7 +1,6 @@
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
-namespace Feature.StatusModule.Scripts {
+namespace Feature.StatusModule.Scripts.Segments {
     public interface ISegmentStatusVisualDataProvider {
         UniTask Initialize();
         SegmentStatusVisualData GetVisualDataByStatus(SegmentStatus status);

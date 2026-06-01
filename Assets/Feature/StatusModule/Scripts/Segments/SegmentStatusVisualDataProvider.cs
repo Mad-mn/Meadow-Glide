@@ -1,8 +1,7 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
-namespace Feature.StatusModule.Scripts {
+namespace Feature.StatusModule.Scripts.Segments {
     public class SegmentStatusVisualDataProvider : ISegmentStatusVisualDataProvider {
         private readonly UniTask<SegmentStatusVisualConfig> _segmentStatusVisualDataProviderTask;
         private SegmentStatusVisualConfig _config;

@@ -4,6 +4,8 @@ using Feature.ColorServiceModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
 using Feature.StatusModule.Scripts;
+using Feature.StatusModule.Scripts.Segments;
+using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
 using Zenject;
@@ -16,6 +18,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<ViewSettings>(AddressConstants.ViewSettings);
             Container.BindAddressableAsset<CircleParamsConfig>(AddressConstants.CircleParamsConfig);
             Container.BindAddressableAsset<SegmentStatusVisualConfig>(AddressConstants.SegmentStatusVisualConfig);
+            Container.BindAddressableAsset<SlideAreaStatusDataConfig>(AddressConstants.SlideAreaStatusDataConfig);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             

@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Feature.StatusModule.Scripts
+namespace Feature.CircleModule.Scripts
 {
     public class SegmentStatusAnimator : MonoBehaviour
     {

@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks.Triggers;
 using Feature.ColorServiceModule.Scripts;
 using Feature.StatusModule.Scripts;
+using Feature.StatusModule.Scripts.Segments;
 using UnityEngine;
 
 namespace Feature.CircleModule.Scripts

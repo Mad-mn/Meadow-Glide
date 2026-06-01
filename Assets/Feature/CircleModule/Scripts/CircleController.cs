@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Feature.ColorServiceModule.Scripts;
 using Feature.StatusModule.Scripts;
+using Feature.StatusModule.Scripts.Segments;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Zenject;

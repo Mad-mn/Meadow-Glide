@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Feature.StatusModule.Scripts {
+namespace Feature.StatusModule.Scripts.Segments {
     [CreateAssetMenu(fileName = "SegmentStatusVisualConfig", menuName = "Configs/Visual/SegmentStatusVisualConfig")]
     public class SegmentStatusVisualConfig : ScriptableObject {
         [SerializeField] private List<SegmentStatusVisualData> _segmentStatusVisualDatas;
