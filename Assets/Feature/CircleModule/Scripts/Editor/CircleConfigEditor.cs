@@ -52,7 +52,7 @@ namespace Feature.CircleModule.Scripts.Editor
                 config.Segments.Add(new SegmentConfig
                 {
                     Angle = anglePerSegment,
-                    ColorType = CircleColorType.White
+                    ColorType = CircleColorType.None
                 });
             }
 

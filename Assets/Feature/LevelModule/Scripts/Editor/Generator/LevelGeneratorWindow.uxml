@@ -20,6 +20,11 @@
                     <uie:IntegerField name="maxSectors" value="8" class="field-input" />
                 </ui:VisualElement>
                 <ui:VisualElement class="field-row">
+                    <ui:Label text="Ring Span (Min/Max):" class="field-label" />
+                    <uie:IntegerField name="minAreaSpan" value="2" class="field-input" />
+                    <uie:IntegerField name="maxAreaSpan" value="4" class="field-input" />
+                </ui:VisualElement>
+<ui:VisualElement class="field-row">
                     <ui:Label text="Target Difficulty:" class="field-label" />
                     <uie:IntegerField name="targetDifficulty" value="8" class="field-input" />
                 </ui:VisualElement>
@@ -43,10 +48,17 @@
                     <ui:Label text="Filter Chance:" class="field-label" />
                     <ui:Slider name="filterChance" low-value="0" high-value="1" value="0.2" class="field-input" />
                 </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Allowed Colors (Min/Max):" class="field-label" />
+                    <uie:IntegerField name="minFilterColors" value="2" class="field-input" />
+                    <uie:IntegerField name="maxFilterColors" value="3" class="field-input" />
+                </ui:VisualElement>
 </ui:ScrollView>
             <ui:Button name="generateButton" text="Generate Level" class="primary-button" />
+            <ui:Button name="cancelButton" text="Cancel Generation" class="cancel-button hidden" />
+            <ui:Label name="progressLabel" text="" class="progress-label" />
         </ui:VisualElement>
-        
+
         <ui:VisualElement name="preview-panel" class="panel preview-panel">
             <ui:Label text="Visual Preview" class="header" />
             <ui:VisualElement name="previewArea" class="preview-area" />

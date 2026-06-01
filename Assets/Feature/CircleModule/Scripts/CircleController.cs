@@ -102,7 +102,7 @@ namespace Feature.CircleModule.Scripts {
                     segData = new SegmentConfig {
                         Radius = _calculatedRadius, 
                         Angle = anglePerSegment, 
-                        ColorType = CircleColorType.White,
+                        ColorType = CircleColorType.None,
                         SegmentStatus = SegmentStatus.Default
                     };
                 }

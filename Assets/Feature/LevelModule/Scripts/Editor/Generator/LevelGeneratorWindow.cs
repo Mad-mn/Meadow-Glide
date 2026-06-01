@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Feature.CircleModule.Scripts;
 using Feature.LevelModule.Scripts;
@@ -13,7 +14,11 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private LevelData _currentLevel;
         private VisualElement _previewArea;
         private Label _statsLabel;
+        private Label _progressLabel;
         private Button _generateButton;
+        private Button _cancelButton;
+        
+        private CancellationTokenSource _cts;
 
         [MenuItem("Tools/ColorRings/Level Generator")]
         public static void ShowWindow() {
@@ -28,18 +33,39 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
             _previewArea = rootVisualElement.Q<VisualElement>("previewArea");
             _statsLabel = rootVisualElement.Q<Label>("statsLabel");
+            _progressLabel = rootVisualElement.Q<Label>("progressLabel");
             _generateButton = rootVisualElement.Q<Button>("generateButton");
+            _cancelButton = rootVisualElement.Q<Button>("cancelButton");
 
             _previewArea.generateVisualContent += DrawPreview;
 
             _generateButton.clicked += OnGenerateClicked;
+            _cancelButton.clicked += OnCancelClicked;
             rootVisualElement.Q<Button>("saveButton").clicked += OnSaveClicked;
+        }
+
+        private void OnDestroy() {
+            _cts?.Cancel();
+            _cts?.Dispose();
+        }
+
+        private void OnCancelClicked() {
+            _cts?.Cancel();
+            _progressLabel.text = "Cancelling...";
+            _cancelButton.SetEnabled(false);
         }
 
         private async void OnGenerateClicked() {
             _generateButton.SetEnabled(false);
-            _statsLabel.text = "Generating... (Solving with A*)";
+            _cancelButton.RemoveFromClassList("hidden");
+            _cancelButton.SetEnabled(true);
             
+            _statsLabel.text = "Generating...";
+            _progressLabel.text = "Starting...";
+            
+            _cts = new CancellationTokenSource();
+            var progress = new Progress<string>(msg => _progressLabel.text = msg);
+
             var p = new LevelGenerator.GenerationParams {
                 MinRings = rootVisualElement.Q<IntegerField>("minRings").value,
                 MaxRings = rootVisualElement.Q<IntegerField>("maxRings").value,
@@ -50,26 +76,36 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 AllowBlocked = rootVisualElement.Q<Toggle>("allowBlocked").value,
                 BlockedChance = rootVisualElement.Q<Slider>("blockedChance").value,
                 AllowFilterColors = rootVisualElement.Q<Toggle>("allowFilterColors").value,
-                FilterColorsChance = rootVisualElement.Q<Slider>("filterChance").value
+                FilterColorsChance = rootVisualElement.Q<Slider>("filterChance").value,
+                MinFilterColors = rootVisualElement.Q<IntegerField>("minFilterColors").value,
+                MaxFilterColors = rootVisualElement.Q<IntegerField>("maxFilterColors").value,
+                MinAreaSpan = rootVisualElement.Q<IntegerField>("minAreaSpan").value,
+                MaxAreaSpan = rootVisualElement.Q<IntegerField>("maxAreaSpan").value
             };
 
             int targetDepth = rootVisualElement.Q<IntegerField>("targetDifficulty").value;
 
             try {
-                var rawData = await _generator.GenerateAsync(p, targetDepth);
+                var rawData = await _generator.GenerateAsync(p, targetDepth, _cts.Token, progress);
 
                 if (rawData != null) {
                     _currentLevel = ConvertToUnityLevelData(rawData);
                     _statsLabel.text = $"Difficulty: {_currentLevel.Difficulty} | Rings: {_currentLevel.LevelConfig.CircleConfigs.Count}";
                     _previewArea.MarkDirtyRepaint();
                 } else {
-                    _statsLabel.text = "Timeout or Limit reached. Try again.";
+                    _statsLabel.text = "Timeout or Limit reached.";
                 }
+            } catch (OperationCanceledException) {
+                _statsLabel.text = "Generation cancelled.";
+                _progressLabel.text = "";
             } catch (Exception e) {
                 Debug.LogException(e);
                 _statsLabel.text = "Error during generation.";
             } finally {
                 _generateButton.SetEnabled(true);
+                _cancelButton.AddToClassList("hidden");
+                _cts?.Dispose();
+                _cts = null;
             }
         }
 
@@ -128,38 +164,74 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
             // Draw Areas background
             foreach (var area in _currentLevel.LevelConfig.SlideAreaConfigs) {
-                float innerR = (area.startCircleIndex + 1) * ringThickness - ringThickness/2f;
-                float outerR = (area.endCircleIndex + 1) * ringThickness + ringThickness/2f;
-                int sectors = circles[0].SegmentCount;
-                float angleStep = 360f / sectors;
+                float innerR = (area.startCircleIndex + 1) * ringThickness - ringThickness / 2f;
+                float outerR = (area.endCircleIndex + 1) * ringThickness + ringThickness / 2f;
+                
+                float angleStep = 360f / area.totalSegments;
                 float startA = area.sectorIndex * angleStep - 90f;
                 float endA = (area.sectorIndex + 1) * angleStep - 90f;
 
                 if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
-                    painter.fillColor = new Color(1, 0.6f, 0, 0.3f);
+                    painter.fillColor = new Color(1, 0.6f, 0, 0.25f);
                     painter.strokeColor = Color.orange;
                     painter.lineWidth = 2f;
                 } else {
-                    painter.fillColor = new Color(1, 1, 1, 0.15f);
+                    painter.fillColor = new Color(1, 1, 1, 0.1f);
                 }
 
                 painter.BeginPath();
                 painter.Arc(center, outerR, Angle.Degrees(startA), Angle.Degrees(endA), ArcDirection.Clockwise);
                 painter.Arc(center, innerR, Angle.Degrees(endA), Angle.Degrees(startA), ArcDirection.CounterClockwise);
                 painter.Fill();
-                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) painter.Stroke();
-                
-                // Draw sector index
-                float midA = (startA + endA) / 2f;
-                Vector2 labelPos = center + new Vector2(Mathf.Cos(midA * Mathf.Deg2Rad), Mathf.Sin(midA * Mathf.Deg2Rad)) * (outerR + 15f);
-                // Note: Painter2D doesn't support text easily, so we just use small circles or markers if needed.
-                // But we can skip text for now as it's not critical for the logic.
+                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
+                    painter.Stroke();
+                    
+                    // Draw allowed colors as small dots
+                    if (area.Colors != null && area.Colors.Count > 0) {
+                        float midA = (startA + endA) / 2f;
+                        float dotRadius = 4f;
+                        float spacing = 12f;
+                        float startDist = (innerR + outerR) / 2f - (area.Colors.Count - 1) * spacing / 2f;
+                        
+                        for (int cIdx = 0; cIdx < area.Colors.Count; cIdx++) {
+                            float dist = startDist + cIdx * spacing;
+                            Vector2 dotPos = center + new Vector2(Mathf.Cos(midA * Mathf.Deg2Rad), Mathf.Sin(midA * Mathf.Deg2Rad)) * dist;
+                            painter.fillColor = GetColor(area.Colors[cIdx]);
+                            painter.BeginPath();
+                            painter.Arc(dotPos, dotRadius, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                            painter.Fill();
+                            // Border for dot
+                            painter.strokeColor = Color.black;
+                            painter.lineWidth = 1f;
+                            painter.Stroke();
+                        }
+                    }
+                }
+            }
+
+            // Draw Sector Indices
+            int totalSectors = circles[0].SegmentCount;
+            float sectorAngleStep = 360f / totalSectors;
+            painter.fillColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
+            for (int s = 0; s < totalSectors; s++) {
+                float angle = s * sectorAngleStep + (sectorAngleStep / 2f) - 90f;
+                Vector2 pos = center + new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * (maxRadius + 10f);
+                painter.BeginPath();
+                painter.Arc(pos, 2f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                painter.Fill();
             }
 
             for (int i = 0; i < count; i++) {
                 float r = (i + 1) * ringThickness;
                 int sectors = circles[i].SegmentCount;
                 float angleStep = 360f / sectors;
+                
+                // Draw Ring Index Marker (small dot at start of ring)
+                Vector2 ringMarkerPos = center + new Vector2(0, -1) * (r + ringThickness * 0.35f);
+                painter.fillColor = new Color(1, 1, 1, 0.2f);
+                painter.BeginPath();
+                painter.Arc(ringMarkerPos, 1.5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                painter.Fill();
 
                 for (int s = 0; s < sectors; s++) {
                     var segment = circles[i].Segments[s];

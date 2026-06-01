@@ -15,7 +15,17 @@ MonoBehaviour:
   _levelDatas:
   - LevelID: 0
     LevelConfig: {fileID: 11400000, guid: b6e8935324d905f45b02fdf6ac910c22, type: 2}
+    Difficulty: 0
+    MinimumMoves: 0
   - LevelID: 1
     LevelConfig: {fileID: 11400000, guid: b6e8935324d905f45b02fdf6ac910c22, type: 2}
+    Difficulty: 0
+    MinimumMoves: 0
   - LevelID: 2
-    LevelConfig: {fileID: 11400000, guid: a9d7e32a73873af429923752ba8dc5e4, type: 2}
+    LevelConfig: {fileID: 11400000, guid: 4232b8c50c9b77a4bbec5e296fbf59dd, type: 2}
+    Difficulty: 0
+    MinimumMoves: 0
+  - LevelID: 2
+    LevelConfig: {fileID: 11400000, guid: 4232b8c50c9b77a4bbec5e296fbf59dd, type: 2}
+    Difficulty: 0
+    MinimumMoves: 0

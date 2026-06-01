@@ -2,6 +2,10 @@
 2026-06-01 AI-Tag
 This was created with the help of Assistant, a Unity Artificial Intelligence product.
 */
+/*
+2026-06-01 AI-Tag
+This was created with the help of Assistant, a Unity Artificial Intelligence product.
+*/
 .generator-window {
     flex-direction: row;
     flex-grow: 1;
@@ -17,7 +21,7 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
 }
 
 #settings-panel {
-    width: 300px;
+    width: 320px;
 }
 
 .preview-panel {
@@ -43,14 +47,15 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
 }
 
 .field-row {
-flex-direction: row;
+    flex-direction: row;
     margin-bottom: 5px;
     align-items: center;
 }
 
 .field-label {
-    width: 120px;
+    width: 130px;
     color: #bdbdbd;
+    font-size: 11px;
 }
 
 .field-input {
@@ -60,11 +65,13 @@ flex-direction: row;
 
 .preview-area {
     flex-grow: 1;
-    width: 400px;
-    height: 400px;
+    width: 100%;
+    aspect-ratio: 1;
     background-color: #1a1a1a;
-    border-radius: 200px;
-    margin: 20px;
+    border-radius: 50%;
+    margin: 10px;
+    min-width: 200px;
+    min-height: 200px;
 }
 
 .primary-button {
@@ -72,6 +79,14 @@ flex-direction: row;
     color: white;
     height: 35px;
     margin-top: 10px;
+    -unity-font-style: bold;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+    height: 35px;
+    margin-top: 5px;
     -unity-font-style: bold;
 }
 
@@ -86,4 +101,16 @@ flex-direction: row;
     font-size: 14px;
     color: #8bc34a;
     margin-top: 5px;
+}
+
+.progress-label {
+    font-size: 11px;
+    color: #ffeb3b;
+    margin-top: 5px;
+    -unity-font-style: italic;
+    white-space: normal;
+}
+
+.hidden {
+    display: none;
 }
