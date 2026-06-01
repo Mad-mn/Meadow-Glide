@@ -198,15 +198,15 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
         private bool HasConflict(List<SlideAreaConfig> areas, int s, int startR, int endR, int sectors) {
             foreach (var existing in areas) {
+                // Rule: No identical circle ranges across any sectors
+                if (existing.startCircleIndex == startR && existing.endCircleIndex == endR) return true;
+
                 int sectorDiff = Math.Abs(existing.sectorIndex - s);
                 sectorDiff = Math.Min(sectorDiff, sectors - sectorDiff);
 
-                if (sectorDiff == 0) {
+                // If in the same or adjacent sector, arenas cannot share any rings
+                if (sectorDiff <= 1) {
                     if (startR <= existing.endCircleIndex && endR >= existing.startCircleIndex) return true;
-                } else if (sectorDiff == 1) {
-                    int overlapStart = Math.Max(startR, existing.startCircleIndex);
-                    int overlapEnd = Math.Min(endR, existing.endCircleIndex);
-                    if (Math.Max(0, overlapEnd - overlapStart + 1) > 1) return true;
                 }
             }
             return false;
