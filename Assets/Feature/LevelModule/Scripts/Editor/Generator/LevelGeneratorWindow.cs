@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Feature.CircleModule.Scripts;
@@ -17,6 +18,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private Label _progressLabel;
         private Button _generateButton;
         private Button _cancelButton;
+        private TextField _nameField;
+        private ListView _levelList;
+        private List<LevelConfig> _existingLevels = new List<LevelConfig>();
         
         private CancellationTokenSource _cts;
 
@@ -36,12 +40,67 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _progressLabel = rootVisualElement.Q<Label>("progressLabel");
             _generateButton = rootVisualElement.Q<Button>("generateButton");
             _cancelButton = rootVisualElement.Q<Button>("cancelButton");
+            _nameField = rootVisualElement.Q<TextField>("levelName");
+            _levelList = rootVisualElement.Q<ListView>("levelList");
 
             _previewArea.generateVisualContent += DrawPreview;
 
             _generateButton.clicked += OnGenerateClicked;
             _cancelButton.clicked += OnCancelClicked;
             rootVisualElement.Q<Button>("saveButton").clicked += OnSaveClicked;
+            rootVisualElement.Q<Button>("refreshButton").clicked += RefreshLevelList;
+
+            SetupListView();
+            RefreshLevelList();
+        }
+
+        private void SetupListView() {
+            _levelList.makeItem = () => {
+                var container = new VisualElement();
+                container.AddToClassList("level-item");
+                var label = new Label();
+                label.name = "name";
+                label.AddToClassList("level-item-label");
+                var difficulty = new Label();
+                difficulty.name = "difficulty";
+                difficulty.AddToClassList("level-item-difficulty");
+                container.Add(label);
+                container.Add(difficulty);
+                return container;
+            };
+
+            _levelList.bindItem = (element, i) => {
+                if (i >= _existingLevels.Count) return;
+                var level = _existingLevels[i];
+                element.Q<Label>("name").text = level.name;
+                element.Q<Label>("difficulty").text = $"Diff: {level.Difficulty}";
+            };
+
+            _levelList.onSelectionChange += obj => {
+                var selected = obj.FirstOrDefault() as LevelConfig;
+                if (selected != null) {
+                    _currentLevel = new LevelData {
+                        LevelConfig = selected,
+                        Difficulty = selected.Difficulty,
+                        MinimumMoves = selected.Difficulty
+                    };
+                    _statsLabel.text = $"Loaded: {selected.name} | Difficulty: {selected.Difficulty}";
+                    _previewArea.MarkDirtyRepaint();
+                }
+            };
+
+            _levelList.itemsSource = _existingLevels;
+        }
+
+        private void RefreshLevelList() {
+            _existingLevels.Clear();
+            var guids = AssetDatabase.FindAssets("t:LevelConfig");
+            foreach (var guid in guids) {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var level = AssetDatabase.LoadAssetAtPath<LevelConfig>(path);
+                if (level != null) _existingLevels.Add(level);
+            }
+            _levelList.Rebuild();
         }
 
         private void OnDestroy() {
@@ -126,7 +185,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 circles.Add(circle);
             }
 
-            levelConfig.SetConfigs(circles, raw.Areas);
+            levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty);
 
             return new LevelData {
                 LevelConfig = levelConfig,
@@ -138,7 +197,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private void OnSaveClicked() {
             if (_currentLevel == null) return;
 
-            string path = EditorUtility.SaveFilePanelInProject("Save Level Config", "LevelConfig_New", "asset", "Save Level Config");
+            string fileName = _nameField.value;
+            if (string.IsNullOrEmpty(fileName)) fileName = "LevelConfig_New";
+
+            string path = EditorUtility.SaveFilePanelInProject("Save Level Config", fileName, "asset", "Save Level Config");
             if (string.IsNullOrEmpty(path)) return;
 
             AssetDatabase.CreateAsset(_currentLevel.LevelConfig, path);
@@ -148,6 +210,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            RefreshLevelList();
             EditorUtility.DisplayDialog("Success", "Level saved to " + path, "OK");
         }
 

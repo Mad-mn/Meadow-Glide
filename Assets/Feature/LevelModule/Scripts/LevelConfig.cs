@@ -10,13 +10,16 @@ namespace Feature.LevelModule.Scripts {
     public class LevelConfig : ScriptableObject {
         [SerializeField] private List<CircleConfig> _circleConfigs = new List<CircleConfig>();
         [SerializeField] private List<SlideAreaConfig> _slideAreaConfigs = new List<SlideAreaConfig>();
+        [SerializeField] private int _difficulty;
 
         public IReadOnlyList<CircleConfig> CircleConfigs => _circleConfigs;
         public IReadOnlyList<SlideAreaConfig> SlideAreaConfigs => _slideAreaConfigs;
+        public int Difficulty => _difficulty;
 
-        public void SetConfigs(List<CircleConfig> circles, List<SlideAreaConfig> areas) {
+        public void SetConfigs(List<CircleConfig> circles, List<SlideAreaConfig> areas, int difficulty) {
             _circleConfigs = circles;
             _slideAreaConfigs = areas;
+            _difficulty = difficulty;
         }
     }
 

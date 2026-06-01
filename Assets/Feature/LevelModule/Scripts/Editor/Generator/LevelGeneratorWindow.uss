@@ -24,6 +24,10 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
     width: 320px;
 }
 
+#browser-panel {
+    width: 250px;
+}
+
 .preview-panel {
     flex-grow: 1;
     align-items: center;
@@ -113,4 +117,156 @@ This was created with the help of Assistant, a Unity Artificial Intelligence pro
 
 .hidden {
     display: none;
+}
+
+.level-list {
+    flex-grow: 1;
+    background-color: #2a2a2a;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+.level-item {
+    padding: 5px;
+    border-bottom-width: 1px;
+    border-bottom-color: #444;
+}
+
+.level-item-label {
+    color: #eee;
+    font-size: 12px;
+}
+
+.level-item-difficulty {
+    color: #8bc34a;
+    font-size: 10px;
+}
+
+.panel {
+    background-color: #383838;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
+}
+
+#settings-panel {
+    width: 320px;
+}
+
+#browser-panel {
+    width: 250px;
+}
+
+.preview-panel {
+    flex-grow: 1;
+    align-items: center;
+}
+
+.header {
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+}
+
+.subheader {
+    font-size: 13px;
+    -unity-font-style: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #a0a0a0;
+    border-bottom-width: 1px;
+    border-bottom-color: #555;
+}
+
+.field-row {
+    flex-direction: row;
+    margin-bottom: 5px;
+    align-items: center;
+}
+
+.field-label {
+    width: 130px;
+    color: #bdbdbd;
+    font-size: 11px;
+}
+
+.field-input {
+    flex-grow: 1;
+    margin-left: 5px;
+}
+
+.preview-area {
+    flex-grow: 1;
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: #1a1a1a;
+    border-radius: 50%;
+    margin: 10px;
+    min-width: 200px;
+    min-height: 200px;
+}
+
+.primary-button {
+    background-color: #4CAF50;
+    color: white;
+    height: 35px;
+    margin-top: 10px;
+    -unity-font-style: bold;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+    height: 35px;
+    margin-top: 5px;
+    -unity-font-style: bold;
+}
+
+.secondary-button {
+    background-color: #2196F3;
+    color: white;
+    height: 30px;
+    margin-top: 10px;
+}
+
+.stats-label {
+    font-size: 14px;
+    color: #8bc34a;
+    margin-top: 5px;
+}
+
+.progress-label {
+    font-size: 11px;
+    color: #ffeb3b;
+    margin-top: 5px;
+    -unity-font-style: italic;
+    white-space: normal;
+}
+
+.hidden {
+    display: none;
+}
+
+.level-list {
+    flex-grow: 1;
+    background-color: #2a2a2a;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+.level-item {
+    padding: 5px;
+    border-bottom-width: 1px;
+    border-bottom-color: #444;
+}
+
+.level-item-label {
+    color: #eee;
+    font-size: 12px;
+}
+
+.level-item-difficulty {
+    color: #8bc34a;
+    font-size: 10px;
 }

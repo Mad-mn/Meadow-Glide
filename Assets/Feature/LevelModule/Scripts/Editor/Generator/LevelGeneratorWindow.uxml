@@ -24,7 +24,7 @@
                     <uie:IntegerField name="minAreaSpan" value="2" class="field-input" />
                     <uie:IntegerField name="maxAreaSpan" value="4" class="field-input" />
                 </ui:VisualElement>
-<ui:VisualElement class="field-row">
+                <ui:VisualElement class="field-row">
                     <ui:Label text="Target Difficulty:" class="field-label" />
                     <uie:IntegerField name="targetDifficulty" value="8" class="field-input" />
                 </ui:VisualElement>
@@ -53,17 +53,27 @@
                     <uie:IntegerField name="minFilterColors" value="2" class="field-input" />
                     <uie:IntegerField name="maxFilterColors" value="3" class="field-input" />
                 </ui:VisualElement>
-</ui:ScrollView>
+            </ui:ScrollView>
             <ui:Button name="generateButton" text="Generate Level" class="primary-button" />
             <ui:Button name="cancelButton" text="Cancel Generation" class="cancel-button hidden" />
             <ui:Label name="progressLabel" text="" class="progress-label" />
         </ui:VisualElement>
-
+        
         <ui:VisualElement name="preview-panel" class="panel preview-panel">
             <ui:Label text="Visual Preview" class="header" />
             <ui:VisualElement name="previewArea" class="preview-area" />
             <ui:Label name="statsLabel" text="Moves: - | Depth: -" class="stats-label" />
-            <ui:Button name="saveButton" text="Save as LevelConfig" class="secondary-button" />
+            <ui:VisualElement class="field-row" style="width: 100%; margin-top: 10px;">
+                <ui:Label text="Level Name:" class="field-label" style="width: 80px;" />
+                <ui:TextField name="levelName" value="LevelConfig_New" class="field-input" />
+            </ui:VisualElement>
+            <ui:Button name="saveButton" text="Save as LevelConfig" class="secondary-button" style="width: 100%;" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="browser-panel" class="panel">
+            <ui:Label text="Level Browser" class="header" />
+            <ui:ListView name="levelList" class="level-list" item-height="40" />
+            <ui:Button name="refreshButton" text="Refresh List" class="secondary-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
