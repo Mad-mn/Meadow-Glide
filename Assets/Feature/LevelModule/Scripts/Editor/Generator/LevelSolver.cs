@@ -25,7 +25,6 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             if (initialState.IsSolved()) return 0;
 
             // A* with Priority Queue simulation
-            // We use a standard SortedList where each key maps to a list of states with that score
             var openSet = new SortedList<float, List<(LevelState state, List<Move> path)>>();
             var closedSet = new HashSet<LevelState>();
 
@@ -36,12 +35,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             while (openSet.Count > 0 && iterations < _maxIterations) {
                 iterations++;
                 
-                // Get the lowest score list
                 float firstKey = openSet.Keys[0];
                 var list = openSet.Values[0];
                 var (current, path) = list[0];
                 
-                // Remove the item from the list
                 list.RemoveAt(0);
                 if (list.Count == 0) openSet.RemoveAt(0);
 
@@ -53,7 +50,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 if (closedSet.Contains(current)) continue;
                 closedSet.Add(current);
 
-                foreach (var move in GetAllMoves(current)) {
+                foreach (var move in GetAllPossibleMoves(current)) {
                     var nextState = ApplyMove(current, move);
                     if (closedSet.Contains(nextState)) continue;
 
@@ -87,35 +84,65 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             return score;
         }
 
-        private IEnumerable<Move> GetAllMoves(LevelState state) {
+        private IEnumerable<Move> GetAllPossibleMoves(LevelState state) {
+            // Rotations
             for (int r = 0; r < state.RingCount; r++) {
-                yield return new Move { Type = MoveType.Rotate, Index = r, Direction = 1 };
-                yield return new Move { Type = MoveType.Rotate, Index = r, Direction = -1 };
+                // RULE: If any segment in ring is blocked, ring cannot rotate
+                bool ringBlocked = false;
+                for(int s=0; s < state.SectorCount; s++) {
+                    if (_lockedSegments[r, s] != 0) { ringBlocked = true; break; }
+                }
+                if (ringBlocked) continue;
+
+                // Check every possible offset
+                for (int offset = 1; offset < state.SectorCount; offset++) {
+                    var next = state.Rotate(r, offset);
+                    if (!next.Equals(state)) {
+                        yield return new Move { Type = MoveType.Rotate, Index = r, Offset = offset };
+                    }
+                }
             }
 
+            // Slides
             for (int a = 0; a < _areas.Count; a++) {
                 var area = _areas[a];
-                bool blocked = false;
+                
+                // RULE: If any segment in area path is blocked, cannot slide
+                bool slideBlocked = false;
                 for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
-                    if (_lockedSegments[r, area.sectorIndex] != 0) { blocked = true; break; }
+                    if (_lockedSegments[r, area.sectorIndex] != 0) { slideBlocked = true; break; }
                 }
-                if (blocked) continue;
+                if (slideBlocked) continue;
 
-                yield return new Move { Type = MoveType.Slide, Index = a, Direction = 1 };
-                yield return new Move { Type = MoveType.Slide, Index = a, Direction = -1 };
+                int span = area.endCircleIndex - area.startCircleIndex + 1;
+                for (int offset = 1; offset < span; offset++) {
+                    var next = ApplySlideMove(state, a, offset);
+                    if (!next.Equals(state)) {
+                        yield return new Move { Type = MoveType.Slide, Index = a, Offset = offset };
+                    }
+                }
             }
         }
 
-        private LevelState ApplyMove(LevelState state, Move move) {
-            if (move.Type == MoveType.Rotate) return state.Rotate(move.Index, move.Direction);
-            var area = _areas[move.Index];
+        public LevelState ApplyMove(LevelState state, Move move) {
+            if (move.Type == MoveType.Rotate) return state.Rotate(move.Index, move.Offset);
+            return ApplySlideMove(state, move.Index, move.Offset);
+        }
+
+        private LevelState ApplySlideMove(LevelState state, int areaIndex, int offset) {
+            var area = _areas[areaIndex];
             
             if (area.SlideAreaStatus == SlideAreaStatus.FilterColors) {
-                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
-                    if (!area.Colors.Contains((CircleColorType)state.Colors[r, area.sectorIndex])) return state;
+                int span = area.endCircleIndex - area.startCircleIndex + 1;
+                for (int r = 0; r < span; r++) {
+                    int currentR = area.startCircleIndex + r;
+                    int targetR = area.startCircleIndex + (r + offset) % span;
+                    byte color = state.Colors[currentR, area.sectorIndex];
+                    if (!area.Colors.Contains((CircleColorType)color)) return state;
                 }
             }
-            return state.Slide(area.sectorIndex, area.startCircleIndex, area.endCircleIndex, move.Direction);
+
+            return state.Slide(area.sectorIndex, area.startCircleIndex, area.endCircleIndex, offset);
         }
     }
 }

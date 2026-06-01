@@ -9,8 +9,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
     /// </summary>
     public struct LevelState : IEquatable<LevelState> {
         public byte[,] Colors; // [ringIndex, sectorIndex]
-        public int RingCount => Colors.GetLength(0);
-        public int SectorCount => Colors.GetLength(1);
+        public int RingCount => Colors != null ? Colors.GetLength(0) : 0;
+        public int SectorCount => Colors != null ? Colors.GetLength(1) : 0;
 
         public LevelState(int rings, int sectors) {
             Colors = new byte[rings, sectors];
@@ -30,22 +30,28 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             return true;
         }
 
-        public LevelState Rotate(int ringIndex, int direction) {
+        public LevelState Rotate(int ringIndex, int offset) {
             var next = new LevelState(this);
             int sectors = SectorCount;
+            offset = (offset % sectors + sectors) % sectors;
+            if (offset == 0) return next;
+
             for (int s = 0; s < sectors; s++) {
-                int targetS = (s + direction + sectors) % sectors;
+                int targetS = (s + offset) % sectors;
                 next.Colors[ringIndex, targetS] = Colors[ringIndex, s];
             }
             return next;
         }
 
-        public LevelState Slide(int sectorIndex, int startRing, int endRing, int direction) {
+        public LevelState Slide(int sectorIndex, int startRing, int endRing, int offset) {
             var next = new LevelState(this);
             int count = endRing - startRing + 1;
+            offset = (offset % count + count) % count;
+            if (offset == 0) return next;
+
             for (int r = 0; r < count; r++) {
                 int currentR = startRing + r;
-                int targetR = startRing + (r + direction + count) % count;
+                int targetR = startRing + (r + offset) % count;
                 next.Colors[targetR, sectorIndex] = Colors[currentR, sectorIndex];
             }
             return next;
@@ -67,6 +73,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
         public override int GetHashCode() {
             unchecked {
+                if (Colors == null) return 0;
                 int hash = 17;
                 for (int r = 0; r < RingCount; r++) {
                     for (int s = 0; s < SectorCount; s++) {
@@ -83,8 +90,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
     public struct Move {
         public MoveType Type;
         public int Index; // ringIndex for Rotate, areaIndex for Slide
-        public int Direction; // 1 or -1
+        public int Offset; // Offset value for the move
 
-        public override string ToString() => $"{Type}({Index}, {Direction})";
+        public override string ToString() => $"{Type}({Index}, offset:{Offset})";
     }
 }

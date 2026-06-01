@@ -64,14 +64,13 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     }
 
                     var areas = GenerateValidAreas(rings, sectors, areasCount, rnd, p.MinAreaSpan, p.MaxAreaSpan);
-
+                    
                     if (p.AllowFilterColors) {
                         foreach (var area in areas) {
                             if (rnd.NextDouble() < p.FilterColorsChance) {
                                 area.SlideAreaStatus = Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors;
                                 
                                 var allowedColors = new HashSet<CircleColorType>();
-                                // Always include the solution colors to ensure it starts solvable
                                 for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
                                     allowedColors.Add((CircleColorType)initialColors[r, area.sectorIndex]);
                                 }
@@ -101,16 +100,15 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
                     progress?.Report($"Attempt {attempt}: Scrambling...");
                     var currentLevel = state;
-                    // Increase scramble steps proportional to target difficulty
-                    int scrambleSteps = Math.Max(targetDifficulty, rnd.Next(targetDifficulty, targetDifficulty * 2));
+                    int scrambleSteps = Math.Max(targetDifficulty, rnd.Next(targetDifficulty, targetDifficulty + 5));
                     
                     for (int i = 0; i < scrambleSteps; i++) {
-                        if (i % 10 == 0) ct.ThrowIfCancellationRequested();
-                        var moves = GetAllValidMoves(currentLevel, areas, statuses).ToList();
+                        if (i % 5 == 0) ct.ThrowIfCancellationRequested();
+                        var moves = GetAllValidMoves(currentLevel, areas, statuses, solver).ToList();
                         if (moves.Count == 0) break;
                         
                         var move = moves[rnd.Next(moves.Count)];
-                        currentLevel = ApplyMove(currentLevel, move, areas);
+                        currentLevel = ApplyMove(currentLevel, move, areas, solver);
                     }
 
                     progress?.Report($"Attempt {attempt}: Calculating difficulty...");
@@ -124,7 +122,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                         };
                     }
 
-                    if (bestLevel == null || difficulty > bestLevel.Difficulty) {
+                    if (bestLevel == null || (difficulty > 0 && (bestLevel.Difficulty <= 0 || difficulty > bestLevel.Difficulty))) {
                         bestLevel = new RawLevelData {
                             Rings = rings, Sectors = sectors, Colors = (byte[,])currentLevel.Colors.Clone(),
                             Statuses = statuses, Areas = areas, Difficulty = difficulty
@@ -139,107 +137,111 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
         private List<SlideAreaConfig> GenerateValidAreas(int rings, int sectors, int count, Random rnd, int minSpan, int maxSpan) {
             var areas = new List<SlideAreaConfig>();
-            
-            // Ensure span is within valid bounds
             minSpan = Math.Max(2, Math.Min(minSpan, rings));
             maxSpan = Math.Max(minSpan, Math.Min(maxSpan, rings));
 
-            for (int i = 0; i < count; i++) {
+            var uncoveredRings = new HashSet<int>(Enumerable.Range(0, rings));
+
+            // Phase 1: Ensure every ring is covered by at least one slide area
+            int safetyLimit = 100;
+            while (uncoveredRings.Count > 0 && safetyLimit-- > 0) {
+                int targetR = uncoveredRings.ElementAt(rnd.Next(uncoveredRings.Count));
                 int attempts = 0;
+                while (attempts++ < 100) {
+                    int s = rnd.Next(0, sectors);
+                    int span = rnd.Next(minSpan, maxSpan + 1);
+                    int minStart = Math.Max(0, targetR - span + 1);
+                    int maxStart = Math.Min(rings - span, targetR);
+                    int startR = rnd.Next(minStart, maxStart + 1);
+                    int endR = startR + span - 1;
+
+                    if (!HasConflict(areas, s, startR, endR, sectors)) {
+                        var newArea = new SlideAreaConfig {
+                            sectorIndex = s, startCircleIndex = startR, endCircleIndex = endR,
+                            totalSegments = sectors,
+                            SlideAreaStatus = Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.Default,
+                            Colors = new List<CircleColorType>()
+                        };
+                        areas.Add(newArea);
+                        for (int r = startR; r <= endR; r++) uncoveredRings.Remove(r);
+                        break;
+                    }
+                }
+            }
+
+            // Phase 2: Add more areas to reach the target count if possible
+            while (areas.Count < count) {
+                int attempts = 0;
+                bool areaAdded = false;
                 while (attempts++ < 100) {
                     int s = rnd.Next(0, sectors);
                     int span = rnd.Next(minSpan, maxSpan + 1);
                     int startR = rnd.Next(0, rings - span + 1);
                     int endR = startR + span - 1;
 
-                    bool conflict = false;
-                    foreach (var existing in areas) {
-                        int sectorDiff = Math.Abs(existing.sectorIndex - s);
-                        // Wrap around distance
-                        sectorDiff = Math.Min(sectorDiff, sectors - sectorDiff);
-
-                        if (sectorDiff == 0) {
-                            // Same sector - check overlap
-                            if (startR <= existing.endCircleIndex && endR >= existing.startCircleIndex) {
-                                conflict = true;
-                                break;
-                            }
-                        } else if (sectorDiff == 1) {
-                            // Adjacent sectors - check if more than 1 ring is shared
-                            int overlapStart = Math.Max(startR, existing.startCircleIndex);
-                            int overlapEnd = Math.Min(endR, existing.endCircleIndex);
-                            int sharedRings = Math.Max(0, overlapEnd - overlapStart + 1);
-
-                            if (sharedRings > 1) {
-                                conflict = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!conflict) {
+                    if (!HasConflict(areas, s, startR, endR, sectors)) {
                         areas.Add(new SlideAreaConfig {
-                            sectorIndex = s,
-                            startCircleIndex = startR,
-                            endCircleIndex = endR,
+                            sectorIndex = s, startCircleIndex = startR, endCircleIndex = endR,
                             totalSegments = sectors,
                             SlideAreaStatus = Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.Default,
                             Colors = new List<CircleColorType>()
                         });
+                        areaAdded = true;
                         break;
                     }
                 }
+                if (!areaAdded) break;
             }
+
             return areas;
         }
 
-        private IEnumerable<Move> GetAllValidMoves(LevelState state, List<SlideAreaConfig> areas, SegmentStatus[,] statuses) {
-            for (int r = 0; r < state.RingCount; r++) {
-                yield return new Move { Type = MoveType.Rotate, Index = r, Direction = 1 };
-                yield return new Move { Type = MoveType.Rotate, Index = r, Direction = -1 };
+        private bool HasConflict(List<SlideAreaConfig> areas, int s, int startR, int endR, int sectors) {
+            foreach (var existing in areas) {
+                int sectorDiff = Math.Abs(existing.sectorIndex - s);
+                sectorDiff = Math.Min(sectorDiff, sectors - sectorDiff);
+
+                if (sectorDiff == 0) {
+                    if (startR <= existing.endCircleIndex && endR >= existing.startCircleIndex) return true;
+                } else if (sectorDiff == 1) {
+                    int overlapStart = Math.Max(startR, existing.startCircleIndex);
+                    int overlapEnd = Math.Min(endR, existing.endCircleIndex);
+                    if (Math.Max(0, overlapEnd - overlapStart + 1) > 1) return true;
+                }
             }
+            return false;
+        }
+
+        private IEnumerable<Move> GetAllValidMoves(LevelState state, List<SlideAreaConfig> areas, SegmentStatus[,] statuses, LevelSolver solver) {
+            // Rotation moves
+            for (int r = 0; r < state.RingCount; r++) {
+                bool hasBlocked = false;
+                for(int s=0; s < state.SectorCount; s++) if (statuses[r,s] == SegmentStatus.Blocked) { hasBlocked = true; break; }
+                if (hasBlocked) continue;
+
+                for (int offset = 1; offset < state.SectorCount; offset++) {
+                    var next = state.Rotate(r, offset);
+                    if (!next.Equals(state)) yield return new Move { Type = MoveType.Rotate, Index = r, Offset = offset };
+                }
+            }
+
+            // Slide moves
             for (int a = 0; a < areas.Count; a++) {
                 var area = areas[a];
-                
-                // Check blocked segments
-                bool blocked = false;
-                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
-                    if (statuses[r, area.sectorIndex] == SegmentStatus.Blocked) {
-                        blocked = true;
-                        break;
-                    }
-                }
-                if (blocked) continue;
+                bool hasBlocked = false;
+                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) if (statuses[r, area.sectorIndex] == SegmentStatus.Blocked) { hasBlocked = true; break; }
+                if (hasBlocked) continue;
 
-                // Check FilterColors
-                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
-                    bool allowed = true;
-                    for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
-                        if (!area.Colors.Contains((CircleColorType)state.Colors[r, area.sectorIndex])) {
-                            allowed = false;
-                            break;
-                        }
-                    }
-                    if (!allowed) continue;
+                int span = area.endCircleIndex - area.startCircleIndex + 1;
+                for (int offset = 1; offset < span; offset++) {
+                    yield return new Move { Type = MoveType.Slide, Index = a, Offset = offset };
                 }
-
-                yield return new Move { Type = MoveType.Slide, Index = a, Direction = 1 };
-                yield return new Move { Type = MoveType.Slide, Index = a, Direction = -1 };
             }
         }
 
-        private LevelState ApplyMove(LevelState state, Move move, List<SlideAreaConfig> areas) {
-            if (move.Type == MoveType.Rotate) return state.Rotate(move.Index, move.Direction);
-            var area = areas[move.Index];
-            
-            // Double check FilterColors here just in case, though GetAllValidMoves should handle it
-            if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
-                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
-                    if (!area.Colors.Contains((CircleColorType)state.Colors[r, area.sectorIndex])) return state;
-                }
-            }
-            
-            return state.Slide(area.sectorIndex, area.startCircleIndex, area.endCircleIndex, move.Direction);
+        private LevelState ApplyMove(LevelState state, Move move, List<SlideAreaConfig> areas, LevelSolver solver) {
+            if (move.Type == MoveType.Rotate) return state.Rotate(move.Index, move.Offset);
+            return solver.ApplyMove(state, move);
         }
     }
 }
