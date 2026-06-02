@@ -6,6 +6,7 @@ using Feature.LevelModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SlideAreaModule.Scripts;
+using Feature.TutorialModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
 using UnityEngine;
@@ -14,11 +15,13 @@ using Zenject;
 namespace Feature.LevelInitializeModule {
     public class LevelInitializeService : ILevelInitializeService {
         private readonly UniTask<CircleController> _circleControllerTask;
-        private readonly UniTask<LevelConfigProvider> _levelConfigProviderTask;
+        
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
         private readonly IViewService _viewService;
         private readonly ISaveDataService _saveDataService;
         private readonly ISaveDataModel _saveDataModel;
+        private readonly ILevelService _levelService;
+        private readonly ITutorialService _tutorialService;
         private readonly DiContainer _container;
         private readonly ISlideAreaService _slideAreaService;
         private readonly ICircleRotationService _circleRotationService;
@@ -26,14 +29,12 @@ namespace Feature.LevelInitializeModule {
         private readonly ICircleControllerService _circleControllerService;
         private readonly GameCircleModel _circleModel;
         private CircleParamsConfig _circleParamsConfig;
-        private LevelConfigProvider _levelConfigProvider;
         
         private readonly List<CircleController> _spawnedCircles = new List<CircleController>();
 
         public LevelInitializeService(
             UniTask<CircleController> circleControllerTask, 
             DiContainer container, 
-            UniTask<LevelConfigProvider> levelConfigProviderTask, 
             ISlideAreaService slideAreaService, 
             ICircleRotationService circleRotationService,
             ISlideSegmentService slideSegmentService,
@@ -42,10 +43,11 @@ namespace Feature.LevelInitializeModule {
             UniTask<CircleParamsConfig> circleParamsConfigTask,
             IViewService viewService,
             ISaveDataService saveDataService,
-            ISaveDataModel saveDataModel) {
+            ISaveDataModel saveDataModel,
+            ILevelService levelService,
+            ITutorialService tutorialService) {
             _circleControllerTask = circleControllerTask;
             _container = container;
-            _levelConfigProviderTask = levelConfigProviderTask;
             _slideAreaService = slideAreaService;
             _circleRotationService = circleRotationService;
             _slideSegmentService = slideSegmentService;
@@ -55,32 +57,36 @@ namespace Feature.LevelInitializeModule {
             _viewService = viewService;
             _saveDataService = saveDataService;
             _saveDataModel = saveDataModel;
+            _levelService = levelService;
+            _tutorialService = tutorialService;
         }
         
         public async UniTask Initialize() {
             _viewService.ShowView<GameView>(ViewType.GameView);
 
             CircleController circleControllerPrefab = await _circleControllerTask;
-            _levelConfigProvider = await _levelConfigProviderTask;
             _circleParamsConfig = await _circleParamsConfigTask;
-            PlayerProgressData playerProgressData = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
 
-            LevelData levelData = _levelConfigProvider.LevelDatas[playerProgressData.Level];
+            LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             
             await _slideAreaService.Initialize();
             
             SpawnCircles(levelData, circleControllerPrefab);
             _slideAreaService.SpawnSlideAreas(levelData.LevelConfig);
+
+            await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
+            _levelService.LevelStarted();
         }
 
         public async UniTask Dispose() {
+            _tutorialService.Deinitialize();
             _viewService.HideView(ViewType.GameView);
             _circleRotationService.Clear();
             _slideSegmentService.Clear();
             _slideAreaService.Clear();
             _circleControllerService.Reset();
             _circleModel.Clear();
-
+            _tutorialService.Deinitialize();
             foreach (var circle in _spawnedCircles) {
                 if (circle != null) {
                     Object.Destroy(circle.gameObject);

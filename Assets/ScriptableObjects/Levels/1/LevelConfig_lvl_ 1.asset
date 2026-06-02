@@ -20,3 +20,7 @@ MonoBehaviour:
     endCircleIndex: 1
     sectorIndex: 1
     totalSegments: 4
+    SlideAreaStatus: 0
+    Colors: 
+  _difficulty: 0
+  <TutorialLevelConfig>k__BackingField: {fileID: 11400000, guid: b64b116577338354781f0e4a03596d36, type: 2}

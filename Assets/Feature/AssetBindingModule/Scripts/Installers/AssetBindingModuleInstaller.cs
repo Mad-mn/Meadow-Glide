@@ -6,6 +6,7 @@ using Feature.SlideAreaModule.Scripts;
 using Feature.StatusModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
 using Feature.StatusModule.Scripts.SlideAreas;
+using Feature.TutorialModule.Scripts.Configs;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
 using Zenject;
@@ -19,6 +20,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<CircleParamsConfig>(AddressConstants.CircleParamsConfig);
             Container.BindAddressableAsset<SegmentStatusVisualConfig>(AddressConstants.SegmentStatusVisualConfig);
             Container.BindAddressableAsset<SlideAreaStatusDataConfig>(AddressConstants.SlideAreaStatusDataConfig);
+            Container.BindAddressableAsset<TutorialAssetsConfig>(AddressConstants.TutorialAssetsConfig);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             

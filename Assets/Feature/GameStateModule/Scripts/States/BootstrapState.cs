@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Feature.CameraServiceModule.Scripts;
 using Feature.GameViewModule.Scripts;
+using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
 using Feature.SaveDataModule.Scripts;
@@ -19,15 +20,18 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly ISaveDataService _saveDataService;
         private readonly ISegmentStatusVisualDataProvider _segmentsVisualDataProvider;
         private readonly ISlideAreaDataProvider _slideAreaDataProvider;
+        private readonly ILevelService _levelService;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
-            ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider) {
+            ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
+            ILevelService levelService) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
             _segmentsVisualDataProvider = segmentsVisualDataProvider;
             _slideAreaDataProvider = slideAreaDataProvider;
+            _levelService = levelService;
         }
 
         public void Enter() {
@@ -44,6 +48,7 @@ namespace Feature.GameStateModule.Scripts.States {
 
             _viewService.ShowView<LoadingView>(ViewType.LoadingView);
             await InitializeDataProviders();
+            await _levelService.Initialize();
             await _viewService.PrewarmView<MainMenuView>(ViewType.MainMenu);
             await _viewService.PrewarmView<GameView>(ViewType.GameView);
             ChangeState?.Invoke(typeof(MainMenuState));

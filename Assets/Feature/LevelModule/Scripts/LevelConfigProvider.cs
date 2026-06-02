@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Feature.TutorialModule.Scripts;
 using UnityEngine;
 
 namespace Feature.LevelModule.Scripts {

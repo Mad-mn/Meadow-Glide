@@ -35,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc696bb2a42db254387c5a959c4a6251
+    m_Address: TutorialAssetsConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dcfcb991902f1ac4db2ff562032341ba
     m_Address: SlideAreaStatusDataConfig
     m_ReadOnly: 0

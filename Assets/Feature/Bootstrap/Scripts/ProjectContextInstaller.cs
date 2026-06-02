@@ -11,6 +11,7 @@ using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.SlideAreaModule.Scripts.Installers;
 using Feature.StatusModule.Scripts.Installers;
+using Feature.TutorialModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
@@ -23,6 +24,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         AddressableModuleInstaller.Install(Container);
         AssetBindingModuleInstaller.Install(Container);
         CameraServiceModuleInstaller.Install(Container);
+        TutorialModuleInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);
         SaveDataModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);

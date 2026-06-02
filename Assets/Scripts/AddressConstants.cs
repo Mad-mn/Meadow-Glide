@@ -22,6 +22,7 @@ public static class AddressConstants
     public const string SegmentStatusVisualConfig = "SegmentStatusVisualConfig";
     public const string SlideArea = "SlideArea";
     public const string SlideAreaStatusDataConfig = "SlideAreaStatusDataConfig";
+    public const string TutorialAssetsConfig = "TutorialAssetsConfig";
     public const string UIRoot = "UIRoot";
     public const string ViewSettings = "ViewSettings";
     public const string WinLevel = "WinLevel";
