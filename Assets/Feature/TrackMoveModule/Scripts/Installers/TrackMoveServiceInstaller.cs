@@ -5,6 +5,9 @@ namespace Feature.TrackMoveModule.Scripts.Installers {
         public override void InstallBindings() {
             Container.BindInterfacesAndSelfTo<MoveTrackService>()
                 .AsSingle();
+
+            Container.BindInterfacesAndSelfTo<MoveTrackModel>()
+                .AsSingle();
         }
     }
 }

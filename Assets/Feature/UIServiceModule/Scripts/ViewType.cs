@@ -4,6 +4,6 @@ namespace Feature.UIServiceModule.Scripts {
         SettingsPopup = 2,
         GameView = 3,
         LoadingView = 4,
-            WinLevel = 5,
+        WinLevel = 5,
 }
 }

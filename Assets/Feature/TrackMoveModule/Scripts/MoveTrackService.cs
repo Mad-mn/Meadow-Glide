@@ -9,13 +9,15 @@ namespace Feature.TrackMoveModule.Scripts {
     public class MoveTrackService : IMoveTrackService, IInitializable, IDisposable {
         private readonly SlideAreaModel _slideAreaModel;
         private readonly GameCircleModel _gameCircleModel;
+        private readonly MoveTrackModel _moveTrackModel;
 
         private Dictionary<CircleSegment, float> _cachedSegmentsRadius = new Dictionary<CircleSegment, float>();
         private float _circleRotation;
 
-        public MoveTrackService(SlideAreaModel slideAreaModel, GameCircleModel gameCircleModel) {
+        public MoveTrackService(SlideAreaModel slideAreaModel, GameCircleModel gameCircleModel, MoveTrackModel moveTrackModel) {
             _slideAreaModel = slideAreaModel;
             _gameCircleModel = gameCircleModel;
+            _moveTrackModel = moveTrackModel;
         }
 
         public void Initialize() {
@@ -50,6 +52,7 @@ namespace Feature.TrackMoveModule.Scripts {
             float currentRotation = circle.transform.rotation.z % 360;
             if (!Mathf.Approximately(currentRotation, _circleRotation)) {
                 Debug.LogError("MoveSpend");
+                _moveTrackModel.Move();
             }
         }
 
@@ -61,6 +64,7 @@ namespace Feature.TrackMoveModule.Scripts {
                 float updatedSegmentRadius = updated[keyValuePair.Key];
                 if (!Mathf.Approximately(updatedSegmentRadius, keyValuePair.Value)) {
                     Debug.LogError("SpendStep");
+                    _moveTrackModel.Move();
                     break;
                 }
             }

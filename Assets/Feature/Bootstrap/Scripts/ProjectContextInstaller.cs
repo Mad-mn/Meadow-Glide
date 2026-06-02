@@ -11,6 +11,7 @@ using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.SlideAreaModule.Scripts.Installers;
 using Feature.StatusModule.Scripts.Installers;
+using Feature.TrackMoveModule.Scripts.Installers;
 using Feature.TutorialModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
 using UnityEngine;
@@ -25,6 +26,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         AssetBindingModuleInstaller.Install(Container);
         CameraServiceModuleInstaller.Install(Container);
         TutorialModuleInstaller.Install(Container);
+        TrackMoveServiceInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);
         SaveDataModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);
@@ -36,6 +38,5 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         InputModuleInstaller.Install(Container);
         CircleModuleInstaller.Install(Container);
         StatusModuleInstaller.Install(Container);
-
     }
 }

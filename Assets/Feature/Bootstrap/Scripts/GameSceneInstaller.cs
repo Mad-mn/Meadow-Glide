@@ -8,7 +8,6 @@ namespace Feature.Bootstrap.Scripts {
     public class GameSceneInstaller : ScriptableObjectInstaller<GameSceneInstaller>
     {
         public override void InstallBindings() {
-            TrackMoveServiceInstaller.Install(Container);
         }
     }
 }
