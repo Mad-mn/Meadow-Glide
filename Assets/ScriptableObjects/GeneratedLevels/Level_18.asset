@@ -1,0 +1,176 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-185175712119716911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e50abfa8606c324f9dc01423e49b57e, type: 3}
+  m_Name: Circle_1
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleConfig
+  SegmentCount: 5
+  Segments:
+  - ColorType: 6
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 5
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 7
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 5
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 7
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c744addc726a4f528f226862649d1362, type: 3}
+  m_Name: Level_18
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LevelModule.Scripts.LevelConfig
+  _circleConfigs:
+  - {fileID: 2093009120070846137}
+  - {fileID: -185175712119716911}
+  - {fileID: 690649770977931649}
+  - {fileID: 2805522082650902205}
+  _slideAreaConfigs:
+  - startCircleIndex: 1
+    endCircleIndex: 3
+    sectorIndex: 3
+    totalSegments: 5
+    SlideAreaStatus: 0
+    Colors: 
+  - startCircleIndex: 0
+    endCircleIndex: 1
+    sectorIndex: 0
+    totalSegments: 5
+    SlideAreaStatus: 1
+    Colors: 060000000700000003000000
+  - startCircleIndex: 2
+    endCircleIndex: 3
+    sectorIndex: 0
+    totalSegments: 5
+    SlideAreaStatus: 0
+    Colors: 
+  _difficulty: 9
+  <TutorialLevelConfig>k__BackingField: {fileID: 0}
+--- !u!114 &690649770977931649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e50abfa8606c324f9dc01423e49b57e, type: 3}
+  m_Name: Circle_2
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleConfig
+  SegmentCount: 5
+  Segments:
+  - ColorType: 5
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 7
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 5
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 5
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 3
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+--- !u!114 &2093009120070846137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e50abfa8606c324f9dc01423e49b57e, type: 3}
+  m_Name: Circle_0
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleConfig
+  SegmentCount: 5
+  Segments:
+  - ColorType: 7
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 6
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 7
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 6
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 6
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+--- !u!114 &2805522082650902205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e50abfa8606c324f9dc01423e49b57e, type: 3}
+  m_Name: Circle_3
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleConfig
+  SegmentCount: 5
+  Segments:
+  - ColorType: 3
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 6
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 3
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 3
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
+  - ColorType: 3
+    Radius: 0
+    Angle: 0
+    SegmentStatus: 0
