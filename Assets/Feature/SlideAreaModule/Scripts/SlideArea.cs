@@ -21,6 +21,7 @@ namespace Feature.SlideAreaModule.Scripts {
         public int SectorIndex { get; private set; }
         public int StartCircleIndex { get; private set; }
         public int EndCircleIndex { get; private set; }
+        public int TotalSegments { get; private set; }
 
         public SlideAreaStatus Status => _slideAreaData?.SlideAreaStatus ?? SlideAreaStatus.Default;
         public List<CircleColorType> FilterColors => _colors;
@@ -44,6 +45,7 @@ namespace Feature.SlideAreaModule.Scripts {
             SectorIndex = config.sectorIndex;
             StartCircleIndex = config.startCircleIndex;
             EndCircleIndex = config.endCircleIndex;
+            TotalSegments = config.totalSegments;
             _slideAreaData = slideAreaData;
             _colors = config.Colors;
 

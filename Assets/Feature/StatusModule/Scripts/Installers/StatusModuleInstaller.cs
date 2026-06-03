@@ -10,7 +10,10 @@ namespace Feature.StatusModule.Scripts.Installers {
 
             Container.BindInterfacesAndSelfTo<SlideAreaStatusDataProvider>()
                 .AsSingle();
-            
+
+            Container.BindInterfacesAndSelfTo<SegmentStatusService>()
+                .AsSingle();
+
         }
     }
 }

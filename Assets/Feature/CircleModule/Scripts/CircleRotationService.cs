@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Feature.InputModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
+using Feature.StatusModule.Scripts.Segments;
 using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
 using Zenject;
@@ -17,6 +18,8 @@ namespace Feature.CircleModule.Scripts {
         private readonly IInteractionStateService _interactionState;
         private readonly GameCircleModel _circleModel;
         private readonly MoveTrackModel _moveTrackModel;
+        private readonly ISlideAreaService _slideAreaService;
+
         private readonly List<CircleController> _circles = new List<CircleController>();
 
         private CircleController _activeCircle;
@@ -28,11 +31,12 @@ namespace Feature.CircleModule.Scripts {
         public bool IsInteracting => _activeCircle != null && _isDragging;
 
         public CircleRotationService(IInputService inputService, IInteractionStateService interactionState,
-            GameCircleModel circleModel, MoveTrackModel moveTrackModel) {
+            GameCircleModel circleModel, MoveTrackModel moveTrackModel, ISlideAreaService slideAreaService) {
             _inputService = inputService;
             _interactionState = interactionState;
             _circleModel = circleModel;
             _moveTrackModel = moveTrackModel;
+            _slideAreaService = slideAreaService;
         }
 
         public void Initialize() {
@@ -155,6 +159,7 @@ namespace Feature.CircleModule.Scripts {
                 circle.transform.rotation = Quaternion.Euler(0, 0, targetRot);
             }
             
+            _slideAreaService.UpdateSegmentsInAreas();
             _circleModel.CircleRotationStatusChanges(circle, false);
         }
     }

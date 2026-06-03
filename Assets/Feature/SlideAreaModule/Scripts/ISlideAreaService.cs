@@ -6,6 +6,7 @@ namespace Feature.SlideAreaModule.Scripts {
     public interface ISlideAreaService {
         UniTask Initialize();
         void SpawnSlideAreas(LevelConfig levelConfig);
+        void UpdateSegmentsInAreas();
         void Clear();
         bool IsSliding { get; set; }
         IReadOnlyList<SlideArea> SpawnedAreas { get; }

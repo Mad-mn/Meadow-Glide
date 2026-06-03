@@ -16,3 +16,9 @@ MonoBehaviour:
   - <SegmentStatus>k__BackingField: 1
     <StatusIcon>k__BackingField: {fileID: 21300000, guid: 6f64cb1d6d046104594b92ea16fd9387, type: 3}
     <WightCoeffiecient>k__BackingField: 0.5
+  - <SegmentStatus>k__BackingField: 2
+    <StatusIcon>k__BackingField: {fileID: 21300000, guid: 2d515df0e6d5cdc48a1e598c52699dd5, type: 3}
+    <WightCoeffiecient>k__BackingField: 1
+  - <SegmentStatus>k__BackingField: 3
+    <StatusIcon>k__BackingField: {fileID: 21300000, guid: ac8dc17da752c3a44b3e09bd112c99eb, type: 3}
+    <WightCoeffiecient>k__BackingField: 0.5

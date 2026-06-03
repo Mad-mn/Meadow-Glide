@@ -109,6 +109,7 @@ private readonly List<float> _baseIndices = new List<float>();
                 PrepareSegments(_activeArea);
                 _slideAreaService.IsSliding = true;
                 _slideAreaModel.ChangeSlideState(true);
+                Debug.LogError(1);
             }
         }
 
@@ -229,11 +230,13 @@ ghost.gameObject.name = segment.gameObject.name + "_Ghost";
                 var segment = _activeSegments[i];
                 float finalCircleIdx = startIdx + wrappedSubsetIdx;
                 float r = Mathf.Max(0, _circleParamsConfig.GetRadius(finalCircleIdx));
-                segment.SetRadius(r);
-
+                
                 float baseWidth = _circleParamsConfig.GetWidth(finalCircleIdx);
                 float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
+                
                 segment.SetWidth(baseWidth * fade);
+                segment.SetRadius(r);
+                segment.SetVisible(fade > 0.01f);
 
                 // Ghost segment
                 float mid = subsetCount / 2f;
@@ -247,8 +250,8 @@ ghost.gameObject.name = segment.gameObject.name + "_Ghost";
                 float ghostFade = GetGeometricFade(gr, rStart, rEnd, rLimIn, rLimOut);
 
                 var ghost = _ghosts[i];
-                ghost.SetRadius(gr);
                 ghost.SetWidth(_circleParamsConfig.GetWidth(finalGhostCircleIdx) * ghostFade);
+                ghost.SetRadius(gr);
                 ghost.SetVisible(ghostFade > 0.01f);
                 ghost.transform.localRotation = segment.transform.localRotation;
             }
@@ -346,9 +349,9 @@ ghost.gameObject.name = segment.gameObject.name + "_Ghost";
                     float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
                     float clampedR = Mathf.Clamp(r, rLimIn, rLimOut);
 
+                    seg.SetWidth(_circleParamsConfig.GetWidth(idx) * fade);
                     seg.SetRadius(clampedR);
-                    float baseWidth = _circleParamsConfig.GetWidth(idx);
-                    seg.SetWidth(baseWidth * fade);
+                    seg.SetVisible(fade > 0.01f);
                 }
 
                 await UniTask.Yield();
@@ -357,11 +360,9 @@ ghost.gameObject.name = segment.gameObject.name + "_Ghost";
             for (int i = 0; i < count; i++) {
                 if (_activeSegments[i] != null) {
                     float finalIdx = startIdx + i;
-                    _activeSegments[i]
-                        .SetRadius(_circleParamsConfig.GetRadius(finalIdx));
-
-                    _activeSegments[i]
-                        .SetWidth(_circleParamsConfig.GetWidth(finalIdx)); // Fade factor is 1.0 at finalIdx
+                    _activeSegments[i].SetWidth(_circleParamsConfig.GetWidth(finalIdx));
+                    _activeSegments[i].SetRadius(_circleParamsConfig.GetRadius(finalIdx));
+                    _activeSegments[i].SetVisible(true);
                 }
             }
 

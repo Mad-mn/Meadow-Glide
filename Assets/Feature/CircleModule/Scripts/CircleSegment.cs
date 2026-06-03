@@ -74,11 +74,26 @@ private Vector3[] _unitArcPositions;
             UpdateStatusIcon();
         }
 
+        public SegmentStatus GetStatus() {
+            if (_currentConfig == null) return SegmentStatus.Default;
+
+            return _currentConfig.SegmentStatus;
+        }
+
         private void UpdateStatusIcon()
         {
             if (_statusIcon == null || _visualDataProvider == null) return;
+            
+            EnsureLineRenderer();
+            float width = _cachedLineRenderer.startWidth;
+            float radius = _currentConfig != null ? _currentConfig.Radius : 0;
+            
+            bool shouldBeVisible = _currentConfig != null && 
+                                   _currentConfig.SegmentStatus != SegmentStatus.Default && 
+                                   _cachedLineRenderer.enabled && 
+                                   width > 0.01f;
 
-            if (_currentConfig == null || _currentConfig.SegmentStatus == SegmentStatus.Default)
+            if (!shouldBeVisible)
             {
                 _statusIcon.gameObject.SetActive(false);
                 return;
@@ -88,15 +103,11 @@ private Vector3[] _unitArcPositions;
             if (visualData == null)
             {
                 _statusIcon.gameObject.SetActive(false);
-                return;
+               return;
             }
 
             _statusIcon.gameObject.SetActive(true);
             _statusIcon.sprite = visualData.StatusIcon;
-            
-            float radius = _currentConfig.Radius;
-            EnsureLineRenderer();
-            float width = _cachedLineRenderer.startWidth;
             
             // Position at the middle of the arc
             _statusIcon.transform.localPosition = new Vector3(radius, 0, 0);
@@ -139,6 +150,8 @@ private Vector3[] _unitArcPositions;
             EnsureLineRenderer();
             _cachedLineRenderer.enabled = visible;
             if (_trigger != null) _trigger.SetActive(visible);
+            _statusIcon.gameObject.SetActive(visible);
+            //UpdateStatusIcon();
         }
 
         public void SetSortingOrder(int order) {
