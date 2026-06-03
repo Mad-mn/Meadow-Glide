@@ -46,7 +46,5 @@ namespace Feature.LevelModule.Scripts {
     public class LevelData {
         public int LevelID;
         public LevelConfig LevelConfig;
-        public int Difficulty;
-        public int MinimumMoves;
     }
 }

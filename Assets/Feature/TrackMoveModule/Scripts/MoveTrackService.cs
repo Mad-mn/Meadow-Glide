@@ -11,8 +11,8 @@ namespace Feature.TrackMoveModule.Scripts {
         private readonly GameCircleModel _gameCircleModel;
         private readonly MoveTrackModel _moveTrackModel;
 
+        private Dictionary<CircleController, float> _circleRotations = new Dictionary<CircleController, float>();
         private Dictionary<CircleSegment, float> _cachedSegmentsRadius = new Dictionary<CircleSegment, float>();
-        private float _circleRotation;
 
         public MoveTrackService(SlideAreaModel slideAreaModel, GameCircleModel gameCircleModel, MoveTrackModel moveTrackModel) {
             _slideAreaModel = slideAreaModel;
@@ -32,7 +32,7 @@ namespace Feature.TrackMoveModule.Scripts {
 
         private void OnCircleRotationStatusChanged(CircleController circle, bool isRotating) {
             if (isRotating) {
-                _circleRotation = circle.transform.rotation.z % 360;
+                _circleRotations[circle] = circle.transform.eulerAngles.z;
             }
             else {
                 CheckForSpendByRotation(circle);
@@ -49,11 +49,15 @@ namespace Feature.TrackMoveModule.Scripts {
         }
 
         private void CheckForSpendByRotation(CircleController circle) {
-            float currentRotation = circle.transform.rotation.z % 360;
-            if (!Mathf.Approximately(currentRotation, _circleRotation)) {
+            if (!_circleRotations.TryGetValue(circle, out float startRotation)) return;
+
+            float currentRotation = circle.transform.eulerAngles.z;
+            if (Mathf.Abs(Mathf.DeltaAngle(currentRotation, startRotation)) > 0.1f) {
                 Debug.LogError("MoveSpend");
                 _moveTrackModel.Move();
             }
+            
+            _circleRotations.Remove(circle);
         }
 
         private void CheckForSpendStepBySlide() {

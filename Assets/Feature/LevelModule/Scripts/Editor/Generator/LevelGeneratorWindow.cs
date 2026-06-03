@@ -80,9 +80,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 var selected = obj.FirstOrDefault() as LevelConfig;
                 if (selected != null) {
                     _currentLevel = new LevelData {
-                        LevelConfig = selected,
-                        Difficulty = selected.Difficulty,
-                        MinimumMoves = selected.Difficulty
+                        LevelConfig = selected
                     };
                     _statsLabel.text = $"Loaded: {selected.name} | Difficulty: {selected.Difficulty}";
                     _previewArea.MarkDirtyRepaint();
@@ -149,7 +147,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
                 if (rawData != null) {
                     _currentLevel = ConvertToUnityLevelData(rawData);
-                    _statsLabel.text = $"Difficulty: {_currentLevel.Difficulty} | Rings: {_currentLevel.LevelConfig.CircleConfigs.Count}";
+                    _statsLabel.text = $"Difficulty: {_currentLevel.LevelConfig.Difficulty} | Rings: {_currentLevel.LevelConfig.CircleConfigs.Count}";
                     _previewArea.MarkDirtyRepaint();
                 } else {
                     _statsLabel.text = "Timeout or Limit reached.";
@@ -188,9 +186,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty);
 
             return new LevelData {
-                LevelConfig = levelConfig,
-                Difficulty = raw.Difficulty,
-                MinimumMoves = raw.Difficulty
+                LevelConfig = levelConfig
             };
         }
 

@@ -88,6 +88,9 @@ namespace Feature.CircleModule.Scripts {
                 if (_isDragging) {
                     SnapCircle(_activeCircle).Forget();
                 }
+                else {
+                    _circleModel.CircleRotationStatusChanges(_activeCircle, false);
+                }
                 _activeCircle = null;
             }
             _isDragging = false;

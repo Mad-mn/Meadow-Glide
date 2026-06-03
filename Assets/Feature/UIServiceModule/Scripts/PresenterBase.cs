@@ -13,5 +13,7 @@ namespace Feature.UIServiceModule.Scripts {
         public virtual void Dispose() {
             View = default;
         }
+
+        public virtual void Show() { }
     }
 }

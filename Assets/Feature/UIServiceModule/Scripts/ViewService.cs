@@ -66,15 +66,21 @@ namespace Feature.UIServiceModule.Scripts {
         private async UniTaskVoid ShowViewTask<T>(ViewType viewType) where T : ViewBase {
             await InitializeIfNeeded();
 
-            if (_activeViews.TryGetValue(viewType, out var active)) {
-                active.view.Show();
+            if (TryShow<T>(viewType))
                 return;
+
+            await GetOrInitializeView<T>(viewType);
+            TryShow<T>(viewType);
+        }
+
+        private bool TryShow<T>(ViewType viewType) where T : ViewBase {
+            if (_activeViews.TryGetValue(viewType, out var active)) {
+                active.presenter.Show();
+                active.view.Show();
+                return true;
             }
 
-            T view = await GetOrInitializeView<T>(viewType);
-            if (view != null) {
-                view.Show();
-            }
+            return false;
         }
 
         private async UniTask<T> GetOrInitializeView<T>(ViewType viewType) where T : ViewBase {

@@ -6,6 +6,7 @@ using Feature.LevelModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SlideAreaModule.Scripts;
+using Feature.TrackMoveModule.Scripts;
 using Feature.TutorialModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
@@ -22,6 +23,7 @@ namespace Feature.LevelInitializeModule {
         private readonly ISaveDataModel _saveDataModel;
         private readonly ILevelService _levelService;
         private readonly ITutorialService _tutorialService;
+        private readonly MoveTrackModel _moveTrackModel;
         private readonly DiContainer _container;
         private readonly ISlideAreaService _slideAreaService;
         private readonly ICircleRotationService _circleRotationService;
@@ -45,7 +47,8 @@ namespace Feature.LevelInitializeModule {
             ISaveDataService saveDataService,
             ISaveDataModel saveDataModel,
             ILevelService levelService,
-            ITutorialService tutorialService) {
+            ITutorialService tutorialService,
+            MoveTrackModel moveTrackModel) {
             _circleControllerTask = circleControllerTask;
             _container = container;
             _slideAreaService = slideAreaService;
@@ -59,18 +62,19 @@ namespace Feature.LevelInitializeModule {
             _saveDataModel = saveDataModel;
             _levelService = levelService;
             _tutorialService = tutorialService;
+            _moveTrackModel = moveTrackModel;
         }
         
         public async UniTask Initialize() {
-            _viewService.ShowView<GameView>(ViewType.GameView);
-
             CircleController circleControllerPrefab = await _circleControllerTask;
             _circleParamsConfig = await _circleParamsConfigTask;
 
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
+            _moveTrackModel.CacheMovesForLevel(levelData);
+            _viewService.ShowView<GameView>(ViewType.GameView);
             
             await _slideAreaService.Initialize();
-            
+
             SpawnCircles(levelData, circleControllerPrefab);
             _slideAreaService.SpawnSlideAreas(levelData.LevelConfig);
 

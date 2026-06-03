@@ -15,85 +15,43 @@ MonoBehaviour:
   _levelDatas:
   - LevelID: 0
     LevelConfig: {fileID: 11400000, guid: b6e8935324d905f45b02fdf6ac910c22, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 1
     LevelConfig: {fileID: 11400000, guid: b6e8935324d905f45b02fdf6ac910c22, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 2
     LevelConfig: {fileID: 11400000, guid: 2b0c56758377b9a43bc44ca6b9f21d76, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 3
     LevelConfig: {fileID: 11400000, guid: 1d96949da5055674bb66d86ceb7e159b, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 4
     LevelConfig: {fileID: 11400000, guid: 63e244e50f7590740ad43d12a3e74d6f, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 5
     LevelConfig: {fileID: 11400000, guid: f623babcbf5054c4b9008c2957fd837b, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 6
     LevelConfig: {fileID: 11400000, guid: 2fa317cefd6b36e49ab36b0f098653ce, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 7
     LevelConfig: {fileID: 11400000, guid: c127a48db0956e54eaf04895b63b86cb, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 8
     LevelConfig: {fileID: 11400000, guid: f8011201155dcb444b6e61e00e72f248, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 9
     LevelConfig: {fileID: 11400000, guid: 6eef1fb2cacaba641835cdbd9ec3fdf5, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 10
     LevelConfig: {fileID: 11400000, guid: bcab3855cb412154f85c17da6413015b, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 11
     LevelConfig: {fileID: 11400000, guid: a8a1f1770e05f254b96aa9da6183c912, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 12
     LevelConfig: {fileID: 11400000, guid: 1888e646822c4ed4da090fc1ffe9f843, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 13
     LevelConfig: {fileID: 11400000, guid: db474eb41846ace4984d2811ae252064, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 14
     LevelConfig: {fileID: 11400000, guid: 23f2510d11e7c374bb431e4e64e80f1e, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 15
     LevelConfig: {fileID: 11400000, guid: d9895c0b7426dc244bf83509c24d21f7, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 16
     LevelConfig: {fileID: 11400000, guid: c32e525c88a6bd44481c03cedc88412f, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 17
     LevelConfig: {fileID: 11400000, guid: c516ffb36e6d68a42921710dbae751a9, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 18
     LevelConfig: {fileID: 11400000, guid: 9b7d2a26e1ea51140b2d6abe3ecca699, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 19
     LevelConfig: {fileID: 11400000, guid: 8eb3d1eca90d9914a93ab34506719aec, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0
   - LevelID: 20
     LevelConfig: {fileID: 11400000, guid: 7c250ce576fcf034b8eb7757f315bd60, type: 2}
-    Difficulty: 0
-    MinimumMoves: 0

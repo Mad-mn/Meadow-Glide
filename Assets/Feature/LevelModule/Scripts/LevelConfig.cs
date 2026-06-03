@@ -12,11 +12,15 @@ namespace Feature.LevelModule.Scripts {
         [SerializeField] private List<CircleConfig> _circleConfigs = new List<CircleConfig>();
         [SerializeField] private List<SlideAreaConfig> _slideAreaConfigs = new List<SlideAreaConfig>();
         [SerializeField] private int _difficulty;
+        [SerializeField] private float _difficultyMultiplier = 2;
         [field: SerializeField] public TutorialLevelConfig TutorialLevelConfig { get; private set; }
 
         public IReadOnlyList<CircleConfig> CircleConfigs => _circleConfigs;
         public IReadOnlyList<SlideAreaConfig> SlideAreaConfigs => _slideAreaConfigs;
         public int Difficulty => _difficulty;
+
+        public int MovesForLevel =>
+            Mathf.RoundToInt(_difficulty * _difficultyMultiplier);
 
         public void SetConfigs(List<CircleConfig> circles, List<SlideAreaConfig> areas, int difficulty) {
             _circleConfigs = circles;
