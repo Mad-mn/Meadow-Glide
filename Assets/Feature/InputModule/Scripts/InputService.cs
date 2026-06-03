@@ -10,6 +10,7 @@ namespace Feature.InputModule.Scripts {
 
         public Vector2 PointerPosition => _pointAction?.ReadValue<Vector2>() ?? Vector2.zero;
         public bool IsPointerPressed => _clickAction?.IsPressed() ?? false;
+        public bool IsRightClickPressed => _rightCick?.IsPressed() ?? false;
 
         public event Action PointerDown;
         public event Action PointerUp;
@@ -30,6 +31,7 @@ namespace Feature.InputModule.Scripts {
 
             _pointAction = actions.FindAction("UI/Point");
             _clickAction = actions.FindAction("UI/Click");
+            _rightCick = actions.FindAction("UI/RightClick");
 
             if (_clickAction != null) {
                 _clickAction.performed += OnClickPerformed;
@@ -38,6 +40,7 @@ namespace Feature.InputModule.Scripts {
         }
 
         private bool _wasPressed;
+        private InputAction _rightCick;
 
         private void OnClickPerformed(InputAction.CallbackContext context) {
             bool pressed = context.ReadValueAsButton();

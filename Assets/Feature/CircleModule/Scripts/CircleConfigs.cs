@@ -22,5 +22,16 @@ namespace Feature.CircleModule.Scripts
         public float Radius;
         public float Angle;
         public SegmentStatus SegmentStatus;
+
+        public SegmentConfig Clone()
+        {
+            return new SegmentConfig
+            {
+                ColorType = ColorType,
+                Radius = Radius,
+                Angle = Angle,
+                SegmentStatus = SegmentStatus
+            };
+        }
     }
 }

@@ -8,12 +8,12 @@ using Feature.InputModule.Scripts;
 using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Zenject;
 
 namespace Feature.SlideAreaModule.Scripts {
     public class SlideSegmentService : ISlideSegmentService, ITickable, IInitializable, IDisposable {
         private readonly IInputService _inputService;
-        private readonly ISlideAreaService _slideAreaService;
         private readonly IInteractionStateService _interactionState;
         private readonly ICameraService _cameraService;
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
@@ -36,11 +36,10 @@ private readonly List<float> _baseIndices = new List<float>();
         public bool IsSliding =>
             _activeArea != null;
 
-        public SlideSegmentService(IInputService inputService, ISlideAreaService slideAreaService, IInteractionStateService interactionState,
+        public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState,
             ICameraService cameraService, UniTask<CircleParamsConfig> circleParamsConfigTask, GameCircleModel circleModel,
             SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel) {
             _inputService = inputService;
-            _slideAreaService = slideAreaService;
             _interactionState = interactionState;
             _cameraService = cameraService;
             _circleParamsConfigTask = circleParamsConfigTask;
@@ -65,6 +64,34 @@ private readonly List<float> _baseIndices = new List<float>();
             _circles.Add(circle);
             _sortedCircles = _circles.OrderBy(c => c.Radius)
                 .ToList();
+        }
+        
+        public void UpdateSegmentsInAreas() {
+            List<CircleController> sortedCircles = _circleModel.Circles.OrderBy(c => c.Radius).ToList();
+            HashSet<CircleSegment> segmentsInAreas = new HashSet<CircleSegment>();
+            IReadOnlyList<SlideArea> spawnedAreas = _slideAreaModel.SpawnedAreas;
+
+            for (int circleIdx = 0; circleIdx < sortedCircles.Count; circleIdx++) {
+                var circle = sortedCircles[circleIdx];
+                foreach (var segment in circle.SpawnedSegments) {
+                    float worldAngle = (circle.transform.eulerAngles.z + segment.transform.localEulerAngles.z) % 360;
+                    worldAngle = (worldAngle + 360) % 360;
+
+                    foreach (var area in spawnedAreas) {
+                        if (circleIdx >= area.StartCircleIndex && circleIdx <= area.EndCircleIndex) {
+                            float angleStep = 360f / area.TotalSegments;
+                            float areaCenterAngle = area.SectorIndex * angleStep;
+
+                            if (Mathf.Abs(Mathf.DeltaAngle(worldAngle, areaCenterAngle)) < 0.1f) {
+                                segmentsInAreas.Add(segment);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            _slideAreaModel.UpdateSegmentsInAreas(segmentsInAreas);
         }
 
         public void Clear() {
@@ -107,14 +134,12 @@ private readonly List<float> _baseIndices = new List<float>();
 
                 _startRadius = Vector3.Dot(worldPos, _slideDirection);
                 PrepareSegments(_activeArea);
-                _slideAreaService.IsSliding = true;
                 _slideAreaModel.ChangeSlideState(true);
-                Debug.LogError(1);
             }
         }
 
         private SlideArea FindSlideArea(Vector3 worldPos) {
-            foreach (var area in _slideAreaService.SpawnedAreas) {
+            foreach (var area in _slideAreaModel.SpawnedAreas) {
                 var collider = area.GetComponent<PolygonCollider2D>();
                 if (collider.OverlapPoint(worldPos)) {
                     return area;
@@ -159,9 +184,15 @@ private readonly List<float> _baseIndices = new List<float>();
                     }
 
                     var ghost = UnityEngine.Object.Instantiate(segment, segment.transform.parent);
-ghost.gameObject.name = segment.gameObject.name + "_Ghost";
+                    ghost.gameObject.name = segment.gameObject.name + "_Ghost";
+                    
+                    // CRITICAL: Clone the config so ghosts don't share state with originals
+                    var configClone = segment.GetConfig().Clone();
+                    ghost.SetConfig(configClone);
+                    
                     ghost.SetVisible(false);
                     ghost.SetSortingOrder(segment.GetSortingOrder() - 1);
+                    ghost.HideStatusIcon();
                     _ghosts.Add(ghost);
                 }
             }
@@ -253,6 +284,7 @@ ghost.gameObject.name = segment.gameObject.name + "_Ghost";
                 ghost.SetWidth(_circleParamsConfig.GetWidth(finalGhostCircleIdx) * ghostFade);
                 ghost.SetRadius(gr);
                 ghost.SetVisible(ghostFade > 0.01f);
+                ghost.HideStatusIcon();
                 ghost.transform.localRotation = segment.transform.localRotation;
             }
         }
@@ -274,7 +306,6 @@ ghost.gameObject.name = segment.gameObject.name + "_Ghost";
                     .Forget();
 
                 _activeArea = null;
-                _slideAreaService.IsSliding = false;
             }
 
             _interactionState.IsSlideActive = false;

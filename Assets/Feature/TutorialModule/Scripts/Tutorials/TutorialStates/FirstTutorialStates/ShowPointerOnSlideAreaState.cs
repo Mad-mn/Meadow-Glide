@@ -17,6 +17,7 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private readonly ITutorialAssetProvider _tutorialAssetProvider;
         private readonly DiContainer _container;
         private readonly IInputService _inputService;
+        private readonly SlideAreaModel _slideAreaModel;
         private readonly ISlideAreaService _slideAreaService;
         public event Action OnComplete;
 
@@ -28,12 +29,12 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private Vector3 _center;
 
         public ShowPointerOnSlideAreaState(GameCircleModel gameCircleModel, ITutorialAssetProvider tutorialAssetProvider, DiContainer container,
-            IInputService inputService, ISlideAreaService slideAreaService) {
+            IInputService inputService, SlideAreaModel slideAreaModel) {
             _gameCircleModel = gameCircleModel;
             _tutorialAssetProvider = tutorialAssetProvider;
             _container = container;
             _inputService = inputService;
-            _slideAreaService = slideAreaService;
+            _slideAreaModel = slideAreaModel;
         }
 
         public void Enter() {
@@ -59,7 +60,7 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             var circleStart = _gameCircleModel.Circles[CIRCLE_INDEX_FOR_HINT_START];
             var circleFinish = _gameCircleModel.Circles[CIRCLE_INDEX_FOR_HINT_FINISH];
 
-            var segment = _slideAreaService.SpawnedAreas[0];
+            var segment = _slideAreaModel.SpawnedAreas[0];
             CircleSegment segStart = circleStart.SpawnedSegments[segment.SectorIndex]; // 3rd segment
             CircleSegment segEnd = circleFinish.SpawnedSegments[segment.SectorIndex];   // 1st segment
             

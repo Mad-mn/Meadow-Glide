@@ -79,6 +79,8 @@ namespace Feature.LevelInitializeModule {
             _slideAreaService.SpawnSlideAreas(levelData.LevelConfig);
 
             await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
+
+            await UniTask.Delay(1);
             _levelService.LevelStarted();
         }
 
@@ -125,8 +127,9 @@ namespace Feature.LevelInitializeModule {
                 
                 _circleRotationService.Register(circleController);
                 _slideSegmentService.RegisterCircle(circleController);
+                _circleModel.RegisterCircle(circleController);
                 _spawnedCircles.Add(circleController);
-            }
+}
         }
     }
 }

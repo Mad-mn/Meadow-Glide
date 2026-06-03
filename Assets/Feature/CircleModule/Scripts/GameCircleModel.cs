@@ -14,7 +14,6 @@ namespace Feature.CircleModule.Scripts {
         public void RegisterCircle(CircleController circle) {
             if(_circles.Contains(circle))
             {
-                Debug.LogError("Circle already registered");
                 return;
             }
 

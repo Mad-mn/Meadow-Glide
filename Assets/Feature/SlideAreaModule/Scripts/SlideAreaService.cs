@@ -17,56 +17,26 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly ISlideAreaDataProvider _slideAreaDataProvider;
         private readonly GameCircleModel _circleModel;
         private readonly SlideAreaModel _slideAreaModel;
+        private readonly ISlideSegmentService _slideSegmentService;
         private CircleParamsConfig _circleParamsConfig;
         
         private readonly List<SlideArea> _spawnedAreas = new List<SlideArea>();
         private SlideArea _slideAreaPrefab;
 
-        public bool IsSliding { get; set; }
-        public IReadOnlyList<SlideArea> SpawnedAreas => _spawnedAreas;
-
         public SlideAreaService(DiContainer container, UniTask<SlideArea> slideAreaTask, UniTask<CircleParamsConfig> circleParamsConfigTask,
-            ISlideAreaDataProvider slideAreaDataProvider, GameCircleModel circleModel, SlideAreaModel slideAreaModel) {
+            ISlideAreaDataProvider slideAreaDataProvider, GameCircleModel circleModel, SlideAreaModel slideAreaModel, ISlideSegmentService slideSegmentService) {
             _container = container;
             _slideAreaTask = slideAreaTask;
             _circleParamsConfigTask = circleParamsConfigTask;
             _slideAreaDataProvider = slideAreaDataProvider;
             _circleModel = circleModel;
             _slideAreaModel = slideAreaModel;
+            _slideSegmentService = slideSegmentService;
         }
 
         public async UniTask Initialize() {
             _slideAreaPrefab = await _slideAreaTask;
             _circleParamsConfig = await _circleParamsConfigTask;
-            UpdateSegmentsInAreas();
-        }
-        
-        public void UpdateSegmentsInAreas() {
-            List<CircleController> sortedCircles = _circleModel.Circles.OrderBy(c => c.Radius).ToList();
-            HashSet<CircleSegment> segmentsInAreas = new HashSet<CircleSegment>();
-            IReadOnlyList<SlideArea> spawnedAreas = SpawnedAreas;
-
-            for (int circleIdx = 0; circleIdx < sortedCircles.Count; circleIdx++) {
-                var circle = sortedCircles[circleIdx];
-                foreach (var segment in circle.SpawnedSegments) {
-                    float worldAngle = (circle.transform.eulerAngles.z + segment.transform.localEulerAngles.z) % 360;
-                    worldAngle = (worldAngle + 360) % 360;
-
-                    foreach (var area in spawnedAreas) {
-                        if (circleIdx >= area.StartCircleIndex && circleIdx <= area.EndCircleIndex) {
-                            float angleStep = 360f / area.TotalSegments;
-                            float areaCenterAngle = area.SectorIndex * angleStep;
-
-                            if (Mathf.Abs(Mathf.DeltaAngle(worldAngle, areaCenterAngle)) < 0.1f) {
-                                segmentsInAreas.Add(segment);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            _slideAreaModel.UpdateSegmentsInAreas(segmentsInAreas);
         }
 
         public void SpawnSlideAreas(LevelConfig levelConfig) {
@@ -98,6 +68,8 @@ namespace Feature.SlideAreaModule.Scripts {
                 
                 _spawnedAreas.Add(slideArea);
             }
+            _slideAreaModel.SetupAreas(_spawnedAreas);
+            _slideSegmentService.UpdateSegmentsInAreas();
         }
 
         public void Clear() {

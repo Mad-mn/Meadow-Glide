@@ -16,16 +16,17 @@ namespace Feature.CircleModule.Scripts
         [SerializeField] private float _weightCoefficient = 0.5f;
 
         private const int SegmentsPerArc = 40;
-        [SerializeField] private SegmentConfig _currentConfig;
+        private SegmentConfig _currentConfig;
         private ISegmentStatusVisualDataProvider _visualDataProvider;
+        private float _currentRadius;
+        private float _currentWidth;
 
         private LineRenderer _cachedLineRenderer;
-private Vector3[] _unitArcPositions;
+        private Vector3[] _unitArcPositions;
         private float _lastPrecalculatedAngle = -1f;
 
         public float Radius => _currentConfig != null ? _currentConfig.Radius : 0;
-        public CircleColorType ColorType =>
-            _currentConfig.ColorType;
+        public CircleColorType ColorType => _currentConfig != null ? _currentConfig.ColorType : CircleColorType.None;
 
         public bool IsBlocked => _currentConfig != null && _currentConfig.SegmentStatus == SegmentStatus.Blocked;
 
@@ -33,6 +34,9 @@ private Vector3[] _unitArcPositions;
         {
             _currentConfig = config;
             _visualDataProvider = visualDataProvider;
+            _currentRadius = config.Radius;
+            _currentWidth = width;
+            
             EnsureLineRenderer();
             
             if (_statusAnimator == null)
@@ -48,9 +52,18 @@ private Vector3[] _unitArcPositions;
             _cachedLineRenderer.startWidth = width;
             _cachedLineRenderer.endWidth = width;
             
-            DrawArc(config.Radius, config.Angle);
+            DrawArc(_currentRadius, config.Angle);
 
             SetupTriggerPosition(config);
+            UpdateStatusIcon();
+        }
+
+        public SegmentConfig GetConfig() => _currentConfig;
+
+        public void SetConfig(SegmentConfig config)
+        {
+            _currentConfig = config;
+            _currentRadius = config.Radius;
             UpdateStatusIcon();
         }
 
@@ -61,6 +74,7 @@ private Vector3[] _unitArcPositions;
         }
 
         public void SetWidth(float width) {
+            _currentWidth = width;
             EnsureLineRenderer();
             _cachedLineRenderer.startWidth = width;
             _cachedLineRenderer.endWidth = width;
@@ -74,9 +88,12 @@ private Vector3[] _unitArcPositions;
             UpdateStatusIcon();
         }
 
+        public void HideStatusIcon() {
+            _statusIcon.gameObject.SetActive(false);
+        }
+
         public SegmentStatus GetStatus() {
             if (_currentConfig == null) return SegmentStatus.Default;
-
             return _currentConfig.SegmentStatus;
         }
 
@@ -85,13 +102,11 @@ private Vector3[] _unitArcPositions;
             if (_statusIcon == null || _visualDataProvider == null) return;
             
             EnsureLineRenderer();
-            float width = _cachedLineRenderer.startWidth;
-            float radius = _currentConfig != null ? _currentConfig.Radius : 0;
             
             bool shouldBeVisible = _currentConfig != null && 
                                    _currentConfig.SegmentStatus != SegmentStatus.Default && 
                                    _cachedLineRenderer.enabled && 
-                                   width > 0.01f;
+                                   _currentWidth > 0.001f;
 
             if (!shouldBeVisible)
             {
@@ -110,13 +125,13 @@ private Vector3[] _unitArcPositions;
             _statusIcon.sprite = visualData.StatusIcon;
             
             // Position at the middle of the arc
-            _statusIcon.transform.localPosition = new Vector3(radius, 0, 0);
+            _statusIcon.transform.localPosition = new Vector3(_currentRadius, 0, 0);
             
             // Rotation: bottom to center
             _statusIcon.transform.localRotation = Quaternion.Euler(0, 0, -90f);
             
             // Scale: width * WightCoeffiecient
-            float targetSize = width * visualData.WightCoeffiecient;
+            float targetSize = _currentWidth * visualData.WightCoeffiecient;
             if (_statusIcon.sprite != null)
             {
                 float spriteSize = _statusIcon.sprite.bounds.size.x;
@@ -139,10 +154,11 @@ private Vector3[] _unitArcPositions;
         }
 
         public void SetRadius(float radius) {
-            if (_currentConfig == null) return;
-            _currentConfig.Radius = radius;
-            DrawArc(radius, _currentConfig.Angle);
-            SetupTriggerPosition(_currentConfig);
+            _currentRadius = radius;
+            if (_currentConfig != null) _currentConfig.Radius = radius;
+            
+            DrawArc(radius, _currentConfig != null ? _currentConfig.Angle : 360f / 4f);
+            if (_currentConfig != null) SetupTriggerPosition(_currentConfig);
             UpdateStatusIcon();
         }
 
@@ -151,7 +167,6 @@ private Vector3[] _unitArcPositions;
             _cachedLineRenderer.enabled = visible;
             if (_trigger != null) _trigger.SetActive(visible);
             _statusIcon.gameObject.SetActive(visible);
-            //UpdateStatusIcon();
         }
 
         public void SetSortingOrder(int order) {

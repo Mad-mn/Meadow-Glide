@@ -9,12 +9,10 @@ namespace Feature.StatusModule.Scripts.Segments {
     public class SegmentStatusService : ISegmentStatusService, IInitializable {
         private readonly GameCircleModel _circleModel;
         private readonly SlideAreaModel _slideAreaModel;
-        private readonly ISlideAreaService _slideAreaService;
 
-        public SegmentStatusService(GameCircleModel circleModel, SlideAreaModel slideAreaModel, ISlideAreaService slideAreaService) {
+        public SegmentStatusService(GameCircleModel circleModel, SlideAreaModel slideAreaModel) {
             _circleModel = circleModel;
             _slideAreaModel = slideAreaModel;
-            _slideAreaService = slideAreaService;
         }
 
         public void Initialize() {
@@ -32,9 +30,8 @@ namespace Feature.StatusModule.Scripts.Segments {
                 foreach (CircleSegment segment in circle.SpawnedSegments) {
                     bool isInArea = _slideAreaModel.SegmentsInAreas.Contains(segment);
                     SegmentStatus currentStatus = segment.GetStatus();
-
                     if (isInArea) {
-                        if (currentStatus is SegmentStatus.Default or SegmentStatus.Horizontal) {
+if (currentStatus is SegmentStatus.Default or SegmentStatus.Horizontal) {
                             segment.SetStatus(SegmentStatus.Vertical);
                         }
                     }
