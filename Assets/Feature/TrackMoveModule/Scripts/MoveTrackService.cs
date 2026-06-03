@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Feature.CircleModule.Scripts;
+using Feature.LoseViewModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
+using Feature.UIServiceModule.Scripts;
 using UnityEngine;
 using Zenject;
 
@@ -10,14 +12,17 @@ namespace Feature.TrackMoveModule.Scripts {
         private readonly SlideAreaModel _slideAreaModel;
         private readonly GameCircleModel _gameCircleModel;
         private readonly MoveTrackModel _moveTrackModel;
+        private readonly IViewService _viewService;
 
         private Dictionary<CircleController, float> _circleRotations = new Dictionary<CircleController, float>();
         private Dictionary<CircleSegment, float> _cachedSegmentsRadius = new Dictionary<CircleSegment, float>();
 
-        public MoveTrackService(SlideAreaModel slideAreaModel, GameCircleModel gameCircleModel, MoveTrackModel moveTrackModel) {
+        public MoveTrackService(SlideAreaModel slideAreaModel, GameCircleModel gameCircleModel, MoveTrackModel moveTrackModel,
+            IViewService viewService) {
             _slideAreaModel = slideAreaModel;
             _gameCircleModel = gameCircleModel;
             _moveTrackModel = moveTrackModel;
+            _viewService = viewService;
         }
 
         public void Initialize() {
@@ -53,8 +58,8 @@ namespace Feature.TrackMoveModule.Scripts {
 
             float currentRotation = circle.transform.eulerAngles.z;
             if (Mathf.Abs(Mathf.DeltaAngle(currentRotation, startRotation)) > 0.1f) {
-                Debug.LogError("MoveSpend");
                 _moveTrackModel.Move();
+                CheckForLose();
             }
             
             _circleRotations.Remove(circle);
@@ -67,13 +72,19 @@ namespace Feature.TrackMoveModule.Scripts {
             foreach (KeyValuePair<CircleSegment, float> keyValuePair in _cachedSegmentsRadius) {
                 float updatedSegmentRadius = updated[keyValuePair.Key];
                 if (!Mathf.Approximately(updatedSegmentRadius, keyValuePair.Value)) {
-                    Debug.LogError("SpendStep");
                     _moveTrackModel.Move();
+                    CheckForLose();
                     break;
                 }
             }
             
             _cachedSegmentsRadius.Clear();
+        }
+
+        private void CheckForLose() {
+            if (_moveTrackModel.MovesLeft == 0) {
+                _viewService.ShowView<LoseView>(ViewType.LoseView);
+            }
         }
 
         private Dictionary<CircleSegment, float> GetSegmentsRadius() {

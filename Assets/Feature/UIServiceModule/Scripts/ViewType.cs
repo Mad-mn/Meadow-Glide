@@ -5,5 +5,6 @@ namespace Feature.UIServiceModule.Scripts {
         GameView = 3,
         LoadingView = 4,
         WinLevel = 5,
+        LoseView = 6,
 }
 }

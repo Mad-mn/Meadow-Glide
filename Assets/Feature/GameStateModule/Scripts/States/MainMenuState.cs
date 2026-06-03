@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Feature.LoadingViewModule.Scripts;
+using Feature.LoseViewModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
 using Feature.StateModule.Scripts.Base;
 using Feature.UIServiceModule.Scripts;
@@ -21,12 +22,14 @@ namespace Feature.GameStateModule.Scripts.States {
         public void Enter() {
             LoadMainMenuScene().Forget();
             _viewService.ReleasePrewarmedView(ViewType.WinLevel);
+            _viewService.ReleasePrewarmedView(ViewType.LoseView);
         }
 
         public void Exit() {
             _viewService.ShowView<LoadingView>(ViewType.LoadingView);
             _viewService.HideView(ViewType.MainMenu);
             _viewService.PrewarmView<WinLevel>(ViewType.WinLevel);
+            _viewService.PrewarmView<LoseView>(ViewType.LoseView);
         }
 
         private async UniTaskVoid LoadMainMenuScene() {

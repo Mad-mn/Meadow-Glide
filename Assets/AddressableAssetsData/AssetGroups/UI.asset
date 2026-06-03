@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: UI
   m_GUID: c2cc154410beb834c84b9e1d0c275557
   m_SerializeEntries:
+  - m_GUID: 187e70d9970957747a12d93765fd64ff
+    m_Address: LoseView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3688563366627f14397b6a4e1dfbe407
     m_Address: CircleSegmentPrefab
     m_ReadOnly: 0

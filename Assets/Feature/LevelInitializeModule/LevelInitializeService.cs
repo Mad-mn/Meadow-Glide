@@ -101,8 +101,9 @@ namespace Feature.LevelInitializeModule {
             await UniTask.CompletedTask;
         }
 
-        public async UniTask LoadNextLevel() {
+        public async UniTask ReloadScene() {
             _viewService.HideView(ViewType.WinLevel);
+            _viewService.HideView(ViewType.LoseView);
             await Dispose();
             await Initialize();
         }

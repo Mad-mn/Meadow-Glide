@@ -4,6 +4,6 @@ namespace Feature.LevelInitializeModule {
     public interface ILevelInitializeService {
         UniTask Initialize();
         UniTask Dispose();
-        UniTask LoadNextLevel();
+        UniTask ReloadScene();
     }
 }

@@ -11,12 +11,14 @@ namespace Feature.TrackMoveModule.Scripts {
         public int MovesLeft { get; private set; }
 
         public void CacheMovesForLevel(LevelData levelData) {
-            MaxMovesForCurrentLevel = levelData.LevelConfig.Difficulty;
+            MaxMovesForCurrentLevel = levelData.LevelConfig.MovesForLevel;
             MovesLeft = MaxMovesForCurrentLevel;
         }
 
         public void Move() {
             MovesLeft--;
+            if (MovesLeft < 0)
+                MovesLeft = 0;
             OnMove?.Invoke();
         }
     }

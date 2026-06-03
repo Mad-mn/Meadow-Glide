@@ -25,3 +25,6 @@ MonoBehaviour:
   - ViewType: 5
     Address: WinLevel
     PresenterTypeName: Feature.WinLevelModule.Scripts.WinLevelPresenter
+  - ViewType: 6
+    Address: LoseView
+    PresenterTypeName: Feature.LoseViewModule.Scripts.LosePresenter

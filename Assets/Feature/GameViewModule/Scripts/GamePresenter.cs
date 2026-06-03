@@ -37,7 +37,6 @@ namespace Feature.GameViewModule.Scripts {
         }
 
         private void UpdateMovesText() {
-            Debug.LogError(_moveTrackModel.MovesLeft);
             View.SetMoveCount(_moveTrackModel.MovesLeft.ToString());
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Feature.InputModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
+using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
 using Zenject;
 
@@ -15,6 +16,7 @@ namespace Feature.CircleModule.Scripts {
         private readonly IInputService _inputService;
         private readonly IInteractionStateService _interactionState;
         private readonly GameCircleModel _circleModel;
+        private readonly MoveTrackModel _moveTrackModel;
         private readonly List<CircleController> _circles = new List<CircleController>();
 
         private CircleController _activeCircle;
@@ -26,10 +28,11 @@ namespace Feature.CircleModule.Scripts {
         public bool IsInteracting => _activeCircle != null && _isDragging;
 
         public CircleRotationService(IInputService inputService, IInteractionStateService interactionState,
-            GameCircleModel circleModel) {
+            GameCircleModel circleModel, MoveTrackModel moveTrackModel) {
             _inputService = inputService;
             _interactionState = interactionState;
             _circleModel = circleModel;
+            _moveTrackModel = moveTrackModel;
         }
 
         public void Initialize() {
@@ -51,6 +54,8 @@ namespace Feature.CircleModule.Scripts {
         }
 
         private void OnPointerDown() {
+            if(_moveTrackModel.MovesLeft<=0)
+                return;
             if (_interactionState.IsSlideActive) {
                 return;
             }
@@ -87,9 +92,6 @@ namespace Feature.CircleModule.Scripts {
             if (_activeCircle != null) {
                 if (_isDragging) {
                     SnapCircle(_activeCircle).Forget();
-                }
-                else {
-                    _circleModel.CircleRotationStatusChanges(_activeCircle, false);
                 }
                 _activeCircle = null;
             }

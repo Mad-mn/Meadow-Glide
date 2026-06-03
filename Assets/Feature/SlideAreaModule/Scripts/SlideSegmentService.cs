@@ -6,6 +6,7 @@ using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.StatusModule.Scripts.SlideAreas;
+using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
 using Zenject;
 
@@ -18,6 +19,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
         private readonly GameCircleModel _circleModel;
         private readonly SlideAreaModel _slideAreaModel;
+        private readonly MoveTrackModel _moveTrackModel;
         private CircleParamsConfig _circleParamsConfig;
         private readonly List<CircleController> _circles = new List<CircleController>();
 
@@ -36,7 +38,7 @@ private readonly List<float> _baseIndices = new List<float>();
 
         public SlideSegmentService(IInputService inputService, ISlideAreaService slideAreaService, IInteractionStateService interactionState,
             ICameraService cameraService, UniTask<CircleParamsConfig> circleParamsConfigTask, GameCircleModel circleModel,
-            SlideAreaModel slideAreaModel) {
+            SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel) {
             _inputService = inputService;
             _slideAreaService = slideAreaService;
             _interactionState = interactionState;
@@ -44,6 +46,7 @@ private readonly List<float> _baseIndices = new List<float>();
             _circleParamsConfigTask = circleParamsConfigTask;
             _circleModel = circleModel;
             _slideAreaModel = slideAreaModel;
+            _moveTrackModel = moveTrackModel;
         }
 
         public async void Initialize() {
@@ -80,6 +83,8 @@ private readonly List<float> _baseIndices = new List<float>();
         }
 
         private void OnPointerDown() {
+            if(_moveTrackModel.MovesLeft<=0)
+                return;
             if (_interactionState.IsRotationActive) {
                 return;
             }
