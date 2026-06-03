@@ -1,0 +1,28 @@
+{
+    "asset": "f31cc82738b533e4b94c0c670d1a87b2",
+    "fileName": "019e8df4-ae0b-792f-ad00-cd1e80dfdc93.png",
+    "prompt": "A minimal, stylized UI icon representing player steps or moves. Simple footprints silhouette. Clean lines, flat design, modern aesthetic. Soft pastel colors matching a neutral game UI. High resolution.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}
