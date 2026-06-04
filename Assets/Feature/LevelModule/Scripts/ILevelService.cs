@@ -6,5 +6,6 @@ namespace Feature.LevelModule.Scripts {
         LevelData GetLevelDataForCurrentLevel();
 
         void LevelStarted();
+        void LevelEnded();
     }
 }

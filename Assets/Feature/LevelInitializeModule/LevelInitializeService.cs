@@ -93,6 +93,7 @@ namespace Feature.LevelInitializeModule {
             _circleControllerService.Reset();
             _circleModel.Clear();
             _tutorialService.Deinitialize();
+            _levelService.LevelEnded();
             foreach (var circle in _spawnedCircles) {
                 if (circle != null) {
                     Object.Destroy(circle.gameObject);

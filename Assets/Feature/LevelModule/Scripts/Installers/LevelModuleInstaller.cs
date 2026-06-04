@@ -5,6 +5,9 @@ namespace Feature.LevelModule.Scripts.Installers {
         public override void InstallBindings() {
             Container.BindInterfacesAndSelfTo<LevelService>()
                 .AsSingle();
+
+            Container.Bind<LevelModel>()
+                .AsSingle();
         }
     }
 }

@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
+using Feature.LevelModule.Scripts;
 using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly GameCircleModel _circleModel;
         private readonly SlideAreaModel _slideAreaModel;
         private readonly MoveTrackModel _moveTrackModel;
+        private readonly LevelModel _levelModel;
         private CircleParamsConfig _circleParamsConfig;
         private readonly List<CircleController> _circles = new List<CircleController>();
 
@@ -29,16 +31,16 @@ namespace Feature.SlideAreaModule.Scripts {
         private Vector3 _slideDirection;
         private bool _isBlockedByStatus;
         private readonly List<CircleSegment> _activeSegments = new List<CircleSegment>();
-private readonly List<float> _baseIndices = new List<float>();
+        private readonly List<float> _baseIndices = new List<float>();
         private readonly List<CircleSegment> _ghosts = new List<CircleSegment>();
         private List<CircleController> _sortedCircles = new List<CircleController>();
 
         public bool IsSliding =>
             _activeArea != null;
 
-        public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState,
-            ICameraService cameraService, UniTask<CircleParamsConfig> circleParamsConfigTask, GameCircleModel circleModel,
-            SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel) {
+        public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState, ICameraService cameraService,
+            UniTask<CircleParamsConfig> circleParamsConfigTask, GameCircleModel circleModel, SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel,
+            LevelModel levelModel) {
             _inputService = inputService;
             _interactionState = interactionState;
             _cameraService = cameraService;
@@ -46,15 +48,27 @@ private readonly List<float> _baseIndices = new List<float>();
             _circleModel = circleModel;
             _slideAreaModel = slideAreaModel;
             _moveTrackModel = moveTrackModel;
+            _levelModel = levelModel;
         }
 
         public async void Initialize() {
-            _inputService.PointerDown += OnPointerDown;
-            _inputService.PointerUp += OnPointerUp;
+            _levelModel.OnLevelStart += OnLevelStart;
+            _levelModel.OnLevelEnd += OnLevelEnd;
             _circleParamsConfig = await _circleParamsConfigTask;
         }
 
+        private void OnLevelStart() {
+            _inputService.PointerDown += OnPointerDown;
+            _inputService.PointerUp += OnPointerUp;
+        }
+
         public void Dispose() {
+            _levelModel.OnLevelStart -= OnLevelStart;
+            _levelModel.OnLevelEnd -= OnLevelEnd;
+            OnLevelEnd();
+        }
+
+        private void OnLevelEnd() {
             _inputService.PointerDown -= OnPointerDown;
             _inputService.PointerUp -= OnPointerUp;
             ClearGhosts();
@@ -65,9 +79,11 @@ private readonly List<float> _baseIndices = new List<float>();
             _sortedCircles = _circles.OrderBy(c => c.Radius)
                 .ToList();
         }
-        
+
         public void UpdateSegmentsInAreas() {
-            List<CircleController> sortedCircles = _circleModel.Circles.OrderBy(c => c.Radius).ToList();
+            List<CircleController> sortedCircles = _circleModel.Circles.OrderBy(c => c.Radius)
+                .ToList();
+
             HashSet<CircleSegment> segmentsInAreas = new HashSet<CircleSegment>();
             IReadOnlyList<SlideArea> spawnedAreas = _slideAreaModel.SpawnedAreas;
 
@@ -110,8 +126,9 @@ private readonly List<float> _baseIndices = new List<float>();
         }
 
         private void OnPointerDown() {
-            if(_moveTrackModel.MovesLeft<=0)
+            if (_moveTrackModel.MovesLeft <= 0)
                 return;
+
             if (_interactionState.IsRotationActive) {
                 return;
             }
@@ -185,17 +202,20 @@ private readonly List<float> _baseIndices = new List<float>();
 
                     var ghost = UnityEngine.Object.Instantiate(segment, segment.transform.parent);
                     ghost.gameObject.name = segment.gameObject.name + "_Ghost";
-                    
+
                     // CRITICAL: Clone the config so ghosts don't share state with originals
-                    var configClone = segment.GetConfig().Clone();
+                    var configClone = segment.GetConfig()
+                        .Clone();
+
                     ghost.SetConfig(configClone);
-                    
+
                     ghost.SetVisible(false);
                     ghost.SetSortingOrder(segment.GetSortingOrder() - 1);
                     ghost.HideStatusIcon();
                     _ghosts.Add(ghost);
                 }
             }
+
             _slideAreaModel.SetupActiveSegments(_activeSegments);
         }
 
@@ -214,7 +234,7 @@ private readonly List<float> _baseIndices = new List<float>();
             worldPos.z = 0;
 
             float currentRadius = Vector3.Dot(worldPos, _slideDirection);
-            
+
             if (_isBlockedByStatus) {
                 // If the user tries to move significantly, trigger the shake
                 if (Mathf.Abs(currentRadius - _startRadius) > 0.05f) {
@@ -228,6 +248,7 @@ private readonly List<float> _baseIndices = new List<float>();
                         _activeArea.TriggerBlockedAnimation();
                     }
                 }
+
                 return;
             }
 
@@ -261,10 +282,10 @@ private readonly List<float> _baseIndices = new List<float>();
                 var segment = _activeSegments[i];
                 float finalCircleIdx = startIdx + wrappedSubsetIdx;
                 float r = Mathf.Max(0, _circleParamsConfig.GetRadius(finalCircleIdx));
-                
+
                 float baseWidth = _circleParamsConfig.GetWidth(finalCircleIdx);
                 float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
-                
+
                 segment.SetWidth(baseWidth * fade);
                 segment.SetRadius(r);
                 segment.SetVisible(fade > 0.01f);
@@ -391,9 +412,14 @@ private readonly List<float> _baseIndices = new List<float>();
             for (int i = 0; i < count; i++) {
                 if (_activeSegments[i] != null) {
                     float finalIdx = startIdx + i;
-                    _activeSegments[i].SetWidth(_circleParamsConfig.GetWidth(finalIdx));
-                    _activeSegments[i].SetRadius(_circleParamsConfig.GetRadius(finalIdx));
-                    _activeSegments[i].SetVisible(true);
+                    _activeSegments[i]
+                        .SetWidth(_circleParamsConfig.GetWidth(finalIdx));
+
+                    _activeSegments[i]
+                        .SetRadius(_circleParamsConfig.GetRadius(finalIdx));
+
+                    _activeSegments[i]
+                        .SetVisible(true);
                 }
             }
 
