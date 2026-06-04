@@ -14,6 +14,7 @@ namespace Feature.CircleModule.Scripts
         [SerializeField] private SpriteRenderer _statusIcon;
         [SerializeField] private SegmentStatusAnimator _statusAnimator;
         [SerializeField] private float _weightCoefficient = 0.5f;
+        [SerializeField] private float _zoomScaleMultiplier = 2;
 
         private const int SegmentsPerArc = 40;
         private SegmentConfig _currentConfig;
@@ -24,6 +25,7 @@ namespace Feature.CircleModule.Scripts
         private LineRenderer _cachedLineRenderer;
         private Vector3[] _unitArcPositions;
         private float _lastPrecalculatedAngle = -1f;
+        private bool _zoomed;
 
         public float Radius => _currentConfig != null ? _currentConfig.Radius : 0;
         public CircleColorType ColorType => _currentConfig != null ? _currentConfig.ColorType : CircleColorType.None;
@@ -97,6 +99,49 @@ namespace Feature.CircleModule.Scripts
             return _currentConfig.SegmentStatus;
         }
 
+        public void SetVisible(bool visible) {
+            EnsureLineRenderer();
+            _cachedLineRenderer.enabled = visible;
+            if (_trigger != null) _trigger.SetActive(visible);
+            _statusIcon.gameObject.SetActive(visible);
+        }
+
+        public int GetSortingOrder() {
+            EnsureLineRenderer();
+            return _cachedLineRenderer.sortingOrder;
+        }
+
+        public void SetSortingOrder(int order) {
+            EnsureLineRenderer();
+            _cachedLineRenderer.sortingOrder = order;
+        }
+
+        public void SetRadius(float radius) {
+            _currentRadius = radius;
+            if (_currentConfig != null) _currentConfig.Radius = radius;
+            
+            DrawArc(radius, _currentConfig != null ? _currentConfig.Angle : 360f / 4f);
+            if (_currentConfig != null) SetupTriggerPosition(_currentConfig);
+            UpdateStatusIcon();
+        }
+
+        public void ZoomIn() {
+            if (_zoomed)
+                return;
+
+            Debug.LogError(3);
+            SetWidth(_currentWidth * _zoomScaleMultiplier);
+            _zoomed = true;
+        }
+
+        public void ZoomOut() {
+            if (!_zoomed)
+                return;
+            
+            SetWidth(_currentWidth / _zoomScaleMultiplier);
+            _zoomed = false;
+        }
+
         private void UpdateStatusIcon()
         {
             if (_statusIcon == null || _visualDataProvider == null) return;
@@ -151,32 +196,6 @@ namespace Feature.CircleModule.Scripts
             if (_cachedLineRenderer == null) {
                 _cachedLineRenderer = _lineRenderer != null ? _lineRenderer : GetComponent<LineRenderer>();
             }
-        }
-
-        public void SetRadius(float radius) {
-            _currentRadius = radius;
-            if (_currentConfig != null) _currentConfig.Radius = radius;
-            
-            DrawArc(radius, _currentConfig != null ? _currentConfig.Angle : 360f / 4f);
-            if (_currentConfig != null) SetupTriggerPosition(_currentConfig);
-            UpdateStatusIcon();
-        }
-
-        public void SetVisible(bool visible) {
-            EnsureLineRenderer();
-            _cachedLineRenderer.enabled = visible;
-            if (_trigger != null) _trigger.SetActive(visible);
-            _statusIcon.gameObject.SetActive(visible);
-        }
-
-        public void SetSortingOrder(int order) {
-            EnsureLineRenderer();
-            _cachedLineRenderer.sortingOrder = order;
-        }
-
-        public int GetSortingOrder() {
-            EnsureLineRenderer();
-            return _cachedLineRenderer.sortingOrder;
         }
 
         private void SetupTriggerPosition(SegmentConfig config) {
