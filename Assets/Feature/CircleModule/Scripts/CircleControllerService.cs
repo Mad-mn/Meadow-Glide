@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Feature.ColorServiceModule.Scripts;
+using Feature.LoseViewModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.TrackMoveModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
 using UnityEngine;
@@ -14,23 +16,25 @@ namespace Feature.CircleModule.Scripts {
         private readonly IViewService _viewService;
         private readonly ISaveDataModel _saveDataModel;
         private readonly ISaveDataService _saveDataService;
+        private readonly MoveTrackModel _moveTrackModel;
 
         private List<CircleController> _filledCircles = new List<CircleController>();
 
         public CircleControllerService(GameCircleModel circleModel, IViewService viewService,
-            ISaveDataModel saveDataModel, ISaveDataService saveDataService) {
+            ISaveDataModel saveDataModel, ISaveDataService saveDataService, MoveTrackModel moveTrackModel) {
             _circleModel = circleModel;
             _viewService = viewService;
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
+            _moveTrackModel = moveTrackModel;
         }
 
         public void Initialize() {
-            _circleModel.OnSegmentsChanged += OnCircleSegmentChanged;
+            _moveTrackModel.OnMovesChanged += OnCircleSegmentChanged;
         }
 
         public void Dispose() {
-            _circleModel.OnSegmentsChanged -= OnCircleSegmentChanged;
+            _moveTrackModel.OnMovesChanged -= OnCircleSegmentChanged;
         }
 
         public void Reset() {
@@ -43,12 +47,21 @@ namespace Feature.CircleModule.Scripts {
 
         private void CheckCheckForMatchColors() {
             UpdateCirclesStates();
-            CheckForWin();
+            if(!CheckForWin())
+                CheckForLose();
         }
 
-        private void CheckForWin() {
-            if (_filledCircles.Count == _circleModel.Circles.Count && _circleModel.Circles.Count > 0) {
-                ApplyWin();
+        private bool CheckForWin() {
+            if (_filledCircles.Count != _circleModel.Circles.Count || _circleModel.Circles.Count <= 0)
+                return false;
+
+            ApplyWin();
+            return true;
+        }
+        
+        private void CheckForLose() {
+            if (_moveTrackModel.MovesLeft == 0) {
+                _viewService.ShowView<LoseView>(ViewType.LoseView);
             }
         }
 

@@ -62,6 +62,7 @@ MonoBehaviour:
   _destroyOnClose: 0
   <RestartButton>k__BackingField: {fileID: 5474993395651797970}
   <MainMenuButton>k__BackingField: {fileID: 270253613645902856}
+  <AddMovesButton>k__BackingField: {fileID: 4658945778932252151}
 --- !u!1 &5233519578708644687
 GameObject:
   m_ObjectHideFlags: 0

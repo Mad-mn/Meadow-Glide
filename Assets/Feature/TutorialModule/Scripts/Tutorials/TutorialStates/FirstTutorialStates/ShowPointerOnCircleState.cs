@@ -52,11 +52,11 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private void HandlePointerDown() {
             _isTapped = true;
             _fingerHint.Disable();
-            _moveTrackModel.OnMove += WaiteForMove;
+            _moveTrackModel.OnMovesChanged += WaiteForMovesChanged;
         }
 
-        private void WaiteForMove() {
-            _moveTrackModel.OnMove -= WaiteForMove;
+        private void WaiteForMovesChanged() {
+            _moveTrackModel.OnMovesChanged -= WaiteForMovesChanged;
             OnComplete?.Invoke();
         }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Feature.TrackMoveModule.Scripts {
     public class MoveTrackModel {
-        public event Action OnMove;
+        public event Action OnMovesChanged;
 
         public int MaxMovesForCurrentLevel { get; private set; }
 
@@ -19,7 +19,12 @@ namespace Feature.TrackMoveModule.Scripts {
             MovesLeft--;
             if (MovesLeft < 0)
                 MovesLeft = 0;
-            OnMove?.Invoke();
+            OnMovesChanged?.Invoke();
+        }
+
+        public void AddMoves(int addedMoves) {
+            MovesLeft += addedMoves;
+            OnMovesChanged?.Invoke();
         }
     }
 }

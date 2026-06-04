@@ -59,7 +59,6 @@ namespace Feature.TrackMoveModule.Scripts {
             float currentRotation = circle.transform.eulerAngles.z;
             if (Mathf.Abs(Mathf.DeltaAngle(currentRotation, startRotation)) > 0.1f) {
                 _moveTrackModel.Move();
-                CheckForLose();
             }
             
             _circleRotations.Remove(circle);
@@ -73,18 +72,11 @@ namespace Feature.TrackMoveModule.Scripts {
                 float updatedSegmentRadius = updated[keyValuePair.Key];
                 if (!Mathf.Approximately(updatedSegmentRadius, keyValuePair.Value)) {
                     _moveTrackModel.Move();
-                    CheckForLose();
                     break;
                 }
             }
             
             _cachedSegmentsRadius.Clear();
-        }
-
-        private void CheckForLose() {
-            if (_moveTrackModel.MovesLeft == 0) {
-                _viewService.ShowView<LoseView>(ViewType.LoseView);
-            }
         }
 
         private Dictionary<CircleSegment, float> GetSegmentsRadius() {
@@ -94,6 +86,10 @@ namespace Feature.TrackMoveModule.Scripts {
             }
 
             return current;
+        }
+
+        public void AddMoves(int addedMoves) {
+            _moveTrackModel.AddMoves(addedMoves);
         }
     }
 }

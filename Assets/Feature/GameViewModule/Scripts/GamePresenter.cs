@@ -24,7 +24,7 @@ namespace Feature.GameViewModule.Scripts {
 
         public override void Initialize() {
             View.MainMenuButton.onClick.AddListener(ShowConfirmExitToMainMenu);
-            _moveTrackModel.OnMove += UpdateMovesText;
+            _moveTrackModel.OnMovesChanged += UpdateMovesChangedsText;
         }
 
         public override void Show() {
@@ -34,10 +34,10 @@ namespace Feature.GameViewModule.Scripts {
         private void SetupText() {
             string lvlText = $"Level {_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level}";
             View.SetLevelText(lvlText);
-            UpdateMovesText();
+            UpdateMovesChangedsText();
         }
 
-        private void UpdateMovesText() {
+        private void UpdateMovesChangedsText() {
             View.SetMoveCount(_moveTrackModel.MovesLeft.ToString());
         }
 
