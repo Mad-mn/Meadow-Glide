@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5847894201820573498}
   - component: {fileID: 1130617826621928679}
   - component: {fileID: 8234104268376401055}
+  - component: {fileID: 4465946366806152376}
   m_Layer: 0
   m_Name: GameView
   m_TagString: Untagged
@@ -64,6 +65,18 @@ MonoBehaviour:
   _mainMenuButton: {fileID: 4053183636084007373}
   _levelTxt: {fileID: 5041213063631350665}
   _moveCountTxt: {fileID: 7197212453172038029}
+--- !u!114 &4465946366806152376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423806369584540399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9062c0999926d64ba80f4dbd41e6fcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SafeAreaFitter
 --- !u!1 &3451164248928619777
 GameObject:
   m_ObjectHideFlags: 0
