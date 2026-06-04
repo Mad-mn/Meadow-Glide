@@ -18,11 +18,11 @@ MonoBehaviour:
     Radius: 0
     Angle: 90
     SegmentStatus: 0
-  - ColorType: 2
+  - ColorType: 3
     Radius: 0
     Angle: 90
     SegmentStatus: 0
-  - ColorType: 3
+  - ColorType: 2
     Radius: 0
     Angle: 90
     SegmentStatus: 0

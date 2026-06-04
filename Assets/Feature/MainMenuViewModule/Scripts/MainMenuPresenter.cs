@@ -17,6 +17,10 @@ namespace Feature.MainMenuViewModule.Scripts {
 
         public override void Initialize() {
             View.PlayButton.onClick.AddListener(StartSimpleGame);
+        }
+
+        public override void Show() {
+            base.Show();
             SetupText();
         }
 
