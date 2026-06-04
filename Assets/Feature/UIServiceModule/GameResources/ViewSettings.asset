@@ -28,3 +28,6 @@ MonoBehaviour:
   - ViewType: 6
     Address: LoseView
     PresenterTypeName: Feature.LoseViewModule.Scripts.LosePresenter
+  - ViewType: 7
+    Address: ConfirmExitToMainMenuView
+    PresenterTypeName: Feature.ConfirmExitToMainMenuViewModule.Scripts.ConfirmExitToMainMenuPresenter

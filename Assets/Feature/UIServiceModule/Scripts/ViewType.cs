@@ -6,5 +6,6 @@ namespace Feature.UIServiceModule.Scripts {
         LoadingView = 4,
         WinLevel = 5,
         LoseView = 6,
+        ConfirmExitToMainMenuView = 7,
 }
 }

@@ -35,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50b316f212073f241947b2aa50a72d93
+    m_Address: ConfirmExitToMainMenuView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 79cff393eca8e364aaad30cf4bc42aac
     m_Address: WinLevel
     m_ReadOnly: 0

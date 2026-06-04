@@ -1,3 +1,4 @@
+using Feature.ConfirmExitToMainMenuViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.SaveDataModule.Scripts;
@@ -41,7 +42,7 @@ namespace Feature.GameViewModule.Scripts {
         }
 
         private void ShowConfirmExitToMainMenu() {
-            _gameStateMachine.EnterState(typeof(MainMenuState));
+            _viewService.ShowView<ConfirmExitToMainMenuView>(ViewType.ConfirmExitToMainMenuView);
         }
     }
 }
