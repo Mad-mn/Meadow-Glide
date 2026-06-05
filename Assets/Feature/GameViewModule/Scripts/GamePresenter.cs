@@ -1,25 +1,24 @@
 using Feature.ConfirmExitToMainMenuViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
-using Feature.GameStateModule.Scripts.States;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.SoundModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using Feature.UIServiceModule.Scripts;
-using UnityEngine;
 
 namespace Feature.GameViewModule.Scripts {
     public class GamePresenter : PresenterBase<GameView> {
         private readonly IViewService _viewService;
-        private readonly IGameStateMachine _gameStateMachine;
         private readonly SaveDataModel _saveDataModel;
         private readonly MoveTrackModel _moveTrackModel;
+        private readonly IAudioService _audioService;
 
-        public GamePresenter(GameView view, IViewService viewService, IGameStateMachine gameStateMachine,
-            SaveDataModel saveDataModel, MoveTrackModel moveTrackModel) : base(view) {
+        public GamePresenter(GameView view, IViewService viewService, SaveDataModel saveDataModel,
+            MoveTrackModel moveTrackModel, IAudioService audioService) : base(view) {
             _viewService = viewService;
-            _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _moveTrackModel = moveTrackModel;
+            _audioService = audioService;
         }
 
         public override void Initialize() {
@@ -42,6 +41,7 @@ namespace Feature.GameViewModule.Scripts {
         }
 
         private void ShowConfirmExitToMainMenu() {
+            _audioService.PlaySound(AudioType.ButtonClick);
             _viewService.ShowView<ConfirmExitToMainMenuView>(ViewType.ConfirmExitToMainMenuView);
         }
     }

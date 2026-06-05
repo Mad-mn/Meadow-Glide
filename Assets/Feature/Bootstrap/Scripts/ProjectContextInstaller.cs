@@ -10,6 +10,7 @@ using Feature.LevelModule.Scripts.Installers;
 using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.SlideAreaModule.Scripts.Installers;
+using Feature.SoundModule.Scripts.Installers;
 using Feature.StatusModule.Scripts.Installers;
 using Feature.TrackMoveModule.Scripts.Installers;
 using Feature.TutorialModule.Scripts.Installers;
@@ -25,6 +26,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         AddressableModuleInstaller.Install(Container);
         AssetBindingModuleInstaller.Install(Container);
         CameraServiceModuleInstaller.Install(Container);
+        AudioModuleInstaller.Install(Container);
         TutorialModuleInstaller.Install(Container);
         TrackMoveServiceInstaller.Install(Container);
         GameStateModuleInstaller.Install(Container);

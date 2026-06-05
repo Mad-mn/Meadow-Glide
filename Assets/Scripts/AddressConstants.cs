@@ -1,14 +1,19 @@
 // This file is auto-generated. Do not modify manually.
 public static class AddressConstants
 {
+    public const string AudioConfig = "AudioConfig";
     public const string Camera = "Camera";
     public const string CircleColorProvider = "CircleColorProvider";
     public const string CircleParamsConfig = "CircleParamsConfig";
     public const string CircleSegmentPrefab = "CircleSegmentPrefab";
+    public const string ConfirmExitToMainMenuView = "ConfirmExitToMainMenuView";
+    public const string DebugView = "DebugView";
+    public const string FingerHint = "FingerHint";
     public const string GameView = "GameView";
     public const string GircleModule = "GircleModule";
     public const string LevelConfigProvider = "LevelConfigProvider";
     public const string LoadingView = "LoadingView";
+    public const string LoseView = "LoseView";
     public const string MainMenuView = "MainMenuView";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_GeometryPool_GeometryPoolKernels_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/GeometryPool/GeometryPoolKernels.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_Utilities_CopyBuffer_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/Utilities/CopyBuffer.compute";

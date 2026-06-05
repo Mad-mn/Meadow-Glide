@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 953b7f4c3a4c4e60bc215dd1790044a9, type: 3}
+  m_Name: AudioConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.SoundModule.Scripts.AudioConfig
+  _audioData:
+  - AudioType: 1
+    AudioClip: {fileID: 0}
+  - AudioType: 2
+    AudioClip: {fileID: 8300000, guid: 8f38cf9715dc8ef46888ce594fe60a27, type: 3}
+  - AudioType: 3
+    AudioClip: {fileID: 8300000, guid: f1dbfbe9911b1eb4bb6732255398ef22, type: 3}
+  - AudioType: 4
+    AudioClip: {fileID: 8300000, guid: 1127bf195a8e3b3448dacbbdd18cedf9, type: 3}
+  <AudioSource>k__BackingField: {fileID: 264942075100458240, guid: ed8de50505d67164f8a05c40a676e208, type: 3}
+  <MusicSource>k__BackingField: {fileID: 1256827963319172688, guid: 6f23d37247668e447b78cdd4555e4803, type: 3}

@@ -3,20 +3,24 @@ using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.SoundModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
+using AudioType = Feature.SoundModule.Scripts.AudioType;
 
 namespace Feature.MainMenuViewModule.Scripts {
     public class MainMenuPresenter : PresenterBase<MainMenuView> {
         private readonly IGameStateMachine _gameStateMachine;
         private readonly SaveDataModel _saveDataModel;
         private readonly IViewService _viewService;
+        private readonly IAudioService _audioService;
 
         public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel,
-            IViewService viewService) : base(view) {
+            IViewService viewService, IAudioService audioService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _viewService = viewService;
+            _audioService = audioService;
         }
 
         public override void Initialize() {
@@ -38,6 +42,7 @@ namespace Feature.MainMenuViewModule.Scripts {
         }
 
         private void StartSimpleGame() {
+            _audioService.PlaySound(AudioType.ButtonClick);
             _gameStateMachine.EnterState(typeof(GameSimpleState));
         }
     }

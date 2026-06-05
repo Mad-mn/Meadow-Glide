@@ -6,6 +6,7 @@ using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
 using Feature.SaveDataModule.Scripts;
+using Feature.SoundModule.Scripts;
 using Feature.StateModule.Scripts.Base;
 using Feature.StatusModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
@@ -21,17 +22,21 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly ISegmentStatusVisualDataProvider _segmentsVisualDataProvider;
         private readonly ISlideAreaDataProvider _slideAreaDataProvider;
         private readonly ILevelService _levelService;
+        private readonly IAudioDataProvider _audioDataProvider;
+        private readonly IAudioService _audioService;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
             ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
-            ILevelService levelService) {
+            ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
             _segmentsVisualDataProvider = segmentsVisualDataProvider;
             _slideAreaDataProvider = slideAreaDataProvider;
             _levelService = levelService;
+            _audioDataProvider = audioDataProvider;
+            _audioService = audioService;
         }
 
         public void Enter() {
@@ -45,9 +50,9 @@ namespace Feature.GameStateModule.Scripts.States {
             _saveDataService.LoadAll();
             await _cameraService.Initialize();
             await _viewService.Initialize();
-
             _viewService.ShowView<LoadingView>(ViewType.LoadingView);
             await InitializeDataProviders();
+            _audioService.Initialize();
             await _levelService.Initialize();
             await _viewService.PrewarmView<MainMenuView>(ViewType.MainMenu);
             await _viewService.PrewarmView<GameView>(ViewType.GameView);
@@ -57,6 +62,7 @@ namespace Feature.GameStateModule.Scripts.States {
         private async UniTask InitializeDataProviders() {
             await _segmentsVisualDataProvider.Initialize();
             await _slideAreaDataProvider.Initialize();
+            await _audioDataProvider.Initialize();
         }
     }
 }

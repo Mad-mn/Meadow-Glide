@@ -5,10 +5,12 @@ using Cysharp.Threading.Tasks;
 using Feature.CameraServiceModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
+using Feature.SoundModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
 using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
 using Zenject;
+using AudioType = Feature.SoundModule.Scripts.AudioType;
 
 namespace Feature.CircleModule.Scripts {
     public class CircleRotationService : ICircleRotationService, ITickable, IInitializable, IDisposable {
@@ -21,6 +23,7 @@ namespace Feature.CircleModule.Scripts {
         private readonly MoveTrackModel _moveTrackModel;
         private readonly ISlideSegmentService _slideSegmentService;
         private readonly ICameraService _cameraService;
+        private readonly IAudioService _audioService;
 
         private readonly List<CircleController> _circles = new List<CircleController>();
 
@@ -34,13 +37,14 @@ namespace Feature.CircleModule.Scripts {
 
         public CircleRotationService(IInputService inputService, IInteractionStateService interactionState,
             GameCircleModel circleModel, MoveTrackModel moveTrackModel, ISlideSegmentService slideSegmentService,
-            ICameraService cameraService) {
+            ICameraService cameraService, IAudioService audioService) {
             _inputService = inputService;
             _interactionState = interactionState;
             _circleModel = circleModel;
             _moveTrackModel = moveTrackModel;
             _slideSegmentService = slideSegmentService;
             _cameraService = cameraService;
+            _audioService = audioService;
         }
 
         public void Initialize() {
@@ -151,6 +155,7 @@ namespace Feature.CircleModule.Scripts {
         }
 
         private void ChangeCircleScaleOnRotation(bool isRotating) {
+            _audioService.PlaySound(isRotating ? AudioType.CircleStartInteraction : AudioType.CircleStopInteraction);
             foreach (CircleSegment segment in _activeCircle.SpawnedSegments) {
                 if(isRotating)
                     segment.ZoomIn();

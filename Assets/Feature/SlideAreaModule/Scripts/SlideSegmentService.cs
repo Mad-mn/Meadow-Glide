@@ -6,11 +6,13 @@ using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.SoundModule.Scripts;
 using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Zenject;
+using AudioType = Feature.SoundModule.Scripts.AudioType;
 
 namespace Feature.SlideAreaModule.Scripts {
     public class SlideSegmentService : ISlideSegmentService, ITickable, IInitializable, IDisposable {
@@ -22,6 +24,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly SlideAreaModel _slideAreaModel;
         private readonly MoveTrackModel _moveTrackModel;
         private readonly LevelModel _levelModel;
+        private readonly IAudioService _audioService;
         private CircleParamsConfig _circleParamsConfig;
         private readonly List<CircleController> _circles = new List<CircleController>();
 
@@ -40,7 +43,7 @@ namespace Feature.SlideAreaModule.Scripts {
 
         public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState, ICameraService cameraService,
             UniTask<CircleParamsConfig> circleParamsConfigTask, GameCircleModel circleModel, SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel,
-            LevelModel levelModel) {
+            LevelModel levelModel, IAudioService audioService) {
             _inputService = inputService;
             _interactionState = interactionState;
             _cameraService = cameraService;
@@ -49,6 +52,7 @@ namespace Feature.SlideAreaModule.Scripts {
             _slideAreaModel = slideAreaModel;
             _moveTrackModel = moveTrackModel;
             _levelModel = levelModel;
+            _audioService = audioService;
         }
 
         public async void Initialize() {
@@ -133,6 +137,10 @@ namespace Feature.SlideAreaModule.Scripts {
                 return;
             }
 
+            TrySlideSegments();
+        }
+
+        private void TrySlideSegments() {
             if (_mainCamera == null) {
                 _mainCamera = _cameraService.CameraObject;
             }
@@ -152,6 +160,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 _startRadius = Vector3.Dot(worldPos, _slideDirection);
                 PrepareSegments(_activeArea);
                 _slideAreaModel.ChangeSlideState(true);
+                _audioService.PlaySound(AudioType.CircleStartInteraction);
             }
         }
 
@@ -325,6 +334,7 @@ namespace Feature.SlideAreaModule.Scripts {
             if (_activeArea != null) {
                 SnapSegments(areaToSnap)
                     .Forget();
+                _audioService.PlaySound(AudioType.CircleStopInteraction);
 
                 _activeArea = null;
             }
