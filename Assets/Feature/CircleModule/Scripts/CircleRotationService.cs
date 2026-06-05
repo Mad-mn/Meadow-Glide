@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Feature.CameraServiceModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
@@ -19,6 +20,7 @@ namespace Feature.CircleModule.Scripts {
         private readonly GameCircleModel _circleModel;
         private readonly MoveTrackModel _moveTrackModel;
         private readonly ISlideSegmentService _slideSegmentService;
+        private readonly ICameraService _cameraService;
 
         private readonly List<CircleController> _circles = new List<CircleController>();
 
@@ -31,12 +33,14 @@ namespace Feature.CircleModule.Scripts {
         public bool IsInteracting => _activeCircle != null && _isDragging;
 
         public CircleRotationService(IInputService inputService, IInteractionStateService interactionState,
-            GameCircleModel circleModel, MoveTrackModel moveTrackModel, ISlideSegmentService slideSegmentService) {
+            GameCircleModel circleModel, MoveTrackModel moveTrackModel, ISlideSegmentService slideSegmentService,
+            ICameraService cameraService) {
             _inputService = inputService;
             _interactionState = interactionState;
             _circleModel = circleModel;
             _moveTrackModel = moveTrackModel;
             _slideSegmentService = slideSegmentService;
+            _cameraService = cameraService;
         }
 
         public void Initialize() {
@@ -64,13 +68,13 @@ namespace Feature.CircleModule.Scripts {
                 return;
             }
 
-            Vector2 screenPos = _inputService.PointerPosition;
-            var camera = Camera.main;
-            
-            if (camera == null) {
-                camera = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
-            }
+            TryStartRotation();
+        }
 
+        private void TryStartRotation() {
+            Vector2 screenPos = _inputService.PointerPosition;
+            var camera = _cameraService.CameraObject;
+            
             if (camera == null) {
                 return;
             }
@@ -89,6 +93,7 @@ namespace Feature.CircleModule.Scripts {
                 _initialCircleRotation = _activeCircle.transform.eulerAngles.z;
                 _isDragging = false;
                 _circleModel.CircleRotationStatusChanges(_activeCircle, true);
+                TryChangeScaleCircleWithDelay().Forget();
             }
         }
 
@@ -97,6 +102,7 @@ namespace Feature.CircleModule.Scripts {
                 if (_isDragging) {
                     SnapCircle(_activeCircle).Forget();
                 }
+                ChangeCircleScaleOnRotation(false);
                 _activeCircle = null;
             }
             _isDragging = false;
@@ -109,6 +115,10 @@ namespace Feature.CircleModule.Scripts {
                 return;
             }
 
+            RotateCircle();
+        }
+
+        private void RotateCircle() {
             Vector2 screenPos = _inputService.PointerPosition;
             var camera = Camera.main ?? GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None).FirstOrDefault();
             if (camera == null) return;
@@ -124,11 +134,30 @@ namespace Feature.CircleModule.Scripts {
                     _isDragging = true;
                     _interactionState.IsRotationActive = true;
                 }
+
                 return;
             }
             
             float angleDelta = Mathf.DeltaAngle(_startAngle, currentAngle);
             _activeCircle.transform.rotation = Quaternion.Euler(0, 0, _initialCircleRotation + angleDelta);
+        }
+
+        private async UniTaskVoid TryChangeScaleCircleWithDelay() {
+            await UniTask.Yield();
+            if (_interactionState.IsSlideActive) {
+                return;
+            }
+            ChangeCircleScaleOnRotation(true);
+        }
+
+        private void ChangeCircleScaleOnRotation(bool isRotating) {
+            foreach (CircleSegment segment in _activeCircle.SpawnedSegments) {
+                if(isRotating)
+                    segment.ZoomIn();
+                else {
+                    segment.ZoomOut();
+                }
+            }
         }
 
         private async UniTaskVoid SnapCircle(CircleController circle) {

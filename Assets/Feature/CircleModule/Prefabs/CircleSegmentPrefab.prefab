@@ -331,11 +331,7 @@ MonoBehaviour:
   _statusIcon: {fileID: 5679628872982880035}
   _statusAnimator: {fileID: 6959634358699003826}
   _weightCoefficient: 0.5
-  _currentConfig:
-    ColorType: 0
-    Radius: 0
-    Angle: 0
-    SegmentStatus: 0
+  _zoomScaleMultiplier: 1.3
 --- !u!114 &6959634358699003826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -348,6 +344,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ec2a954969e5b8489e924e8e3bc46bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.StatusModule.Scripts.SegmentStatusAnimator
-  _target: {fileID: 0}
+  _target: {fileID: 8913364528657223711}
   _shakeDuration: 0.3
   _shakeAmount: 0.1

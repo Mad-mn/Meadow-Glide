@@ -129,7 +129,7 @@ namespace Feature.CircleModule.Scripts
             if (_zoomed)
                 return;
 
-            Debug.LogError(3);
+            _lineRenderer.sortingOrder *= 2;
             SetWidth(_currentWidth * _zoomScaleMultiplier);
             _zoomed = true;
         }
@@ -137,7 +137,8 @@ namespace Feature.CircleModule.Scripts
         public void ZoomOut() {
             if (!_zoomed)
                 return;
-            
+
+            _lineRenderer.sortingOrder /= 2;
             SetWidth(_currentWidth / _zoomScaleMultiplier);
             _zoomed = false;
         }
