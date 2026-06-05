@@ -1,0 +1,38 @@
+{
+    "asset": "06b5d284a478cdd42a118117e711cd22",
+    "fileName": "019e978e-900b-7abf-978c-343a6909ef19.png",
+    "prompt": "A game title logo for 'Color Rings'. The text 'Color Rings' should be in a playful, rounded, and friendly bold font similar to Baloo. The letters should be vibrant and multi-colored (using colors like red, yellow, blue, and green). Style: clean casual cartoon vector art. The logo should have a soft white outline and a gentle drop shadow to ensure perfect readability against a light blue sky background. The overall look should be friendly and not too sharp or harsh. Transparent background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": [
+            {
+                "doodleReferenceType": 7,
+                "doodle": [],
+                "label": "Image",
+                "strength": 0.25,
+                "invertStrength": false,
+                "assetReferenceGuid": "a166eaa883667674687342593ebda99f",
+                "unlabeledIndex": -1
+            }
+        ]
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}
