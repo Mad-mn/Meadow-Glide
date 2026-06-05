@@ -1,3 +1,4 @@
+using Feature.DebugViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.SaveDataModule.Scripts;
@@ -9,14 +10,22 @@ namespace Feature.MainMenuViewModule.Scripts {
     public class MainMenuPresenter : PresenterBase<MainMenuView> {
         private readonly IGameStateMachine _gameStateMachine;
         private readonly SaveDataModel _saveDataModel;
+        private readonly IViewService _viewService;
 
-        public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel) : base(view) {
+        public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel,
+            IViewService viewService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
+            _viewService = viewService;
         }
 
         public override void Initialize() {
             View.PlayButton.onClick.AddListener(StartSimpleGame);
+            View.DebugButton.onClick.AddListener(ShowDebugWindow);
+        }
+
+        private void ShowDebugWindow() {
+            _viewService.ShowView<DebugView>(ViewType.DebugView);
         }
 
         public override void Show() {

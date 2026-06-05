@@ -31,3 +31,6 @@ MonoBehaviour:
   - ViewType: 7
     Address: ConfirmExitToMainMenuView
     PresenterTypeName: Feature.ConfirmExitToMainMenuViewModule.Scripts.ConfirmExitToMainMenuPresenter
+  - ViewType: 8
+    Address: DebugView
+    PresenterTypeName: Feature.DebugViewModule.Scripts.DebugPresenter
