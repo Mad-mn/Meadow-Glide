@@ -7,6 +7,15 @@
       "dependencies": {},
       "hash": "e5acc106ee196bc5a32fb14cdf2987b0f96d11e0"
     },
+    "com.dreamertheory.haptics": {
+      "version": "https://github.com/RahulLinganagoudra/com.dreamertheory.haptics.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.androidjni": "1.0.0"
+      },
+      "hash": "2aeb0e8c42929efc5e9626fe0b49149549117878"
+    },
     "com.unity.2d.animation": {
       "version": "13.0.4",
       "depth": 0,
