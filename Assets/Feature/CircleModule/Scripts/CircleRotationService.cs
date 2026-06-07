@@ -33,6 +33,7 @@ namespace Feature.CircleModule.Scripts {
         private float _initialCircleRotation;
 
         private bool _isDragging;
+        private bool _zomedIn;
 
         public bool IsInteracting => _activeCircle != null && _isDragging;
 
@@ -157,12 +158,17 @@ namespace Feature.CircleModule.Scripts {
         }
 
         private void ChangeCircleScaleOnRotation(bool isRotating) {
+            if (!_zomedIn && !isRotating)
+                return;
             _audioService.PlaySound(isRotating ? AudioType.CircleStartInteraction : AudioType.CircleStopInteraction);
             _vibrationService.PlayVibration(VibrationType.Low);
             foreach (CircleSegment segment in _activeCircle.SpawnedSegments) {
-                if(isRotating)
+                if(isRotating) {
+                    _zomedIn = true;
                     segment.ZoomIn();
+                }
                 else {
+                    _zomedIn = false;
                     segment.ZoomOut();
                 }
             }

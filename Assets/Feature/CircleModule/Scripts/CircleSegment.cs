@@ -75,11 +75,11 @@ namespace Feature.CircleModule.Scripts
                 _statusAnimator.PlayShake().Forget();
         }
 
-        public void SetWidth(float width) {
-            _currentWidth = width;
+        public void SetWidth(float width, bool zommed = false) {
+            _currentWidth = zommed ? width * _zoomScaleMultiplier : width;
             EnsureLineRenderer();
-            _cachedLineRenderer.startWidth = width;
-            _cachedLineRenderer.endWidth = width;
+            _cachedLineRenderer.startWidth = zommed ? width * _zoomScaleMultiplier : width;
+            _cachedLineRenderer.endWidth = zommed ? width * _zoomScaleMultiplier : width;
             UpdateStatusIcon();
         }
 
@@ -125,8 +125,8 @@ namespace Feature.CircleModule.Scripts
             UpdateStatusIcon();
         }
 
-        public void ZoomIn() {
-            if (_zoomed)
+        public void ZoomIn(bool force = false) {
+            if (_zoomed && !force)
                 return;
 
             _lineRenderer.sortingOrder *= 2;

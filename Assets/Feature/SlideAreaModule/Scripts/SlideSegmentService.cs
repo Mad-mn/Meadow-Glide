@@ -139,6 +139,9 @@ namespace Feature.SlideAreaModule.Scripts {
             if (_interactionState.IsRotationActive) {
                 return;
             }
+            
+            if(_isSnapping)
+                return;
 
             TrySlideSegments();
         }
@@ -163,8 +166,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 _startRadius = Vector3.Dot(worldPos, _slideDirection);
                 PrepareSegments(_activeArea);
                 _slideAreaModel.ChangeSlideState(true);
-                _audioService.PlaySound(AudioType.CircleStartInteraction);
-                _vibrationService.PlayVibration(VibrationType.Low);
+                PlaySoundAndVibrationOnInteract(true);
             }
         }
 
@@ -299,7 +301,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 float baseWidth = _circleParamsConfig.GetWidth(finalCircleIdx);
                 float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
 
-                segment.SetWidth(baseWidth * fade);
+                segment.SetWidth(baseWidth * fade, true);
                 segment.SetRadius(r);
                 segment.SetVisible(fade > 0.01f);
 
@@ -315,7 +317,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 float ghostFade = GetGeometricFade(gr, rStart, rEnd, rLimIn, rLimOut);
 
                 var ghost = _ghosts[i];
-                ghost.SetWidth(_circleParamsConfig.GetWidth(finalGhostCircleIdx) * ghostFade);
+                ghost.SetWidth(_circleParamsConfig.GetWidth(finalGhostCircleIdx) * ghostFade, true);
                 ghost.SetRadius(gr);
                 ghost.SetVisible(ghostFade > 0.01f);
                 ghost.HideStatusIcon();
@@ -338,9 +340,8 @@ namespace Feature.SlideAreaModule.Scripts {
             if (_activeArea != null) {
                 SnapSegments(areaToSnap)
                     .Forget();
-                _audioService.PlaySound(AudioType.CircleStopInteraction);
-                _vibrationService.PlayVibration(VibrationType.Low);
 
+                PlaySoundAndVibrationOnInteract(false);
                 _activeArea = null;
             }
 
@@ -411,6 +412,11 @@ namespace Feature.SlideAreaModule.Scripts {
             _baseIndices.Clear();
             _slideAreaModel.ChangeSlideState(false);
             _isSnapping = false;
+        }
+        
+        private void PlaySoundAndVibrationOnInteract(bool isSliding) {
+            _audioService.PlaySound(isSliding ? AudioType.CircleStartInteraction : AudioType.CircleStopInteraction);
+            _vibrationService.PlayVibration(VibrationType.Low);
         }
 
         private void SegmentSetupAfterSnap(int i, int startIdx) {
