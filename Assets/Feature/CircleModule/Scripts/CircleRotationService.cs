@@ -24,6 +24,7 @@ namespace Feature.CircleModule.Scripts {
         private readonly ISlideSegmentService _slideSegmentService;
         private readonly ICameraService _cameraService;
         private readonly IAudioService _audioService;
+        private readonly IVibrationService _vibrationService;
 
         private readonly List<CircleController> _circles = new List<CircleController>();
 
@@ -37,7 +38,7 @@ namespace Feature.CircleModule.Scripts {
 
         public CircleRotationService(IInputService inputService, IInteractionStateService interactionState,
             GameCircleModel circleModel, MoveTrackModel moveTrackModel, ISlideSegmentService slideSegmentService,
-            ICameraService cameraService, IAudioService audioService) {
+            ICameraService cameraService, IAudioService audioService, IVibrationService vibrationService) {
             _inputService = inputService;
             _interactionState = interactionState;
             _circleModel = circleModel;
@@ -45,6 +46,7 @@ namespace Feature.CircleModule.Scripts {
             _slideSegmentService = slideSegmentService;
             _cameraService = cameraService;
             _audioService = audioService;
+            _vibrationService = vibrationService;
         }
 
         public void Initialize() {
@@ -156,6 +158,7 @@ namespace Feature.CircleModule.Scripts {
 
         private void ChangeCircleScaleOnRotation(bool isRotating) {
             _audioService.PlaySound(isRotating ? AudioType.CircleStartInteraction : AudioType.CircleStopInteraction);
+            _vibrationService.PlayVibration(VibrationType.Low);
             foreach (CircleSegment segment in _activeCircle.SpawnedSegments) {
                 if(isRotating)
                     segment.ZoomIn();

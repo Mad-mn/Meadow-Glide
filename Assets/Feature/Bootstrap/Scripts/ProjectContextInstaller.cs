@@ -15,6 +15,7 @@ using Feature.StatusModule.Scripts.Installers;
 using Feature.TrackMoveModule.Scripts.Installers;
 using Feature.TutorialModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
+using Feature.VibrationModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
 
@@ -40,5 +41,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         InputModuleInstaller.Install(Container);
         CircleModuleInstaller.Install(Container);
         StatusModuleInstaller.Install(Container);
+        VibrationModuleInstaller.Install(Container);
     }
 }

@@ -25,6 +25,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly MoveTrackModel _moveTrackModel;
         private readonly LevelModel _levelModel;
         private readonly IAudioService _audioService;
+        private readonly IVibrationService _vibrationService;
         private CircleParamsConfig _circleParamsConfig;
         private readonly List<CircleController> _circles = new List<CircleController>();
 
@@ -37,13 +38,14 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly List<float> _baseIndices = new List<float>();
         private readonly List<CircleSegment> _ghosts = new List<CircleSegment>();
         private List<CircleController> _sortedCircles = new List<CircleController>();
+        private bool _isSnapping;
 
         public bool IsSliding =>
             _activeArea != null;
 
         public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState, ICameraService cameraService,
             UniTask<CircleParamsConfig> circleParamsConfigTask, GameCircleModel circleModel, SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel,
-            LevelModel levelModel, IAudioService audioService) {
+            LevelModel levelModel, IAudioService audioService, IVibrationService vibrationService) {
             _inputService = inputService;
             _interactionState = interactionState;
             _cameraService = cameraService;
@@ -53,6 +55,7 @@ namespace Feature.SlideAreaModule.Scripts {
             _moveTrackModel = moveTrackModel;
             _levelModel = levelModel;
             _audioService = audioService;
+            _vibrationService = vibrationService;
         }
 
         public async void Initialize() {
@@ -161,6 +164,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 PrepareSegments(_activeArea);
                 _slideAreaModel.ChangeSlideState(true);
                 _audioService.PlaySound(AudioType.CircleStartInteraction);
+                _vibrationService.PlayVibration(VibrationType.Low);
             }
         }
 
@@ -335,6 +339,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 SnapSegments(areaToSnap)
                     .Forget();
                 _audioService.PlaySound(AudioType.CircleStopInteraction);
+                _vibrationService.PlayVibration(VibrationType.Low);
 
                 _activeArea = null;
             }
@@ -343,6 +348,9 @@ namespace Feature.SlideAreaModule.Scripts {
         }
 
         private async UniTaskVoid SnapSegments(SlideArea area) {
+            if(_isSnapping)
+                return;
+            _isSnapping = true;
             int count = _activeSegments.Count;
             if (count == 0 || _circleParamsConfig == null || _isBlockedByStatus) {
                 _slideAreaModel.ChangeSlideState(false);
@@ -373,6 +381,69 @@ namespace Feature.SlideAreaModule.Scripts {
             float[] currentVirtualIndices = new float[count];
             float[] targetVirtualIndices = new float[count];
 
+            DisableGhosts(count, startIdx, subsetCount, currentVirtualIndices, targetVirtualIndices);
+
+            int endIdx = startIdx + subsetCount - 1;
+            float rStart = _circleParamsConfig.GetRadius(startIdx);
+            float rEnd = _circleParamsConfig.GetRadius(endIdx);
+            float rLimIn = (rStart + _circleParamsConfig.GetRadius(startIdx - 1)) / 2f;
+            float rLimOut = (rEnd + _circleParamsConfig.GetRadius(endIdx + 1)) / 2f;
+
+            while (elapsed < duration) {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                t = 1f - Mathf.Pow(1f - t, 3);
+
+                for (int i = 0; i < count; i++) {
+                    SnapSegment(i, currentVirtualIndices, targetVirtualIndices, t, rStart, rEnd, rLimIn, rLimOut);
+                }
+
+                await UniTask.Yield();
+            }
+
+            for (int i = 0; i < count; i++) {
+                SegmentSetupAfterSnap(i, startIdx);
+            }
+
+            _circleModel.SegmentsChanged();
+            ClearGhosts();
+            _activeSegments.Clear();
+            _baseIndices.Clear();
+            _slideAreaModel.ChangeSlideState(false);
+            _isSnapping = false;
+        }
+
+        private void SegmentSetupAfterSnap(int i, int startIdx) {
+            if (_activeSegments[i] != null) {
+                float finalIdx = startIdx + i;
+                _activeSegments[i]
+                    .SetWidth(_circleParamsConfig.GetWidth(finalIdx));
+
+                _activeSegments[i]
+                    .SetRadius(_circleParamsConfig.GetRadius(finalIdx));
+
+                _activeSegments[i]
+                    .SetVisible(true);
+            }
+        }
+
+        private void SnapSegment(int i, float[] currentVirtualIndices, float[] targetVirtualIndices, float t, float rStart, float rEnd, float rLimIn, float rLimOut) {
+            var seg = _activeSegments[i];
+            if (seg == null)
+                return;
+
+            float idx = Mathf.Lerp(currentVirtualIndices[i], targetVirtualIndices[i], t);
+            float r = Mathf.Max(0, _circleParamsConfig.GetRadius(idx));
+
+            float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
+            float clampedR = Mathf.Clamp(r, rLimIn, rLimOut);
+
+            seg.SetWidth(_circleParamsConfig.GetWidth(idx) * fade);
+            seg.SetRadius(clampedR);
+            seg.SetVisible(fade > 0.01f);
+        }
+
+        private void DisableGhosts(int count, int startIdx, int subsetCount, float[] currentVirtualIndices, float[] targetVirtualIndices) {
             for (int i = 0; i < count; i++) {
                 float currentIdx = _circleParamsConfig.GetVirtualIndex(_activeSegments[i].Radius);
                 float targetIdx = startIdx + i;
@@ -388,56 +459,6 @@ namespace Feature.SlideAreaModule.Scripts {
                 _ghosts[i]
                     .SetVisible(false);
             }
-
-            int endIdx = startIdx + subsetCount - 1;
-            float rStart = _circleParamsConfig.GetRadius(startIdx);
-            float rEnd = _circleParamsConfig.GetRadius(endIdx);
-            float rLimIn = (rStart + _circleParamsConfig.GetRadius(startIdx - 1)) / 2f;
-            float rLimOut = (rEnd + _circleParamsConfig.GetRadius(endIdx + 1)) / 2f;
-
-            while (elapsed < duration) {
-                elapsed += Time.deltaTime;
-                float t = elapsed / duration;
-                t = 1f - Mathf.Pow(1f - t, 3);
-
-                for (int i = 0; i < count; i++) {
-                    var seg = _activeSegments[i];
-                    if (seg == null)
-                        continue;
-
-                    float idx = Mathf.Lerp(currentVirtualIndices[i], targetVirtualIndices[i], t);
-                    float r = Mathf.Max(0, _circleParamsConfig.GetRadius(idx));
-
-                    float fade = GetGeometricFade(r, rStart, rEnd, rLimIn, rLimOut);
-                    float clampedR = Mathf.Clamp(r, rLimIn, rLimOut);
-
-                    seg.SetWidth(_circleParamsConfig.GetWidth(idx) * fade);
-                    seg.SetRadius(clampedR);
-                    seg.SetVisible(fade > 0.01f);
-                }
-
-                await UniTask.Yield();
-            }
-
-            for (int i = 0; i < count; i++) {
-                if (_activeSegments[i] != null) {
-                    float finalIdx = startIdx + i;
-                    _activeSegments[i]
-                        .SetWidth(_circleParamsConfig.GetWidth(finalIdx));
-
-                    _activeSegments[i]
-                        .SetRadius(_circleParamsConfig.GetRadius(finalIdx));
-
-                    _activeSegments[i]
-                        .SetVisible(true);
-                }
-            }
-
-            _circleModel.SegmentsChanged();
-            ClearGhosts();
-            _activeSegments.Clear();
-            _baseIndices.Clear();
-            _slideAreaModel.ChangeSlideState(false);
         }
 
         private void ApplyShift(SlideArea area, int shift) {
