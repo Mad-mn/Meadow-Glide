@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 712f4388b06df234f9f377b8b699d577
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 308330
+  packageName: Haptic Feedback
+  packageVersion: 1.0
+  assetPath: Assets/Techjuego/HapticFeedback/Plugins/Android/AndroidHaptic.cs
+  uploadId: 782548

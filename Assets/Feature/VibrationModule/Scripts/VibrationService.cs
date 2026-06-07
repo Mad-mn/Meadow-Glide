@@ -1,14 +1,10 @@
-using System;
-using DT.Haptics;
-using UnityEditor;
+using TechJuego.HapticFeedback;
 
 public class VibrationService : IVibrationService {
     public void EnableVibration() {
-        Haptics.CanUseHaptics = true;        
     }
 
     public void DisableVibration() {
-        Haptics.CanUseHaptics = false;        
     }
 
     public void PlayVibration(VibrationType vibrationType) {
@@ -16,16 +12,15 @@ public class VibrationService : IVibrationService {
             case VibrationType.None:
                 break;
             case VibrationType.Low:
-                Haptics.PlayLowHaptics();
+                HapticCall.LightHaptic();
                 break;
             case VibrationType.Medium:
-                Haptics.PlayMidHaptics();
+                HapticCall.MediumHaptic();
                 break;
             case VibrationType.High:
-                Haptics.PlayHeavyHaptics();
+                HapticCall.HeavyHaptic();
                 break;
             case VibrationType.VeryHigh:
-                Haptics.PlaySuperHeavyHaptics();
                 break;
         }
     }
