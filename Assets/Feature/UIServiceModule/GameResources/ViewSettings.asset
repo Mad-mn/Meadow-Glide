@@ -34,3 +34,6 @@ MonoBehaviour:
   - ViewType: 8
     Address: DebugView
     PresenterTypeName: Feature.DebugViewModule.Scripts.DebugPresenter
+  - ViewType: 9
+    Address: SettingsView
+    PresenterTypeName: Feature.SettingsViewModule.Scripts.SettingsPresenter

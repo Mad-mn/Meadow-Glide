@@ -1,13 +1,22 @@
+using Feature.SaveDataModule.Scripts;
+using Feature.SaveDataModule.Scripts.SavedData;
 using TechJuego.HapticFeedback;
 
 public class VibrationService : IVibrationService {
-    public void EnableVibration() {
-    }
+    private readonly SaveDataModel _saveDataModel;
+    private bool _canPlay;
 
-    public void DisableVibration() {
+    public VibrationService(SaveDataModel saveDataModel) {
+        _saveDataModel = saveDataModel;
+    }
+    public void Initialize() {
+        ChangeEnabledState(_saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings).VibrationEnabled);
     }
 
     public void PlayVibration(VibrationType vibrationType) {
+        if (!_canPlay)
+            return;
+
         switch (vibrationType) {
             case VibrationType.None:
                 break;
@@ -23,5 +32,9 @@ public class VibrationService : IVibrationService {
             case VibrationType.VeryHigh:
                 break;
         }
+    }
+
+    public void ChangeEnabledState(bool enabled) {
+        _canPlay = enabled;
     }
 }

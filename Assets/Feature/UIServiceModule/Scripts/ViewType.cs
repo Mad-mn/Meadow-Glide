@@ -8,5 +8,6 @@ namespace Feature.UIServiceModule.Scripts {
         LoseView = 6,
         ConfirmExitToMainMenuView = 7,
         DebugView = 8,
+        SettingsView = 9,
 }
 }

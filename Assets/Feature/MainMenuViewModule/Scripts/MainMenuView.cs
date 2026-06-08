@@ -1,3 +1,4 @@
+using System;
 using Feature.UIServiceModule.Scripts;
 using TMPro;
 using UnityEngine;
@@ -7,6 +8,7 @@ namespace Feature.MainMenuViewModule.Scripts {
     public class MainMenuView : ViewBase {
         [SerializeField] private Button _playButton;
         [SerializeField] private TMP_Text _levelText;
+        [field: SerializeField] public Button SettingsButton { get; private set; }
         [field: SerializeField] public Button DebugButton { get; private set; }
         
         public Button PlayButton => _playButton;

@@ -3,6 +3,7 @@ using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.SettingsViewModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
@@ -26,15 +27,21 @@ namespace Feature.MainMenuViewModule.Scripts {
         public override void Initialize() {
             View.PlayButton.onClick.AddListener(StartSimpleGame);
             View.DebugButton.onClick.AddListener(ShowDebugWindow);
-        }
-
-        private void ShowDebugWindow() {
-            _viewService.ShowView<DebugView>(ViewType.DebugView);
+            View.SettingsButton.onClick.AddListener(OnSettingsClick);
         }
 
         public override void Show() {
             base.Show();
             SetupText();
+        }
+
+        private void OnSettingsClick() {
+            _audioService.PlaySound(AudioType.ButtonClick);
+            _viewService.ShowView<SettingsView>(ViewType.SettingsView);
+        }
+
+        private void ShowDebugWindow() {
+            _viewService.ShowView<DebugView>(ViewType.DebugView);
         }
 
         private void SetupText() {

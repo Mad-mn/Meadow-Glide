@@ -10,5 +10,6 @@ namespace Feature.SoundModule.Scripts {
         void PauseAll();
         void ResumeAll();
         void StopAll();
+        void ChangeEnabledState(bool enabled);
     }
 }

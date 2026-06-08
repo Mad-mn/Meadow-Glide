@@ -29,7 +29,7 @@ namespace Feature.DebugViewModule.Scripts {
             if (Int32.TryParse(View.GoToLevelInputField.text, out int level)) {
                 _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
                     .Level = level;
-                _saveDataService.SaveAll();
+                _saveDataService.Save(SaveDataType.PlayerProgress);
             }
         }
     }

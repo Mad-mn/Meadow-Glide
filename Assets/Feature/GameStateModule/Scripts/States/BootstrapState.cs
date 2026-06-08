@@ -24,11 +24,13 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly ILevelService _levelService;
         private readonly IAudioDataProvider _audioDataProvider;
         private readonly IAudioService _audioService;
+        private readonly IVibrationService _vibrationService;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
             ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
-            ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService) {
+            ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
+            IVibrationService vibrationService) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -37,6 +39,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _levelService = levelService;
             _audioDataProvider = audioDataProvider;
             _audioService = audioService;
+            _vibrationService = vibrationService;
         }
 
         public void Enter() {
@@ -53,6 +56,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _viewService.ShowView<LoadingView>(ViewType.LoadingView);
             await InitializeDataProviders();
             _audioService.Initialize();
+            _vibrationService.Initialize();
             await _levelService.Initialize();
             await _viewService.PrewarmView<MainMenuView>(ViewType.MainMenu);
             await _viewService.PrewarmView<GameView>(ViewType.GameView);

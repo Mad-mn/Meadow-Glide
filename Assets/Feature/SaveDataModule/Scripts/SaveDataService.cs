@@ -24,6 +24,7 @@ namespace Feature.SaveDataModule.Scripts
         public void LoadAll()
         {
             _model.Set(SaveDataType.PlayerProgress, LoadFromDisk<PlayerProgressData>(SaveDataType.PlayerProgress));
+            _model.Set(SaveDataType.Settings, LoadFromDisk<PlayerSettingsData>(SaveDataType.Settings));
             // Add other types here
             Debug.Log("All save data loaded into Model.");
         }

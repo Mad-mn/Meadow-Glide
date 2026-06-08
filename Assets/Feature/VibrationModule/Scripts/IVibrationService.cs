@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public interface IVibrationService {
-    void EnableVibration();
-    void DisableVibration();
+    void Initialize();
     void PlayVibration(VibrationType vibrationType);
+    void ChangeEnabledState(bool enabled);
 }

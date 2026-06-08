@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Linq;
+using Feature.SaveDataModule.Scripts;
+using Feature.SaveDataModule.Scripts.SavedData;
 using UnityEngine;
 using Zenject;
 
@@ -7,6 +9,7 @@ namespace Feature.SoundModule.Scripts {
     public class AudioService : IAudioService {
         private readonly IAudioDataProvider _audioDataProvider;
         private readonly DiContainer _diContainer;
+        private readonly SaveDataModel _saveDataModel;
         private AudioConfig _audioConfig;
         private AudioSource _musicSource;
         private AudioSource _sfxSource;
@@ -14,12 +17,15 @@ namespace Feature.SoundModule.Scripts {
         private float _masterVolume = 1f;
         private float _musicVolume = 1f;
         private float _sfxVolume = 1f;
+        private bool _canPlay = true;
 
         private Coroutine _currentFadeCoroutine;
 
-        public AudioService(IAudioDataProvider audioDataProvider, DiContainer diContainer) {
+        public AudioService(IAudioDataProvider audioDataProvider, DiContainer diContainer,
+            SaveDataModel saveDataModel) {
             _audioDataProvider = audioDataProvider;
             _diContainer = diContainer;
+            _saveDataModel = saveDataModel;
         }
 
         public void Initialize() {
@@ -32,9 +38,13 @@ namespace Feature.SoundModule.Scripts {
 
             _sfxSource.playOnAwake = false;
             _sfxSource.loop = false;
+            ChangeEnabledState(_saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings).SoundsEnabled);
         }
 
         public void PlaySound(AudioType audioType, float volume = 1f) {
+            if(!_canPlay)
+                return;
+            
             AudioClip clip = GetClip(audioType);
             if (clip == null)
                 return;
@@ -45,6 +55,9 @@ namespace Feature.SoundModule.Scripts {
         }
 
         public void PlayMusic(AudioType audioType, bool loop = true, float fadeDuration = 1f) {
+            if(!_canPlay)
+                return;
+            
             AudioClip clip = GetClip(audioType);
             if (clip == null)
                 return;
@@ -110,6 +123,10 @@ namespace Feature.SoundModule.Scripts {
         public void StopAll() {
             _musicSource.Stop();
             _sfxSource.Stop();
+        }
+
+        public void ChangeEnabledState(bool enabled) {
+            _canPlay = enabled;
         }
 
         private AudioClip GetClip(AudioType audioType) {
