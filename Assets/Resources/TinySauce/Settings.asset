@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: faa11ec82e9746928e211e7f096812ca, type: 3}
+  m_Name: Settings
+  m_EditorClassIdentifier: Assembly-CSharp::Voodoo.Tiny.Sauce.Internal.TinySauceSettings
+  gameAnalyticsIosGameKey: 
+  gameAnalyticsIosSecretKey: 
+  gameAnalyticsAndroidGameKey: b7835471a39d91dbc4f3540e31e84bc2
+  gameAnalyticsAndroidSecretKey: d4aea2bc957ada904abbf79dbc738bef1ab53602
+  facebookAppId: 1025006363422480
+  facebookClientToken: 2bb3654c41174c857004860353951ed6
+  adjustIOSToken: 
+  adjustAndroidToken: j7qdhiain8qo
+  EditorIdfa: fd1b3fc2-cb25-4db2-8e2f-a7041c05308f
+  UseRemoteConfig: 0
+  UseVoodooAnalytics: 1
+  doesYourGameDisplayAds: 0
+  companyName: Amana Games
+  privacyPolicyURL: https://doc-hosting.flycricket.io/color-rings/b4e06f83-2761-4e00-badc-a0efbbc619c9/privacy
+  developerContactEmail: volkov181295@gamil.com
