@@ -358,6 +358,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 ClearGhosts();
                 _activeSegments.Clear();
                 _baseIndices.Clear();
+                _isSnapping = false;
                 return;
             }
 
