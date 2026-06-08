@@ -1,5 +1,7 @@
+using Cysharp.Threading.Tasks;
 using Feature.ConfirmExitToMainMenuViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
+using Feature.LevelInitializeModule;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SoundModule.Scripts;
@@ -12,18 +14,26 @@ namespace Feature.GameViewModule.Scripts {
         private readonly SaveDataModel _saveDataModel;
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IAudioService _audioService;
+        private readonly ILevelInitializeService _levelInitializeService;
 
         public GamePresenter(GameView view, IViewService viewService, SaveDataModel saveDataModel,
-            MoveTrackModel moveTrackModel, IAudioService audioService) : base(view) {
+            MoveTrackModel moveTrackModel, IAudioService audioService, ILevelInitializeService levelInitializeService) : base(view) {
             _viewService = viewService;
             _saveDataModel = saveDataModel;
             _moveTrackModel = moveTrackModel;
             _audioService = audioService;
+            _levelInitializeService = levelInitializeService;
         }
 
         public override void Initialize() {
             View.MainMenuButton.onClick.AddListener(ShowConfirmExitToMainMenu);
+            View.ResetLevelButton.onClick.AddListener(ResetLevelButtonClicked);
             _moveTrackModel.OnMovesChanged += UpdateMovesChangedsText;
+        }
+
+        private void ResetLevelButtonClicked() {
+            _audioService.PlaySound(AudioType.ButtonClick);
+            _levelInitializeService.ReloadScene().Forget();
         }
 
         public override void Show() {
