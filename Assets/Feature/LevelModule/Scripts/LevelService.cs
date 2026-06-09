@@ -30,6 +30,9 @@ namespace Feature.LevelModule.Scripts {
 
         public LevelData GetLevelDataForCurrentLevel() {
             PlayerProgressData playerProgressData = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+            if (_levelConfigProvider.LevelDatas.Count <= playerProgressData.Level) {
+                return _levelConfigProvider.LevelDatas[19];
+            }
             return _levelConfigProvider.LevelDatas[playerProgressData.Level];
         }
 
