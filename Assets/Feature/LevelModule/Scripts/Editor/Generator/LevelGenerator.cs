@@ -21,6 +21,18 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public bool AllowFilterColors;
             public float FilterColorsChance;
             public int MinFilterColors, MaxFilterColors;
+            public int MaxAttempts;
+            public int MaxIterations;
+            public int Seed;
+            public bool UseFixedSeed;
+        }
+
+        public struct ValidationResult {
+            public bool IsValid;
+            public string Reason;
+
+            public static ValidationResult Success() => new ValidationResult { IsValid = true };
+            public static ValidationResult Fail(string reason) => new ValidationResult { IsValid = false, Reason = reason };
         }
 
         public class RawLevelData {
@@ -30,13 +42,17 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public SegmentStatus[,] Statuses;
             public List<SlideAreaConfig> Areas;
             public int Difficulty;
+            public int Seed;
         }
 
         public async Task<RawLevelData> GenerateAsync(GenerationParams p, int targetDifficulty, System.Threading.CancellationToken ct, IProgress<string> progress = null) {
             return await Task.Run(() => {
-                var rnd = new Random();
-                int maxAttempts = 10;
+                int activeSeed = p.UseFixedSeed ? p.Seed : unchecked((int)Guid.NewGuid().GetHashCode());
+                var rnd = new Random(activeSeed);
+                int maxAttempts = Math.Max(1, p.MaxAttempts);
                 RawLevelData bestLevel = null;
+
+                progress?.Report($"Seed: {activeSeed}");
 
                 for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                     ct.ThrowIfCancellationRequested();
@@ -49,7 +65,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     var colorPool = Enum.GetValues(typeof(CircleColorType))
                         .Cast<CircleColorType>()
                         .Where(c => c != CircleColorType.None)
-                        .OrderBy(x => rnd.Next())
+                        .OrderBy(_ => rnd.Next())
                         .Take(rings)
                         .ToList();
 
@@ -57,34 +73,39 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     var initialColors = new byte[rings, sectors];
                     for (int r = 0; r < rings; r++) {
                         for (int s = 0; s < sectors; s++) {
-                            bool blocked = p.AllowBlocked && (rnd.NextDouble() < p.BlockedChance);
+                            bool blocked = p.AllowBlocked && rnd.NextDouble() < p.BlockedChance;
                             statuses[r, s] = blocked ? SegmentStatus.Blocked : SegmentStatus.Default;
                             initialColors[r, s] = (byte)colorPool[r];
                         }
                     }
 
                     var areas = GenerateValidAreas(rings, sectors, areasCount, rnd, p.MinAreaSpan, p.MaxAreaSpan);
-                    
+
                     if (p.AllowFilterColors) {
                         foreach (var area in areas) {
                             if (rnd.NextDouble() < p.FilterColorsChance) {
                                 area.SlideAreaStatus = Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors;
-                                
+
                                 var allowedColors = new HashSet<CircleColorType>();
-                                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
+                                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++)
                                     allowedColors.Add((CircleColorType)initialColors[r, area.sectorIndex]);
-                                }
-                                
+
                                 int targetColorCount = rnd.Next(p.MinFilterColors, p.MaxFilterColors + 1);
-                                var pool = colorPool.OrderBy(x => rnd.Next()).ToList();
+                                var pool = colorPool.OrderBy(_ => rnd.Next()).ToList();
                                 foreach (var c in pool) {
                                     if (allowedColors.Count >= targetColorCount) break;
                                     allowedColors.Add(c);
                                 }
-                                
+
                                 area.Colors = allowedColors.ToList();
                             }
                         }
+                    }
+
+                    var layoutValidation = ValidateLayout(rings, areas);
+                    if (!layoutValidation.IsValid) {
+                        LogValidationFailure(attempt, layoutValidation.Reason);
+                        continue;
                     }
 
                     var state = new LevelState(rings, sectors);
@@ -92,47 +113,138 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                         for (int s = 0; s < sectors; s++)
                             state.Colors[r, s] = initialColors[r, s];
 
-                    var solver = new LevelSolver(areas, rings, sectors);
+                    var solver = new LevelSolver(areas, rings, sectors, Math.Max(1, p.MaxIterations));
                     for (int r = 0; r < rings; r++)
                         for (int s = 0; s < sectors; s++)
                             if (statuses[r, s] == SegmentStatus.Blocked)
                                 solver.SetLockedSegment(r, s, initialColors[r, s]);
 
                     progress?.Report($"Attempt {attempt}: Scrambling...");
-                    var currentLevel = state;
-                    int scrambleSteps = Math.Max(targetDifficulty, rnd.Next(targetDifficulty, targetDifficulty + 5));
-                    
-                    for (int i = 0; i < scrambleSteps; i++) {
-                        if (i % 5 == 0) ct.ThrowIfCancellationRequested();
-                        var moves = GetAllValidMoves(currentLevel, areas, solver).ToList();
-                        if (moves.Count == 0) break;
-                        
-                        var move = moves[rnd.Next(moves.Count)];
-                        currentLevel = ApplyMove(currentLevel, move, areas, solver);
+                    var currentLevel = Scramble(state, targetDifficulty, areas, solver, rnd, ct);
+
+                    var validation = ValidateGeneratedLevel(currentLevel, rings, areas);
+                    if (!validation.IsValid) {
+                        LogValidationFailure(attempt, validation.Reason);
+                        continue;
                     }
 
                     progress?.Report($"Attempt {attempt}: Calculating difficulty...");
                     int difficulty = solver.Solve(currentLevel, out _);
-                    
+
+                    var candidate = new RawLevelData {
+                        Rings = rings,
+                        Sectors = sectors,
+                        Colors = (byte[,])currentLevel.Colors.Clone(),
+                        Statuses = statuses,
+                        Areas = areas,
+                        Difficulty = difficulty,
+                        Seed = activeSeed
+                    };
+
                     if (difficulty >= targetDifficulty) {
-                        progress?.Report("Target difficulty reached!");
-                        return new RawLevelData {
-                            Rings = rings, Sectors = sectors, Colors = (byte[,])currentLevel.Colors.Clone(),
-                            Statuses = statuses, Areas = areas, Difficulty = difficulty
-                        };
+                        progress?.Report($"Target difficulty reached! (Seed: {activeSeed})");
+                        return candidate;
                     }
 
-                    if (bestLevel == null || (difficulty > 0 && (bestLevel.Difficulty <= 0 || difficulty > bestLevel.Difficulty))) {
-                        bestLevel = new RawLevelData {
-                            Rings = rings, Sectors = sectors, Colors = (byte[,])currentLevel.Colors.Clone(),
-                            Statuses = statuses, Areas = areas, Difficulty = difficulty
-                        };
-                    }
+                    if (bestLevel == null || (difficulty > 0 && (bestLevel.Difficulty <= 0 || difficulty > bestLevel.Difficulty)))
+                        bestLevel = candidate;
                 }
 
-                progress?.Report("Could not reach target difficulty, returning best found.");
+                progress?.Report(bestLevel != null
+                    ? $"Could not reach target difficulty, returning best found. (Seed: {activeSeed})"
+                    : $"Generation failed after {maxAttempts} attempts. (Seed: {activeSeed})");
                 return bestLevel;
             }, ct);
+        }
+
+        public static ValidationResult ValidateGeneratedLevel(LevelState state, int ringCount, List<SlideAreaConfig> areas) {
+            if (state.IsSolved())
+                return ValidationResult.Fail("Level is already solved after scramble.");
+
+            return ValidateRingConnectivity(ringCount, areas);
+        }
+
+        public static ValidationResult ValidateLayout(int ringCount, List<SlideAreaConfig> areas) {
+            if (areas == null || areas.Count == 0)
+                return ValidationResult.Fail("Level has no slide areas.");
+
+            return ValidateRingConnectivity(ringCount, areas);
+        }
+
+        public static ValidationResult ValidateRingConnectivity(int ringCount, List<SlideAreaConfig> areas) {
+            if (ringCount <= 1)
+                return ValidationResult.Success();
+
+            var parent = Enumerable.Range(0, ringCount).ToArray();
+            var rank = new int[ringCount];
+
+            int Find(int x) {
+                while (parent[x] != x) {
+                    parent[x] = parent[parent[x]];
+                    x = parent[x];
+                }
+                return x;
+            }
+
+            void Union(int a, int b) {
+                int rootA = Find(a);
+                int rootB = Find(b);
+                if (rootA == rootB) return;
+                if (rank[rootA] < rank[rootB])
+                    parent[rootA] = rootB;
+                else if (rank[rootA] > rank[rootB])
+                    parent[rootB] = rootA;
+                else {
+                    parent[rootB] = rootA;
+                    rank[rootA]++;
+                }
+            }
+
+            var coveredRings = new HashSet<int>();
+            foreach (var area in areas) {
+                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
+                    coveredRings.Add(r);
+                    if (r > area.startCircleIndex)
+                        Union(r, r - 1);
+                }
+            }
+
+            var uncovered = Enumerable.Range(0, ringCount).Where(r => !coveredRings.Contains(r)).ToList();
+            if (uncovered.Count > 0)
+                return ValidationResult.Fail($"Rings not covered by any slide area: [{string.Join(", ", uncovered)}].");
+
+            int root = Find(0);
+            var unreachable = Enumerable.Range(1, ringCount - 1).Where(r => Find(r) != root).ToList();
+            if (unreachable.Count > 0)
+                return ValidationResult.Fail($"Rings not connected via slide areas. Unreachable from ring 0: [{string.Join(", ", unreachable)}].");
+
+            return ValidationResult.Success();
+        }
+
+        private static void LogValidationFailure(int attempt, string reason) {
+            Debug.LogWarning($"[LevelGenerator] Attempt {attempt}: Validation failed — {reason}");
+        }
+
+        private LevelState Scramble(LevelState solvedState, int targetDifficulty, List<SlideAreaConfig> areas, LevelSolver solver, Random rnd, System.Threading.CancellationToken ct) {
+            var currentLevel = solvedState;
+            int targetSteps = Math.Max(targetDifficulty, rnd.Next(targetDifficulty, targetDifficulty + 5));
+            int appliedSteps = 0;
+
+            while (appliedSteps < targetSteps) {
+                if (appliedSteps % 5 == 0) ct.ThrowIfCancellationRequested();
+
+                var moves = GetAllValidMoves(currentLevel, areas, solver).ToList();
+                if (moves.Count == 0) break;
+
+                var move = moves[rnd.Next(moves.Count)];
+                var nextLevel = ApplyMove(currentLevel, move, solver);
+                if (nextLevel.Equals(currentLevel)) continue;
+
+                currentLevel = nextLevel;
+                appliedSteps++;
+            }
+
+            return currentLevel;
         }
 
         private List<SlideAreaConfig> GenerateValidAreas(int rings, int sectors, int count, Random rnd, int minSpan, int maxSpan) {
@@ -142,7 +254,6 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
             var uncoveredRings = new HashSet<int>(Enumerable.Range(0, rings));
 
-            // Phase 1: Ensure every ring is covered by at least one slide area
             int safetyLimit = 100;
             while (uncoveredRings.Count > 0 && safetyLimit-- > 0) {
                 int targetR = uncoveredRings.ElementAt(rnd.Next(uncoveredRings.Count));
@@ -156,20 +267,18 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     int endR = startR + span - 1;
 
                     if (!HasConflict(areas, s, startR, endR, sectors)) {
-                        var newArea = new SlideAreaConfig {
+                        areas.Add(new SlideAreaConfig {
                             sectorIndex = s, startCircleIndex = startR, endCircleIndex = endR,
                             totalSegments = sectors,
                             SlideAreaStatus = Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.Default,
                             Colors = new List<CircleColorType>()
-                        };
-                        areas.Add(newArea);
+                        });
                         for (int r = startR; r <= endR; r++) uncoveredRings.Remove(r);
                         break;
                     }
                 }
             }
 
-            // Phase 2: Add more areas to reach the target count if possible
             while (areas.Count < count) {
                 int attempts = 0;
                 bool areaAdded = false;
@@ -198,13 +307,11 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
         private bool HasConflict(List<SlideAreaConfig> areas, int s, int startR, int endR, int sectors) {
             foreach (var existing in areas) {
-                // Rule: No identical circle ranges across any sectors
                 if (existing.startCircleIndex == startR && existing.endCircleIndex == endR) return true;
 
                 int sectorDiff = Math.Abs(existing.sectorIndex - s);
                 sectorDiff = Math.Min(sectorDiff, sectors - sectorDiff);
 
-                // If in the same or adjacent sector, arenas cannot share any rings
                 if (sectorDiff <= 1) {
                     if (startR <= existing.endCircleIndex && endR >= existing.startCircleIndex) return true;
                 }
@@ -216,7 +323,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             for (int r = 0; r < state.RingCount; r++) {
                 for (int offset = 1; offset < state.SectorCount; offset++) {
                     var next = state.Rotate(r, offset);
-                    if (!next.Equals(state)) yield return new Move { Type = MoveType.Rotate, Index = r, Offset = offset };
+                    if (!next.Equals(state))
+                        yield return new Move { Type = MoveType.Rotate, Index = r, Offset = offset };
                 }
             }
 
@@ -227,12 +335,13 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 int span = area.endCircleIndex - area.startCircleIndex + 1;
                 for (int offset = 1; offset < span; offset++) {
                     var next = solver.ApplyMove(state, new Move { Type = MoveType.Slide, Index = a, Offset = offset });
-                    if (!next.Equals(state)) yield return new Move { Type = MoveType.Slide, Index = a, Offset = offset };
+                    if (!next.Equals(state))
+                        yield return new Move { Type = MoveType.Slide, Index = a, Offset = offset };
                 }
             }
         }
 
-        private LevelState ApplyMove(LevelState state, Move move, List<SlideAreaConfig> areas, LevelSolver solver) {
+        private LevelState ApplyMove(LevelState state, Move move, LevelSolver solver) {
             if (move.Type == MoveType.Rotate) return state.Rotate(move.Index, move.Offset);
             return solver.ApplyMove(state, move);
         }

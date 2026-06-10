@@ -16,6 +16,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private VisualElement _previewArea;
         private Label _statsLabel;
         private Label _progressLabel;
+        private Label _activeSeedLabel;
+        private IntegerField _seedField;
         private Button _generateButton;
         private Button _cancelButton;
         private TextField _nameField;
@@ -38,6 +40,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _previewArea = rootVisualElement.Q<VisualElement>("previewArea");
             _statsLabel = rootVisualElement.Q<Label>("statsLabel");
             _progressLabel = rootVisualElement.Q<Label>("progressLabel");
+            _activeSeedLabel = rootVisualElement.Q<Label>("activeSeedLabel");
+            _seedField = rootVisualElement.Q<IntegerField>("seed");
             _generateButton = rootVisualElement.Q<Button>("generateButton");
             _cancelButton = rootVisualElement.Q<Button>("cancelButton");
             _nameField = rootVisualElement.Q<TextField>("levelName");
@@ -121,7 +125,12 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _progressLabel.text = "Starting...";
             
             _cts = new CancellationTokenSource();
-            var progress = new Progress<string>(msg => _progressLabel.text = msg);
+            var progress = new Progress<string>(msg => {
+                _progressLabel.text = msg;
+                if (msg.StartsWith("Seed: ")) {
+                    _activeSeedLabel.text = $"Active seed: {msg.Substring(6)}";
+                }
+            });
 
             var p = new LevelGenerator.GenerationParams {
                 MinRings = rootVisualElement.Q<IntegerField>("minRings").value,
@@ -137,7 +146,11 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 MinFilterColors = rootVisualElement.Q<IntegerField>("minFilterColors").value,
                 MaxFilterColors = rootVisualElement.Q<IntegerField>("maxFilterColors").value,
                 MinAreaSpan = rootVisualElement.Q<IntegerField>("minAreaSpan").value,
-                MaxAreaSpan = rootVisualElement.Q<IntegerField>("maxAreaSpan").value
+                MaxAreaSpan = rootVisualElement.Q<IntegerField>("maxAreaSpan").value,
+                MaxAttempts = rootVisualElement.Q<IntegerField>("maxAttempts").value,
+                MaxIterations = rootVisualElement.Q<IntegerField>("maxIterations").value,
+                Seed = _seedField.value,
+                UseFixedSeed = rootVisualElement.Q<Toggle>("useFixedSeed").value
             };
 
             int targetDepth = rootVisualElement.Q<IntegerField>("targetDifficulty").value;
@@ -147,10 +160,12 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
                 if (rawData != null) {
                     _currentLevel = ConvertToUnityLevelData(rawData);
-                    _statsLabel.text = $"Difficulty: {_currentLevel.LevelConfig.Difficulty} | Rings: {_currentLevel.LevelConfig.CircleConfigs.Count}";
+                    _seedField.SetValueWithoutNotify(rawData.Seed);
+                    _activeSeedLabel.text = $"Active seed: {rawData.Seed}";
+                    _statsLabel.text = $"Difficulty: {_currentLevel.LevelConfig.Difficulty} | Rings: {_currentLevel.LevelConfig.CircleConfigs.Count} | Seed: {rawData.Seed}";
                     _previewArea.MarkDirtyRepaint();
                 } else {
-                    _statsLabel.text = "Timeout or Limit reached.";
+                    _statsLabel.text = "Generation failed — no valid level produced.";
                 }
             } catch (OperationCanceledException) {
                 _statsLabel.text = "Generation cancelled.";

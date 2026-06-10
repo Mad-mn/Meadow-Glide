@@ -29,6 +29,27 @@
                     <uie:IntegerField name="targetDifficulty" value="8" class="field-input" />
                 </ui:VisualElement>
 
+                <ui:Label text="Generation Limits" class="subheader" />
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Max Attempts:" class="field-label" />
+                    <uie:IntegerField name="maxAttempts" value="10" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Max Iterations:" class="field-label" />
+                    <uie:IntegerField name="maxIterations" value="50000" class="field-input" />
+                </ui:VisualElement>
+
+                <ui:Label text="Reproducibility" class="subheader" />
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Use Fixed Seed:" class="field-label" />
+                    <ui:Toggle name="useFixedSeed" value="false" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Seed:" class="field-label" />
+                    <uie:IntegerField name="seed" value="42" class="field-input" />
+                </ui:VisualElement>
+                <ui:Label name="activeSeedLabel" text="Active seed: —" class="progress-label" />
+
                 <ui:Label text="Segment Constraints" class="subheader" />
                 <ui:VisualElement class="field-row">
                     <ui:Label text="Allow Blocked:" class="field-label" />
