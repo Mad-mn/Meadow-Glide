@@ -21,6 +21,9 @@ namespace Feature.CircleModule.Scripts {
 
         private List<CircleController> _filledCircles = new List<CircleController>();
 
+        private bool _isWin;
+        private bool _isLose;
+
         public CircleControllerService(GameCircleModel circleModel, IViewService viewService,
             ISaveDataModel saveDataModel, ISaveDataService saveDataService, MoveTrackModel moveTrackModel) {
             _circleModel = circleModel;
@@ -46,6 +49,8 @@ namespace Feature.CircleModule.Scripts {
 
         public void Reset() {
             _filledCircles.Clear();
+            _isWin = false;
+            _isLose = false;
         }
 
         private void CheckForMatchResult() {
@@ -63,11 +68,19 @@ namespace Feature.CircleModule.Scripts {
         
         private void CheckForLose() {
             if (_moveTrackModel.MovesLeft == 0) {
+                if(_isLose)
+                    return;
+                
+                _isLose = true;
                 _viewService.ShowView<LoseView>(ViewType.LoseView);
             }
         }
 
         private void ApplyWin() {
+            if(_isWin)
+                return;
+            
+            _isWin = true;
             _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
                 .Level++;
             _saveDataService.Save(SaveDataType.PlayerProgress);
