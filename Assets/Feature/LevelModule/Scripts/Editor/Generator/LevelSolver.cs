@@ -20,6 +20,28 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _lockedSegments[ring, sector] = color;
         }
 
+        /// <summary>
+        /// Mirrors runtime SlideSegmentService.PrepareSegments: slide is blocked when any segment
+        /// in the area path is Blocked, or (for FilterColors) any segment color is not in the allowed list.
+        /// </summary>
+        public bool IsSlideAreaBlocked(LevelState state, int areaIndex) {
+            var area = _areas[areaIndex];
+            bool isFilterColors = area.SlideAreaStatus == SlideAreaStatus.FilterColors;
+
+            for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
+                if (_lockedSegments[r, area.sectorIndex] != 0)
+                    return true;
+
+                if (isFilterColors) {
+                    var color = (CircleColorType)state.Colors[r, area.sectorIndex];
+                    if (area.Colors == null || !area.Colors.Contains(color))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         public int Solve(LevelState initialState, out List<Move> solution) {
             solution = null;
             if (initialState.IsSolved()) return 0;
@@ -85,16 +107,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         }
 
         private IEnumerable<Move> GetAllPossibleMoves(LevelState state) {
-            // Rotations
             for (int r = 0; r < state.RingCount; r++) {
-                // RULE: If any segment in ring is blocked, ring cannot rotate
-                bool ringBlocked = false;
-                for(int s=0; s < state.SectorCount; s++) {
-                    if (_lockedSegments[r, s] != 0) { ringBlocked = true; break; }
-                }
-                if (ringBlocked) continue;
-
-                // Check every possible offset
                 for (int offset = 1; offset < state.SectorCount; offset++) {
                     var next = state.Rotate(r, offset);
                     if (!next.Equals(state)) {
@@ -103,17 +116,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 }
             }
 
-            // Slides
             for (int a = 0; a < _areas.Count; a++) {
-                var area = _areas[a];
-                
-                // RULE: If any segment in area path is blocked, cannot slide
-                bool slideBlocked = false;
-                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
-                    if (_lockedSegments[r, area.sectorIndex] != 0) { slideBlocked = true; break; }
-                }
-                if (slideBlocked) continue;
+                if (IsSlideAreaBlocked(state, a)) continue;
 
+                var area = _areas[a];
                 int span = area.endCircleIndex - area.startCircleIndex + 1;
                 for (int offset = 1; offset < span; offset++) {
                     var next = ApplySlideMove(state, a, offset);
@@ -130,18 +136,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         }
 
         private LevelState ApplySlideMove(LevelState state, int areaIndex, int offset) {
-            var area = _areas[areaIndex];
-            
-            if (area.SlideAreaStatus == SlideAreaStatus.FilterColors) {
-                int span = area.endCircleIndex - area.startCircleIndex + 1;
-                for (int r = 0; r < span; r++) {
-                    int currentR = area.startCircleIndex + r;
-                    int targetR = area.startCircleIndex + (r + offset) % span;
-                    byte color = state.Colors[currentR, area.sectorIndex];
-                    if (!area.Colors.Contains((CircleColorType)color)) return state;
-                }
-            }
+            if (IsSlideAreaBlocked(state, areaIndex))
+                return state;
 
+            var area = _areas[areaIndex];
             return state.Slide(area.sectorIndex, area.startCircleIndex, area.endCircleIndex, offset);
         }
     }
