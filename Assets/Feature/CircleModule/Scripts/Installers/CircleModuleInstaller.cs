@@ -18,6 +18,9 @@ namespace Feature.CircleModule.Scripts.Installers {
 
             Container.BindInterfacesAndSelfTo<CircleControllerService>()
                 .AsSingle();
+            
+            Container.BindInterfacesAndSelfTo<CircleCompleteTrackService>()
+                .AsSingle();
         }
     }
 }

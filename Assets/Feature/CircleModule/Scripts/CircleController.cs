@@ -10,6 +10,7 @@ using Zenject;
 namespace Feature.CircleModule.Scripts {
     public class CircleController : MonoBehaviour {
         [SerializeField] private CircleSegment _segmentPrefab;
+        [SerializeField] private CircleAnimationController _circleAnimationController;
 
         private readonly List<CircleSegment> _spawnedSegments = new List<CircleSegment>();
 
@@ -18,6 +19,25 @@ namespace Feature.CircleModule.Scripts {
         private ISegmentStatusVisualDataProvider _statusVisualDataProvider;
         private float _calculatedRadius;
         private float _segmentWidth;
+        public bool IsCompleted {
+            get {
+                CircleColorType circleColorType = CircleColorType.None;
+                bool completed = true;
+                foreach (CircleSegment circleSegment in _spawnedSegments) {
+                    if (circleColorType is CircleColorType.None) {
+                        circleColorType = circleSegment.ColorType;
+                        continue;
+                    }
+
+                    if (circleSegment.ColorType != circleColorType) {
+                        completed = false;
+                        break;
+                    }
+                }
+
+                return completed;
+            }
+        }
 
         public float Radius => _calculatedRadius;
         public int SegmentCount => _currentConfig != null ? _currentConfig.SegmentCount : 0;
@@ -132,6 +152,10 @@ namespace Feature.CircleModule.Scripts {
                 DestroyImmediate(transform.GetChild(i)
                     .gameObject);
             }
+        }
+
+        public void PlayCompletedAnimation(Action callback) {
+            _circleAnimationController.PlayCompletedAnimation(callback);
         }
     }
 }

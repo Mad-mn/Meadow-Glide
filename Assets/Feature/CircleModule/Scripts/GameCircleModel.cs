@@ -5,9 +5,10 @@ using UnityEngine;
 namespace Feature.CircleModule.Scripts {
     public class GameCircleModel {
         private List<CircleController> _circles = new List<CircleController>();
-        
+        private List<CircleController> _completedCircles = new List<CircleController>();
         public event Action OnSegmentsChanged;
         public event Action<CircleController, bool> OnCircleRotationStatusChanged;
+        public event Action<CircleController, bool> OnCircleCompletedStatusChanged;
         
         public IReadOnlyList<CircleController> Circles => _circles;
 
@@ -35,6 +36,21 @@ namespace Feature.CircleModule.Scripts {
 
         public void SegmentsChanged() {
             OnSegmentsChanged?.Invoke();
+        }
+
+        public void ChangeCircleCompleterState(CircleController circle, bool isCompleting) {
+            if (isCompleting) {
+                if(_completedCircles.Contains(circle))
+                    return;
+                _completedCircles.Add(circle);
+                OnCircleCompletedStatusChanged?.Invoke(circle, true);
+            }
+            else {
+                if(!_circles.Contains(circle))
+                    return;
+                _completedCircles.Remove(circle);
+                OnCircleCompletedStatusChanged?.Invoke(circle, false);
+            }
         }
     }
 }

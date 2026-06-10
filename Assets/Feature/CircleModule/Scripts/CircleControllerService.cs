@@ -8,6 +8,7 @@ using Feature.TrackMoveModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Zenject;
 
 namespace Feature.CircleModule.Scripts {
@@ -30,23 +31,24 @@ namespace Feature.CircleModule.Scripts {
         }
 
         public void Initialize() {
-            _moveTrackModel.OnMovesChanged += OnCircleSegmentChanged;
+            _circleModel.OnCircleCompletedStatusChanged += OnCircleCompletedStatusChanged;
         }
 
         public void Dispose() {
-            _moveTrackModel.OnMovesChanged -= OnCircleSegmentChanged;
+            _circleModel.OnCircleCompletedStatusChanged -= OnCircleCompletedStatusChanged;
+        }
+
+        private void OnCircleCompletedStatusChanged(CircleController circle, bool isCompleted) {
+            ApplyResultForCircle(circle, isCompleted);
+            if(isCompleted)
+                circle.PlayCompletedAnimation(CheckForMatchResult);
         }
 
         public void Reset() {
             _filledCircles.Clear();
         }
 
-        private void OnCircleSegmentChanged() {
-            CheckCheckForMatchColors();
-        }
-
-        private void CheckCheckForMatchColors() {
-            UpdateCirclesStates();
+        private void CheckForMatchResult() {
             if(!CheckForWin())
                 CheckForLose();
         }
@@ -71,39 +73,6 @@ namespace Feature.CircleModule.Scripts {
             _saveDataService.Save(SaveDataType.PlayerProgress);
             _viewService.ShowView<WinLevel>(ViewType.WinLevel);
             
-        }
-
-        private void UpdateCirclesStates() {
-            foreach (CircleController circle in _circleModel.Circles) {
-                bool circleFull = IsCircleUniform(circle);
-                ApplyResultForCircle(circle, circleFull);
-            }
-        }
-
-        private bool IsCircleUniform(CircleController circle) {
-            if (circle.SpawnedSegments.Count == 0 || circle.SpawnedSegments.Count != circle.SegmentCount) {
-                return false;
-            }
-
-            CircleColorType targetColor = CircleColorType.None;
-
-            foreach (CircleSegment segment in circle.SpawnedSegments) {
-                if (targetColor == CircleColorType.None) {
-                    targetColor = segment.ColorType;
-                    
-                    // None or White usually shouldn't count as a completed circle color
-                    if (targetColor == CircleColorType.None) {
-                        return false;
-                    }
-                    continue;
-                }
-
-                if (segment.ColorType != targetColor) {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private void ApplyResultForCircle(CircleController circle, bool circleFull) {
