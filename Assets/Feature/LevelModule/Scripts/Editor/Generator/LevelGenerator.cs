@@ -104,7 +104,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     
                     for (int i = 0; i < scrambleSteps; i++) {
                         if (i % 5 == 0) ct.ThrowIfCancellationRequested();
-                        var moves = GetAllValidMoves(currentLevel, areas, statuses, solver).ToList();
+                        var moves = GetAllValidMoves(currentLevel, areas, solver).ToList();
                         if (moves.Count == 0) break;
                         
                         var move = moves[rnd.Next(moves.Count)];
@@ -212,29 +212,22 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             return false;
         }
 
-        private IEnumerable<Move> GetAllValidMoves(LevelState state, List<SlideAreaConfig> areas, SegmentStatus[,] statuses, LevelSolver solver) {
-            // Rotation moves
+        private IEnumerable<Move> GetAllValidMoves(LevelState state, List<SlideAreaConfig> areas, LevelSolver solver) {
             for (int r = 0; r < state.RingCount; r++) {
-                bool hasBlocked = false;
-                for(int s=0; s < state.SectorCount; s++) if (statuses[r,s] == SegmentStatus.Blocked) { hasBlocked = true; break; }
-                if (hasBlocked) continue;
-
                 for (int offset = 1; offset < state.SectorCount; offset++) {
                     var next = state.Rotate(r, offset);
                     if (!next.Equals(state)) yield return new Move { Type = MoveType.Rotate, Index = r, Offset = offset };
                 }
             }
 
-            // Slide moves
             for (int a = 0; a < areas.Count; a++) {
-                var area = areas[a];
-                bool hasBlocked = false;
-                for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) if (statuses[r, area.sectorIndex] == SegmentStatus.Blocked) { hasBlocked = true; break; }
-                if (hasBlocked) continue;
+                if (solver.IsSlideAreaBlocked(state, a)) continue;
 
+                var area = areas[a];
                 int span = area.endCircleIndex - area.startCircleIndex + 1;
                 for (int offset = 1; offset < span; offset++) {
-                    yield return new Move { Type = MoveType.Slide, Index = a, Offset = offset };
+                    var next = solver.ApplyMove(state, new Move { Type = MoveType.Slide, Index = a, Offset = offset });
+                    if (!next.Equals(state)) yield return new Move { Type = MoveType.Slide, Index = a, Offset = offset };
                 }
             }
         }
