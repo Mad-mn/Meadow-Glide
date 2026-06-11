@@ -39,24 +39,31 @@ namespace Feature.CircleModule.Scripts {
             }
         }
 
-        public float Radius => _calculatedRadius;
-        public int SegmentCount => _currentConfig != null ? _currentConfig.SegmentCount : 0;
+        public float Radius =>
+            _calculatedRadius;
+        public int SegmentCount =>
+            _currentConfig != null
+                ? _currentConfig.SegmentCount
+                : 0;
 
-        public IReadOnlyList<CircleSegment> SpawnedSegments => _spawnedSegments;
+        public IReadOnlyList<CircleSegment> SpawnedSegments =>
+            _spawnedSegments;
 
         [Inject]
-        public void InjectDependencies(ICircleColorService colorService, ISegmentStatusVisualDataProvider statusVisualDataProvider, GameCircleModel circleModel) {
+        public void InjectDependencies(ICircleColorService colorService, ISegmentStatusVisualDataProvider statusVisualDataProvider,
+            GameCircleModel circleModel) {
             _circleColorService = colorService;
             _statusVisualDataProvider = statusVisualDataProvider;
         }
 
         public CircleSegment GetSegmentAtAngle(float worldAngle) {
-            if (_spawnedSegments.Count == 0) return null;
-            
+            if (_spawnedSegments.Count == 0)
+                return null;
+
             float anglePerSegment = 360f / _currentConfig.SegmentCount;
             // Normalize world angle to [0, 360)
             float normalizedWorldAngle = (worldAngle % 360 + 360) % 360;
-            
+
             CircleSegment bestSeg = null;
             float minDelta = float.MaxValue;
 
@@ -64,17 +71,18 @@ namespace Feature.CircleModule.Scripts {
                 // World rotation of the segment
                 float segWorldAngle = (transform.eulerAngles.z + seg.transform.localEulerAngles.z) % 360;
                 segWorldAngle = (segWorldAngle + 360) % 360;
-                
+
                 float delta = Mathf.Abs(Mathf.DeltaAngle(segWorldAngle, normalizedWorldAngle));
                 if (delta < minDelta) {
                     minDelta = delta;
                     bestSeg = seg;
                 }
             }
-            
+
             if (minDelta < anglePerSegment / 2f) {
                 return bestSeg;
             }
+
             return null;
         }
 
@@ -108,22 +116,14 @@ namespace Feature.CircleModule.Scripts {
             for (int i = 0; i < _currentConfig.SegmentCount; i++) {
                 SegmentConfig segData;
                 if (_currentConfig.Segments != null && i < _currentConfig.Segments.Count) {
-                    // Create a copy to avoid modifying the ScriptableObject data if we change radius
                     var originalSeg = _currentConfig.Segments[i];
                     segData = new SegmentConfig {
-                        ColorType = originalSeg.ColorType,
-                        Radius = _calculatedRadius, // Force calculated radius
-                        Angle = anglePerSegment,
-                        SegmentStatus = originalSeg.SegmentStatus
+                        ColorType = originalSeg.ColorType, Radius = _calculatedRadius, Angle = anglePerSegment, SegmentStatus = originalSeg.SegmentStatus
                     };
                 }
                 else {
-                    // Fallback to default segment data
                     segData = new SegmentConfig {
-                        Radius = _calculatedRadius, 
-                        Angle = anglePerSegment, 
-                        ColorType = CircleColorType.None,
-                        SegmentStatus = SegmentStatus.Default
+                        Radius = _calculatedRadius, Angle = anglePerSegment, ColorType = CircleColorType.None, SegmentStatus = SegmentStatus.Default
                     };
                 }
 
@@ -147,7 +147,6 @@ namespace Feature.CircleModule.Scripts {
 
             _spawnedSegments.Clear();
 
-            // Also clean up any orphan children
             for (int i = transform.childCount - 1; i >= 0; i--) {
                 DestroyImmediate(transform.GetChild(i)
                     .gameObject);
