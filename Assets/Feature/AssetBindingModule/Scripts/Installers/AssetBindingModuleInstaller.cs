@@ -7,6 +7,7 @@ using Feature.SoundModule.Scripts;
 using Feature.StatusModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
 using Feature.StatusModule.Scripts.SlideAreas;
+using Feature.StripsModule.Scripts;
 using Feature.TutorialModule.Scripts.Configs;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
@@ -28,6 +29,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             
             Container.BindAddressablePrefabComponent<Camera>(AddressConstants.Camera);
             Container.BindAddressablePrefabComponent<CircleController>(AddressConstants.GircleModule);
+            Container.BindAddressablePrefabComponent<StripController>(AddressConstants.Strip);
             Container.BindAddressablePrefabComponent<SlideArea>(AddressConstants.SlideArea);
         }
     }

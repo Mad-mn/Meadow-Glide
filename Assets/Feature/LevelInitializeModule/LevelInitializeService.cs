@@ -6,6 +6,7 @@ using Feature.LevelModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SlideAreaModule.Scripts;
+using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using Feature.TutorialModule.Scripts;
 using Feature.UIServiceModule.Scripts;
@@ -19,12 +20,11 @@ namespace Feature.LevelInitializeModule {
         
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
         private readonly IViewService _viewService;
-        private readonly ISaveDataService _saveDataService;
-        private readonly ISaveDataModel _saveDataModel;
         private readonly ILevelService _levelService;
         private readonly ITutorialService _tutorialService;
         private readonly MoveTrackModel _moveTrackModel;
-        private readonly DiContainer _container;
+        private readonly IStripSpawnService _stripSpawnService;
+        private readonly IInstantiator _instantiator;
         private readonly ISlideAreaService _slideAreaService;
         private readonly ICircleRotationService _circleRotationService;
         private readonly ISlideSegmentService _slideSegmentService;
@@ -33,10 +33,10 @@ namespace Feature.LevelInitializeModule {
         private CircleParamsConfig _circleParamsConfig;
         
         private readonly List<CircleController> _spawnedCircles = new List<CircleController>();
+        private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
         public LevelInitializeService(
             UniTask<CircleController> circleControllerTask, 
-            DiContainer container, 
             ISlideAreaService slideAreaService, 
             ICircleRotationService circleRotationService,
             ISlideSegmentService slideSegmentService,
@@ -48,34 +48,32 @@ namespace Feature.LevelInitializeModule {
             ISaveDataModel saveDataModel,
             ILevelService levelService,
             ITutorialService tutorialService,
-            MoveTrackModel moveTrackModel) {
+            MoveTrackModel moveTrackModel, 
+            IInstantiator instantiator,
+            IStripSpawnService stripSpawnService) {
             _circleControllerTask = circleControllerTask;
-            _container = container;
             _slideAreaService = slideAreaService;
             _circleRotationService = circleRotationService;
             _slideSegmentService = slideSegmentService;
             _circleControllerService = circleControllerService;
             _circleModel = circleModel;
-            _circleParamsConfigTask = circleParamsConfigTask;
             _viewService = viewService;
-            _saveDataService = saveDataService;
-            _saveDataModel = saveDataModel;
             _levelService = levelService;
             _tutorialService = tutorialService;
             _moveTrackModel = moveTrackModel;
+            _stripSpawnService = stripSpawnService;
+            _instantiator = instantiator;
         }
-        
-        public async UniTask Initialize() {
-            CircleController circleControllerPrefab = await _circleControllerTask;
-            _circleParamsConfig = await _circleParamsConfigTask;
 
+        public async UniTask Initialize() {
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);
             _viewService.ShowView<GameView>(ViewType.GameView);
-            
-            await _slideAreaService.Initialize();
 
-            SpawnCircles(levelData, circleControllerPrefab);
+            await _slideAreaService.Initialize();
+            await _stripSpawnService.Initialize();
+            
+            SpawnStrips(levelData);
             _slideAreaService.SpawnSlideAreas(levelData.LevelConfig);
 
             await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
@@ -99,8 +97,9 @@ namespace Feature.LevelInitializeModule {
                     Object.Destroy(circle.gameObject);
                 }
             }
+
             _spawnedCircles.Clear();
-            
+
             await UniTask.CompletedTask;
         }
 
@@ -111,6 +110,19 @@ namespace Feature.LevelInitializeModule {
             await Initialize();
         }
 
+        private void SpawnStrips(LevelData levelData) {
+            _circleRotationService.Clear();
+            _slideSegmentService.Clear();
+            _spawnedCircles.Clear();
+
+            var circleConfigs = levelData.LevelConfig.CircleConfigs;
+            for (int i = 0; i < circleConfigs.Count; i++) {
+                CircleConfig config = circleConfigs[i];
+                StripController strip = _stripSpawnService.SpawnStrip(config, i);
+                _spawnedStrips.Add(strip);
+            }
+        }
+        
         private void SpawnCircles(LevelData levelData, CircleController circleControllerPrefab) {
             _circleRotationService.Clear();
             _slideSegmentService.Clear();
@@ -119,7 +131,7 @@ namespace Feature.LevelInitializeModule {
             var circleConfigs = levelData.LevelConfig.CircleConfigs;
             for (int i = 0; i < circleConfigs.Count; i++) {
                 CircleConfig config = circleConfigs[i];
-                var circleController = _container.InstantiatePrefabForComponent<CircleController>(circleControllerPrefab);
+                var circleController = _instantiator.InstantiatePrefabForComponent<CircleController>(circleControllerPrefab);
                 circleController.transform.position = Vector3.zero;
                 
                 float radius = _circleParamsConfig.GetRadius(i);
@@ -130,7 +142,7 @@ namespace Feature.LevelInitializeModule {
                 _slideSegmentService.RegisterCircle(circleController);
                 _circleModel.RegisterCircle(circleController);
                 _spawnedCircles.Add(circleController);
-}
+            }
         }
     }
 }

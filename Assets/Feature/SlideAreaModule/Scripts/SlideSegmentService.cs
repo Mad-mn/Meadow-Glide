@@ -8,6 +8,7 @@ using Feature.InputModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.StatusModule.Scripts.SlideAreas;
+using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -85,6 +86,10 @@ namespace Feature.SlideAreaModule.Scripts {
             _circles.Add(circle);
             _sortedCircles = _circles.OrderBy(c => c.Radius)
                 .ToList();
+        }
+
+        public void RegisterStrip(StripController strip) {
+            throw new NotImplementedException();
         }
 
         public void UpdateSegmentsInAreas() {
