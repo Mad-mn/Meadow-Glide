@@ -14,6 +14,7 @@ namespace Feature.StripsModule.Scripts {
 
         public void Clear() {
             _strips.Clear();
+            _completedStrips.Clear();
         }
 
         public void CircleRotationStatusChanges(StripController circle, bool isRotating) {

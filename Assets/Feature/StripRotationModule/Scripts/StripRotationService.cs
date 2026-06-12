@@ -1,36 +1,56 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
+using Feature.SlideAreaModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
+using UnityEngine;
 using Zenject;
+using AudioType = Feature.SoundModule.Scripts.AudioType;
 
 namespace Feature.StripRotationModule.Scripts {
-    public class StripRotationService : IStripRotationService, ITickable, IInitializable, IDisposable {
+    public class StripRotationService : IStripRotationService, ITickable, IInitializable, System.IDisposable {
+        private const float Y_THRESHOLD = 0.25f;
+        private const float DRAG_THRESHOLD = 0.05f;
+
         private readonly IInputService _inputService;
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IInteractionStateService _interactionStateService;
         private readonly IAudioService _audioService;
         private readonly IVibrationService _vibrationService;
+        private readonly StripModel _stripModel;
+        private readonly ISlideSegmentService _slideSegmentService;
+        private readonly ICameraService _cameraService;
 
-        private readonly List<StripController> _strips;
+        private readonly List<StripController> _strips = new List<StripController>();
+
         private StripController _activeStrip;
+        private float _startPointerX;
+        private float _initialScrollOffset;
         private bool _isDragging;
-        private bool _zomedIn;
+        private bool _zoomedIn;
+
+        public bool IsInteracting => _activeStrip != null && _isDragging;
 
         public StripRotationService(IInputService inputService, MoveTrackModel moveTrackModel, IInteractionStateService interactionStateService,
-            IAudioService audioService, IVibrationService vibrationService) {
+            IAudioService audioService, IVibrationService vibrationService, StripModel stripModel, ISlideSegmentService slideSegmentService,
+            ICameraService cameraService) {
             _inputService = inputService;
             _moveTrackModel = moveTrackModel;
             _interactionStateService = interactionStateService;
             _audioService = audioService;
             _vibrationService = vibrationService;
+            _stripModel = stripModel;
+            _slideSegmentService = slideSegmentService;
+            _cameraService = cameraService;
         }
+
         public void Register(StripController strip) {
-            if(_strips.Contains(strip))
+            if (_strips.Contains(strip))
                 return;
             _strips.Add(strip);
         }
@@ -38,8 +58,6 @@ namespace Feature.StripRotationModule.Scripts {
         public void Clear() {
             _strips.Clear();
         }
-
-        public bool IsInteracting { get; }
 
         public void Initialize() {
             _inputService.PointerDown += OnPointerDown;
@@ -53,19 +71,17 @@ namespace Feature.StripRotationModule.Scripts {
 
         public void Tick() {
             if (_activeStrip == null) return;
-            if (_interactionStateService.IsSlideActive) {
+            if (_interactionStateService.IsSlideActive)
                 return;
-            }
 
-            RotateStrip();
+            MoveStrip();
         }
 
         private void OnPointerDown() {
-            if(_moveTrackModel.MovesLeft<=0)
+            if (_moveTrackModel.MovesLeft <= 0)
                 return;
-            if (_interactionStateService.IsSlideActive) {
+            if (_interactionStateService.IsSlideActive)
                 return;
-            }
 
             TryStartRotation();
         }
@@ -75,37 +91,118 @@ namespace Feature.StripRotationModule.Scripts {
                 if (_isDragging) {
                     SnapStrip(_activeStrip).Forget();
                 }
-                ChangeCircleScaleOnRotation(false);
+
+                ChangeStripScaleOnRotation(false);
+                _activeStrip.ClearWrapGhosts();
                 _activeStrip = null;
             }
+
             _isDragging = false;
             _interactionStateService.IsRotationActive = false;
         }
 
-        private void RotateStrip() {
-            //TODO: MoveStrip left-right by _inputService.PointerPosition, create ghost like in SlideSegment if stripSegment move to\from away
+        private void TryStartRotation() {
+            Camera camera = _cameraService.CameraObject;
+            if (camera == null)
+                return;
+
+            Vector2 screenPos = _inputService.PointerPosition;
+            Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -camera.transform.position.z));
+            worldPos.z = 0f;
+
+            _activeStrip = _strips
+                .OrderBy(strip => Mathf.Abs(strip.CenterY - worldPos.y))
+                .FirstOrDefault(strip => Mathf.Abs(strip.CenterY - worldPos.y) < Y_THRESHOLD);
+
+            if (_activeStrip == null)
+                return;
+
+            _startPointerX = worldPos.x;
+            _initialScrollOffset = _activeStrip.ScrollOffset;
+            _isDragging = false;
+            _stripModel.CircleRotationStatusChanges(_activeStrip, true);
+            TryChangeScaleWithDelay().Forget();
+        }
+
+        private void MoveStrip() {
+            Camera camera = _cameraService.CameraObject ?? Camera.main;
+            if (camera == null)
+                return;
+
+            Vector2 screenPos = _inputService.PointerPosition;
+            Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -camera.transform.position.z));
+            worldPos.z = 0f;
+
+            float deltaX = worldPos.x - _startPointerX;
+            if (!_isDragging) {
+                if (Mathf.Abs(deltaX) > DRAG_THRESHOLD) {
+                    _isDragging = true;
+                    _interactionStateService.IsRotationActive = true;
+                }
+                else {
+                    return;
+                }
+            }
+
+            float scrollOffset = _initialScrollOffset - deltaX;
+            _activeStrip.SetScrollOffset(scrollOffset, true);
         }
 
         private async UniTaskVoid SnapStrip(StripController activeStrip) {
-            ///TODO: Snap strip to final position calculated by segment wight to nearest position like in CircleRotationService
-        }
-
-        private void TryStartRotation() {
-            ///TODO: Find _active circle by Input and prepare for rotation
-        }
-
-        private void ChangeCircleScaleOnRotation(bool isRotating) {
-            if (!_zomedIn && !isRotating)
+            if (activeStrip.SegmentCount <= 0)
                 return;
+
+            float segmentSpan = activeStrip.GetSegmentSpan();
+            float currentOffset = activeStrip.ScrollOffset;
+            float targetOffset = Mathf.Round(currentOffset / segmentSpan) * segmentSpan;
+
+            float startOffset = currentOffset;
+            const float duration = 0.25f;
+            float elapsed = 0f;
+
+            while (elapsed < duration) {
+                if (activeStrip == null)
+                    return;
+
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                t = 1f - Mathf.Pow(1f - t, 3f);
+                float offset = Mathf.Lerp(startOffset, targetOffset, t);
+                activeStrip.SetScrollOffset(offset, true);
+                await UniTask.Yield();
+            }
+
+            if (activeStrip != null) {
+                activeStrip.SetScrollOffset(targetOffset, false);
+                activeStrip.ClearWrapGhosts();
+            }
+
+            _slideSegmentService.UpdateSegmentsInAreas();
+            _stripModel.CircleRotationStatusChanges(activeStrip, false);
+        }
+
+        private async UniTaskVoid TryChangeScaleWithDelay() {
+            await UniTask.Yield();
+            if (_interactionStateService.IsSlideActive)
+                return;
+
+            ChangeStripScaleOnRotation(true);
+        }
+
+        private void ChangeStripScaleOnRotation(bool isRotating) {
+            if (!_zoomedIn && !isRotating)
+                return;
+
             _audioService.PlaySound(isRotating ? AudioType.CircleStartInteraction : AudioType.CircleStopInteraction);
             _vibrationService.PlayVibration(VibrationType.Low);
-            foreach (CircleSegment segment in _activeStrip.SpawnedSegments) {
-                if(isRotating) {
-                    _zomedIn = true;
+
+            foreach (StripSegment segment in _activeStrip.SpawnedSegments) {
+                if (isRotating) {
+                    _zoomedIn = true;
                     segment.ZoomIn();
                 }
                 else {
-                    _zomedIn = false;
+                    _zoomedIn = false;
                     segment.ZoomOut();
                 }
             }

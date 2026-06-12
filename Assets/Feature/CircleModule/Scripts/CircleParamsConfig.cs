@@ -61,5 +61,36 @@ namespace Feature.CircleModule.Scripts {
             float x = GetVirtualIndex(radius);
             return GetWidth(x);
         }
+
+        public float StripLoopLength => 4f * Mathf.PI * _minRadius;
+        public float StripHeight => _segmentWidth;
+
+        public float GetStripSpacing() => _segmentWidth + _distanceBetweenCircles;
+
+        public float GetStripCenterY(float stripIndex) {
+            return _minRadius - stripIndex * GetStripSpacing();
+        }
+
+        public float GetStripCenterY(int stripIndex) {
+            return GetStripCenterY((float)stripIndex);
+        }
+
+        public float GetUniformSegmentThickness() => _segmentWidth;
+
+        public float GetStripVirtualIndex(float y) {
+            float spacing = GetStripSpacing();
+            return spacing <= 0 ? 0 : (_minRadius - y) / spacing;
+        }
+
+        public float GetStripYFromVirtualIndex(float virtualIndex) {
+            return _minRadius - virtualIndex * GetStripSpacing();
+        }
+
+        public float GetStripBoundaryY(float stripIndex, bool isOuterEdge) {
+            float center = GetStripCenterY(stripIndex);
+            float halfHeight = StripHeight * 0.5f;
+            float halfGap = _distanceBetweenCircles * 0.5f;
+            return isOuterEdge ? center - halfHeight - halfGap : center + halfHeight + halfGap;
+        }
     }
 }

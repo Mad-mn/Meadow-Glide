@@ -1,46 +1,44 @@
 using System;
 using System.Collections;
-using Cysharp.Threading.Tasks;
 using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
+using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using Feature.TutorialModule.Scripts.Hints;
 using UnityEngine;
 using Zenject;
 
 namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialStates {
-    public class ShowPointerOnCircleState : ITutorialState{
-        private const int CIRCLE_INDEX_FOR_HINT = 1;
+    public class ShowPointerOnCircleState : ITutorialState {
+        private const int STRIP_INDEX_FOR_HINT = 1;
         private const int START_SEGMENT_INDEX = 3;
         private const int FINISH_SEGMENT_INDEX = 1;
         private const float MOVE_DURATION = 1.5f;
         private const float DELAY_FOR_LOOP = 0.5f;
 
-        private readonly GameCircleModel _gameCircleModel;
+        private readonly StripModel _stripModel;
         private readonly ITutorialAssetProvider _tutorialAssetProvider;
         private readonly DiContainer _container;
         private readonly IInputService _inputService;
         private readonly MoveTrackModel _moveTrackModel;
-        private readonly IMoveTrackService _moveTrackService;
 
         public event Action OnComplete;
 
         private FingerHint _fingerHint;
-        private Vector3 _center;
-        private float _radius;
-        private float _startAngle;
-        private float _endAngle;
+        private float _stripY;
+        private float _startX;
+        private float _endX;
         private bool _isTapped;
 
-        public ShowPointerOnCircleState(GameCircleModel gameCircleModel, ITutorialAssetProvider tutorialAssetProvider, DiContainer container,
+        public ShowPointerOnCircleState(StripModel stripModel, ITutorialAssetProvider tutorialAssetProvider, DiContainer container,
             IInputService inputService, MoveTrackModel moveTrackModel) {
-            _gameCircleModel = gameCircleModel;
+            _stripModel = stripModel;
             _tutorialAssetProvider = tutorialAssetProvider;
             _container = container;
             _inputService = inputService;
             _moveTrackModel = moveTrackModel;
         }
-        
+
         public void Enter() {
             _isTapped = false;
             InstantiateHint();
@@ -61,25 +59,22 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         }
 
         private void CachePositions() {
-            if (_gameCircleModel.Circles.Count < 2) {
-                Debug.LogError("[ShowPointerOnCircleState] Not enough circles to cache positions!");
+            if (_stripModel.Strips.Count <= STRIP_INDEX_FOR_HINT) {
+                Debug.LogError("[ShowPointerOnCircleState] Not enough strips to cache positions!");
                 return;
             }
 
-            var circle = _gameCircleModel.Circles[CIRCLE_INDEX_FOR_HINT];
-            _radius = circle.Radius;
-            _center = circle.transform.position;
+            StripController strip = _stripModel.Strips[STRIP_INDEX_FOR_HINT];
+            _stripY = strip.CenterY;
 
-            if (circle.SpawnedSegments.Count < START_SEGMENT_INDEX) {
-                Debug.LogError("[ShowPointerOnCircleState] Not enough segments on circle 2!");
+            if (strip.SpawnedSegments.Count <= START_SEGMENT_INDEX) {
+                Debug.LogError("[ShowPointerOnCircleState] Not enough segments on strip!");
                 return;
             }
 
-            var segStart = circle.SpawnedSegments[START_SEGMENT_INDEX]; // 3rd segment
-            var segEnd = circle.SpawnedSegments[FINISH_SEGMENT_INDEX];   // 1st segment
-
-            _startAngle = segStart.transform.localEulerAngles.z;
-            _endAngle = segEnd.transform.localEulerAngles.z;
+            float segmentSpan = strip.GetSegmentSpan();
+            _startX = (START_SEGMENT_INDEX + 0.5f) * segmentSpan - strip.StripLoopLength * 0.5f;
+            _endX = (FINISH_SEGMENT_INDEX + 0.5f) * segmentSpan - strip.StripLoopLength * 0.5f;
         }
 
         private void InstantiateHint() {
@@ -89,35 +84,31 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         }
 
         private void StartHintAnimation() {
-            if (_fingerHint != null) {
+            if (_fingerHint != null)
                 _fingerHint.StartCoroutine(HintRoutine());
-            }
         }
 
         private IEnumerator HintRoutine() {
             while (!_isTapped) {
-                float elapsed = 0;
+                float elapsed = 0f;
 
                 while (elapsed < MOVE_DURATION && !_isTapped) {
                     elapsed += Time.deltaTime;
                     float t = elapsed / MOVE_DURATION;
-                    // Ease in out
-                    float smoothedT = Mathf.SmoothStep(0, 1, t);
-                    float currentAngle = Mathf.LerpAngle(_startAngle, _endAngle, smoothedT);
-                    UpdateHintPosition(currentAngle);
+                    float smoothedT = Mathf.SmoothStep(0f, 1f, t);
+                    float currentX = Mathf.Lerp(_startX, _endX, smoothedT);
+                    UpdateHintPosition(currentX);
                     yield return null;
                 }
 
-                if (!_isTapped) {
+                if (!_isTapped)
                     yield return new WaitForSeconds(DELAY_FOR_LOOP);
-                }
             }
         }
 
-        private void UpdateHintPosition(float angle) {
+        private void UpdateHintPosition(float x) {
             if (_fingerHint == null) return;
-            Vector3 offset = Quaternion.Euler(0, 0, angle) * Vector3.right * _radius;
-            _fingerHint.transform.position = _center + offset;
+            _fingerHint.transform.position = new Vector3(x, _stripY, 0f);
         }
 
         public void Exit() {

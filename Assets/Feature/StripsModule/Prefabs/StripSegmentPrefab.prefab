@@ -256,9 +256,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 4088305371263569912}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4d2e718ed8b00746b0df5a871aa2133, type: 3}
+  m_Script: {fileID: 11500000, guid: c8f1a2b34d5e6f7890abcdef12345678, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.CircleSegment
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.StripsModule.Scripts.StripSegment
   _trigger: {fileID: 8254379538623520618}
   _lineRenderer: {fileID: 3886604811336135793}
   _statusIcon: {fileID: 9140360877361096871}

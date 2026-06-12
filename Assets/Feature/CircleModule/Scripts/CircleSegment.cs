@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 namespace Feature.CircleModule.Scripts
 {
     [RequireComponent(typeof(LineRenderer))]
-    public class CircleSegment : MonoBehaviour
+    public class CircleSegment : MonoBehaviour, IGameSegment
     {
         [SerializeField] private GameObject _trigger;
         [SerializeField] private LineRenderer _lineRenderer;

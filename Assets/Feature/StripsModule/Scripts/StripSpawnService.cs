@@ -33,12 +33,11 @@ namespace Feature.StripsModule.Scripts {
 
         public StripController SpawnStrip(CircleConfig config, int positionIndex) {
             StripController strip = _instantiator.InstantiatePrefabForComponent<StripController>(_stripControllerPrefab);
-            strip.transform.position = Vector3.zero;
+            float centerY = _circleParamsConfig.GetStripCenterY(positionIndex);
+            float segmentHeight = _circleParamsConfig.GetUniformSegmentThickness();
+            float stripLoopLength = _circleParamsConfig.StripLoopLength;
 
-            
-            ///TODO: place strip on position calculated by position index, wight, and distance between strips(_distanceBetweenCircles in _circleParamsConfig)
-            float width = _circleParamsConfig.GetWidth(0);
-            strip.Setup(config, width, positionIndex);
+            strip.Setup(config, segmentHeight, stripLoopLength, centerY, positionIndex);
 
             _stripRotationService.Register(strip);
             _slideSegmentService.RegisterStrip(strip);

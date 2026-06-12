@@ -4,33 +4,43 @@ using Feature.CircleModule.Scripts;
 using Feature.ColorServiceModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Zenject;
 
 namespace Feature.StripsModule.Scripts {
     public class StripController : MonoBehaviour {
-        [SerializeField] private CircleSegment _segmentPrefab;
+        private const int MaxWrapGhosts = 2;
+
+        [SerializeField] private StripSegment _segmentPrefab;
         [SerializeField] private StripAnimationController _stripAnimationController;
 
-        private readonly List<CircleSegment> _spawnedSegments = new List<CircleSegment>();
+        private readonly List<StripSegment> _spawnedSegments = new List<StripSegment>();
+        private readonly List<StripSegment> _wrapGhosts = new List<StripSegment>();
 
         private CircleConfig _currentConfig;
         private ICircleColorService _circleColorService;
         private ISegmentStatusVisualDataProvider _statusVisualDataProvider;
-        private float _segmentWidth;
+        private float _segmentHeight;
+        private float _stripLoopLength;
+        private float _centerY;
         private int _positionIndex;
-        
+        private float _scrollOffset;
+
+        public float CenterY => _centerY;
+        public float ScrollOffset => _scrollOffset;
+        public float StripLoopLength => _stripLoopLength;
+        public int PositionIndex => _positionIndex;
+
         public bool IsCompleted {
             get {
-                CircleColorType circleColorType = CircleColorType.None;
+                CircleColorType stripColorType = CircleColorType.None;
                 bool completed = true;
-                foreach (CircleSegment circleSegment in _spawnedSegments) {
-                    if (circleColorType is CircleColorType.None) {
-                        circleColorType = circleSegment.ColorType;
+                foreach (StripSegment segment in _spawnedSegments) {
+                    if (stripColorType is CircleColorType.None) {
+                        stripColorType = segment.ColorType;
                         continue;
                     }
 
-                    if (circleSegment.ColorType != circleColorType) {
+                    if (segment.ColorType != stripColorType) {
                         completed = false;
                         break;
                     }
@@ -45,21 +55,67 @@ namespace Feature.StripsModule.Scripts {
                 ? _currentConfig.SegmentCount
                 : 0;
 
-        public IReadOnlyList<CircleSegment> SpawnedSegments =>
-            _spawnedSegments;
+        public IReadOnlyList<StripSegment> SpawnedSegments => _spawnedSegments;
 
         [Inject]
-        public void InjectDependencies(ICircleColorService colorService, ISegmentStatusVisualDataProvider statusVisualDataProvider,
-            GameCircleModel circleModel) {
+        public void InjectDependencies(ICircleColorService colorService, ISegmentStatusVisualDataProvider statusVisualDataProvider) {
             _circleColorService = colorService;
             _statusVisualDataProvider = statusVisualDataProvider;
         }
 
-        public void Setup(CircleConfig config, float width, int positionIndex) {
+        public void Setup(CircleConfig config, float segmentHeight, float stripLoopLength, float centerY, int positionIndex) {
             _currentConfig = config;
-            _segmentWidth = width;
+            _segmentHeight = segmentHeight;
+            _stripLoopLength = stripLoopLength;
+            _centerY = centerY;
             _positionIndex = positionIndex;
+            _scrollOffset = 0f;
+            transform.localPosition = new Vector3(0f, centerY, 0f);
             BuildStrip();
+        }
+
+        public float GetSegmentSpan() {
+            return SegmentCount > 0 ? _stripLoopLength / SegmentCount : 0f;
+        }
+
+        public StripSegment GetSegmentAtColumn(int columnIndex) {
+            if (_spawnedSegments.Count == 0)
+                return null;
+
+            float segmentSpan = GetSegmentSpan();
+            int slotIndex = Mod(Mathf.FloorToInt((columnIndex + _scrollOffset / segmentSpan)), SegmentCount);
+            return _spawnedSegments[slotIndex];
+        }
+
+        public void SetScrollOffset(float offset, bool showWrapGhosts = false) {
+            _scrollOffset = offset;
+            ApplySegmentLayout(showWrapGhosts);
+        }
+
+        public void RemoveSegment(StripSegment segment) {
+            _spawnedSegments.Remove(segment);
+        }
+
+        public void AddSegment(StripSegment segment) {
+            segment.transform.SetParent(transform);
+            _spawnedSegments.Add(segment);
+            segment.SetWidth(_segmentHeight);
+            segment.SetSpan(GetSegmentSpan() * 0.5f);
+            segment.SetRadius(0f);
+            ApplySegmentLayout(false);
+        }
+
+        public void PlayCompletedAnimation(Action callback) {
+            _stripAnimationController.PlayCompletedAnimation(callback);
+        }
+
+        public void ClearWrapGhosts() {
+            foreach (StripSegment ghost in _wrapGhosts) {
+                if (ghost != null)
+                    Destroy(ghost.gameObject);
+            }
+
+            _wrapGhosts.Clear();
         }
 
         private void BuildStrip() {
@@ -70,41 +126,102 @@ namespace Feature.StripsModule.Scripts {
                 return;
             }
 
+            float halfSpan = GetSegmentSpan() * 0.5f;
+
             for (int i = 0; i < _currentConfig.SegmentCount; i++) {
                 SegmentConfig segData;
                 if (_currentConfig.Segments != null && i < _currentConfig.Segments.Count) {
                     var originalSeg = _currentConfig.Segments[i];
                     segData = new SegmentConfig {
-                        ColorType = originalSeg.ColorType, SegmentStatus = originalSeg.SegmentStatus
+                        ColorType = originalSeg.ColorType,
+                        SegmentStatus = originalSeg.SegmentStatus,
+                        Radius = 0f,
+                        Angle = 0f
                     };
                 }
                 else {
                     segData = new SegmentConfig {
-                        ColorType = CircleColorType.None, SegmentStatus = SegmentStatus.Default
+                        ColorType = CircleColorType.None,
+                        SegmentStatus = SegmentStatus.Default,
+                        Radius = 0f,
+                        Angle = 0f
                     };
                 }
 
-                CircleSegment segment = Instantiate(_segmentPrefab, transform);
-
+                StripSegment segment = Instantiate(_segmentPrefab, transform);
                 Color color = _circleColorService.GetColor(segData.ColorType);
-                segment.Initialize(segData, color, _segmentWidth, _statusVisualDataProvider);
-
+                segment.Initialize(segData, color, _segmentHeight, halfSpan, _statusVisualDataProvider);
                 _spawnedSegments.Add(segment);
+            }
+
+            ApplySegmentLayout(false);
+        }
+
+        private void ApplySegmentLayout(bool showWrapGhosts) {
+            if (_spawnedSegments.Count == 0)
+                return;
+
+            float segmentSpan = GetSegmentSpan();
+            float halfLoop = _stripLoopLength * 0.5f;
+
+            ClearWrapGhosts();
+
+            for (int i = 0; i < _spawnedSegments.Count; i++) {
+                StripSegment segment = _spawnedSegments[i];
+                float rawX = (i + 0.5f) * segmentSpan - _scrollOffset;
+                float wrappedX = WrapHorizontal(rawX, _stripLoopLength) - halfLoop;
+                segment.SetCenterX(wrappedX);
+                segment.SetRadius(0f);
+                segment.SetVisible(true);
+
+                if (showWrapGhosts)
+                    TrySpawnWrapGhost(segment, rawX, segmentSpan, halfLoop);
             }
         }
 
-        public void RemoveSegment(CircleSegment segment) {
-            _spawnedSegments.Remove(segment);
+        private void TrySpawnWrapGhost(StripSegment source, float rawX, float segmentSpan, float halfLoop) {
+            float fadeStart = _stripLoopLength * 0.5f - segmentSpan;
+            if (fadeStart <= 0f)
+                return;
+
+            float absRaw = Mathf.Abs(rawX - _stripLoopLength * 0.5f);
+            if (absRaw < fadeStart)
+                return;
+
+            float ghostRawX = rawX < _stripLoopLength * 0.5f
+                ? rawX + _stripLoopLength
+                : rawX - _stripLoopLength;
+
+            float wrappedGhostX = WrapHorizontal(ghostRawX, _stripLoopLength) - halfLoop;
+            float fade = Mathf.InverseLerp(_stripLoopLength * 0.5f, fadeStart, absRaw);
+            if (fade <= 0.01f)
+                return;
+
+            StripSegment ghost = Instantiate(source, transform);
+            ghost.gameObject.name = source.gameObject.name + "_WrapGhost";
+            ghost.SetConfig(source.GetConfig().Clone());
+            ghost.SetCenterX(wrappedGhostX);
+            ghost.SetWidth(_segmentHeight * fade);
+            ghost.SetVisible(true);
+            ghost.SetSortingOrder(source.GetSortingOrder() - 1);
+            ghost.HideStatusIcon();
+            _wrapGhosts.Add(ghost);
         }
 
-        public void AddSegment(CircleSegment segment) {
-            segment.transform.SetParent(transform);
-            _spawnedSegments.Add(segment);
-            segment.SetWidth(_segmentWidth);
+        private static float WrapHorizontal(float value, float loopLength) {
+            return Mathf.Repeat(value, loopLength);
+        }
+
+        private static int Mod(int value, int count) {
+            if (count <= 0) return 0;
+            int result = value % count;
+            return result < 0 ? result + count : result;
         }
 
         private void ClearStrip() {
-            foreach (var seg in _spawnedSegments) {
+            ClearWrapGhosts();
+
+            foreach (StripSegment seg in _spawnedSegments) {
                 if (seg != null)
                     DestroyImmediate(seg.gameObject);
             }
@@ -112,13 +229,8 @@ namespace Feature.StripsModule.Scripts {
             _spawnedSegments.Clear();
 
             for (int i = transform.childCount - 1; i >= 0; i--) {
-                DestroyImmediate(transform.GetChild(i)
-                    .gameObject);
+                DestroyImmediate(transform.GetChild(i).gameObject);
             }
-        }
-
-        public void PlayCompletedAnimation(Action callback) {
-            _stripAnimationController.PlayCompletedAnimation(callback);
         }
     }
 }
