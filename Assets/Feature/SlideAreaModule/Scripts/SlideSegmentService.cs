@@ -433,25 +433,45 @@ namespace Feature.SlideAreaModule.Scripts {
 
             int count = _activeSegments.Count;
             int startIdx = area.StartCircleIndex;
+            int sectorIndex = area.SectorIndex;
+
             StripSegment[] shiftedSegments = new StripSegment[count];
+            StripController[] sourceStrips = new StripController[count];
+            int[] targetSlotIndices = new int[count];
+
             for (int i = 0; i < count; i++) {
                 int newIndex = ((i + shift) % count + count) % count;
                 shiftedSegments[newIndex] = _activeSegments[i];
             }
 
             for (int i = 0; i < count; i++) {
-                StripController targetStrip = GetStripByIndex(startIdx + i);
                 StripSegment segment = shiftedSegments[i];
+                if (segment.transform.parent != null)
+                    sourceStrips[i] = segment.transform.parent.GetComponent<StripController>();
 
-                if (segment.transform.parent != null) {
-                    StripController oldStrip = segment.transform.parent.GetComponent<StripController>();
-                    if (oldStrip != null)
-                        oldStrip.RemoveSegment(segment);
-                }
-
-                targetStrip.AddSegment(segment);
-                _activeSegments[i] = segment;
+                StripController targetStrip = GetStripByIndex(startIdx + i);
+                float segmentSpan = targetStrip.GetSegmentSpan();
+                targetSlotIndices[i] = Mod(
+                    Mathf.FloorToInt((sectorIndex + targetStrip.ScrollOffset / segmentSpan)),
+                    targetStrip.SegmentCount);
             }
+
+            for (int i = 0; i < count; i++) {
+                if (sourceStrips[i] != null)
+                    sourceStrips[i].RemoveSegment(shiftedSegments[i]);
+            }
+
+            for (int i = 0; i < count; i++) {
+                StripController targetStrip = GetStripByIndex(startIdx + i);
+                targetStrip.AddSegment(shiftedSegments[i], targetSlotIndices[i]);
+                _activeSegments[i] = shiftedSegments[i];
+            }
+        }
+
+        private static int Mod(int value, int count) {
+            if (count <= 0) return 0;
+            int result = value % count;
+            return result < 0 ? result + count : result;
         }
     }
 }

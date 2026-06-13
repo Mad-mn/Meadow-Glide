@@ -105,6 +105,18 @@ namespace Feature.StripsModule.Scripts {
             ApplySegmentLayout(false);
         }
 
+        public void AddSegment(StripSegment segment, int index) {
+            segment.transform.SetParent(transform);
+
+            int clampedIndex = Mathf.Clamp(index, 0, _spawnedSegments.Count);
+            _spawnedSegments.Insert(clampedIndex, segment);
+
+            segment.SetWidth(_segmentHeight);
+            segment.SetSpan(GetSegmentSpan() * 0.5f);
+            segment.SetRadius(0f);
+            ApplySegmentLayout(false);
+        }
+
         public void PlayCompletedAnimation(Action callback) {
             _stripAnimationController.PlayCompletedAnimation(callback);
         }
