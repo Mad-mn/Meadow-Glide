@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Feature.CircleModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
@@ -7,7 +8,7 @@ using UnityEngine;
 using Zenject;
 
 namespace Feature.StatusModule.Scripts.Segments {
-    public class SegmentStatusService : ISegmentStatusService, IInitializable {
+    public class SegmentStatusService : ISegmentStatusService, IInitializable, IDisposable {
         private readonly StripModel _stripModel;
         private readonly SlideAreaModel _slideAreaModel;
 
@@ -18,11 +19,21 @@ namespace Feature.StatusModule.Scripts.Segments {
 
         public void Initialize() {
             _stripModel.OnStripRotationStatusChanged += HandleRotationStatusChanged;
+            _stripModel.OnSegmentsChanged += HandleSegmentsChanged;
+        }
+
+        public void Dispose() {
+            _stripModel.OnStripRotationStatusChanged -= HandleRotationStatusChanged;
+            _stripModel.OnSegmentsChanged -= HandleSegmentsChanged;
         }
 
         private void HandleRotationStatusChanged(StripController strip, bool status) {
             if (!status)
                 UpdateStatus();
+        }
+
+        private void HandleSegmentsChanged() {
+            UpdateStatus();
         }
 
         public void UpdateStatus() {

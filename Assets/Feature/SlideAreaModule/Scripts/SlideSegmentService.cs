@@ -310,8 +310,9 @@ namespace Feature.SlideAreaModule.Scripts {
                 PlaySoundAndVibrationOnInteract(false);
                 _activeArea = null;
             }
-
-            _interactionState.IsSlideActive = false;
+            else {
+                _interactionState.IsSlideActive = false;
+            }
         }
 
         private async UniTaskVoid SnapSegments(SlideArea area) {
@@ -326,6 +327,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 _activeSegments.Clear();
                 _baseIndices.Clear();
                 _isSnapping = false;
+                _interactionState.IsSlideActive = false;
                 return;
             }
 
@@ -371,12 +373,14 @@ namespace Feature.SlideAreaModule.Scripts {
             for (int i = 0; i < count; i++)
                 SegmentSetupAfterSnap(i, startIdx, uniformHeight);
 
+            UpdateSegmentsInAreas();
             _stripModel.SegmentsChanged();
             ClearGhosts();
             _activeSegments.Clear();
             _baseIndices.Clear();
             _slideAreaModel.ChangeSlideState(false);
             _isSnapping = false;
+            _interactionState.IsSlideActive = false;
         }
 
         private void PlaySoundAndVibrationOnInteract(bool isSliding) {

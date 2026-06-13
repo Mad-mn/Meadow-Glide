@@ -91,6 +91,9 @@ namespace Feature.StripRotationModule.Scripts {
                 if (_isDragging) {
                     SnapStrip(_activeStrip).Forget();
                 }
+                else {
+                    _interactionStateService.IsRotationActive = false;
+                }
 
                 ChangeStripScaleOnRotation(false);
                 _activeStrip.ClearWrapGhosts();
@@ -98,7 +101,6 @@ namespace Feature.StripRotationModule.Scripts {
             }
 
             _isDragging = false;
-            _interactionStateService.IsRotationActive = false;
         }
 
         private void TryStartRotation() {
@@ -149,8 +151,10 @@ namespace Feature.StripRotationModule.Scripts {
         }
 
         private async UniTaskVoid SnapStrip(StripController activeStrip) {
-            if (activeStrip.SegmentCount <= 0)
+            if (activeStrip.SegmentCount <= 0) {
+                _interactionStateService.IsRotationActive = false;
                 return;
+            }
 
             float segmentSpan = activeStrip.GetSegmentSpan();
             float currentOffset = activeStrip.ScrollOffset;
@@ -161,8 +165,10 @@ namespace Feature.StripRotationModule.Scripts {
             float elapsed = 0f;
 
             while (elapsed < duration) {
-                if (activeStrip == null)
+                if (activeStrip == null) {
+                    _interactionStateService.IsRotationActive = false;
                     return;
+                }
 
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
@@ -179,6 +185,7 @@ namespace Feature.StripRotationModule.Scripts {
 
             _slideSegmentService.UpdateSegmentsInAreas();
             _stripModel.CircleRotationStatusChanges(activeStrip, false);
+            _interactionStateService.IsRotationActive = false;
         }
 
         private async UniTaskVoid TryChangeScaleWithDelay() {
