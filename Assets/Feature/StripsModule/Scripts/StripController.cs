@@ -177,6 +177,7 @@ namespace Feature.StripsModule.Scripts {
                 return;
 
             float segmentSpan = GetSegmentSpan();
+            float halfSpan = segmentSpan * 0.5f;
             float halfLoop = _stripLoopLength * 0.5f;
 
             ClearWrapGhosts();
@@ -187,36 +188,62 @@ namespace Feature.StripsModule.Scripts {
                 float wrappedX = WrapHorizontal(rawX, _stripLoopLength) - halfLoop;
                 segment.SetCenterX(wrappedX);
                 segment.SetRadius(0f);
-                segment.SetVisible(true);
 
-                if (showWrapGhosts)
-                    TrySpawnWrapGhost(segment, rawX, segmentSpan, halfLoop);
+                if (showWrapGhosts) {
+                    float segLeft = wrappedX - halfSpan;
+                    float segRight = wrappedX + halfSpan;
+                    float visLeft = Mathf.Max(segLeft, -halfLoop);
+                    float visRight = Mathf.Min(segRight, halfLoop);
+
+                    if (visLeft >= visRight) {
+                        segment.SetVisible(false);
+                    }
+                    else {
+                        segment.SetWidth(_segmentHeight, true);
+                        segment.SetVisibleSpan(visLeft - wrappedX, visRight - wrappedX);
+                        segment.SetVisible(true);
+
+                        bool isClipped = segLeft < -halfLoop || segRight > halfLoop;
+                        if (isClipped)
+                            segment.HideStatusIcon();
+                    }
+
+                    if (segLeft < -halfLoop) {
+                        float overflow = -halfLoop - segLeft;
+                        SpawnOverflowGhost(segment, overflow, true, halfLoop);
+                    }
+
+                    if (segRight > halfLoop) {
+                        float overflow = segRight - halfLoop;
+                        SpawnOverflowGhost(segment, overflow, false, halfLoop);
+                    }
+                }
+                else {
+                    segment.SetWidth(_segmentHeight);
+                    segment.SetVisibleSpan(-halfSpan, halfSpan);
+                    segment.SetVisible(true);
+                }
             }
         }
 
-        private void TrySpawnWrapGhost(StripSegment source, float rawX, float segmentSpan, float halfLoop) {
-            float fadeStart = _stripLoopLength * 0.5f - segmentSpan;
-            if (fadeStart <= 0f)
-                return;
+        private void SpawnOverflowGhost(StripSegment source, float overflow, bool atRightEdge, float halfLoop) {
+            float ghostCenterX = atRightEdge
+                ? halfLoop - overflow * 0.5f
+                : -halfLoop + overflow * 0.5f;
+            float ghostHalfSpan = overflow * 0.5f;
 
-            float absRaw = Mathf.Abs(rawX - _stripLoopLength * 0.5f);
-            if (absRaw < fadeStart)
-                return;
+            float ghostLeft = Mathf.Max(ghostCenterX - ghostHalfSpan, -halfLoop);
+            float ghostRight = Mathf.Min(ghostCenterX + ghostHalfSpan, halfLoop);
 
-            float ghostRawX = rawX < _stripLoopLength * 0.5f
-                ? rawX + _stripLoopLength
-                : rawX - _stripLoopLength;
-
-            float wrappedGhostX = WrapHorizontal(ghostRawX, _stripLoopLength) - halfLoop;
-            float fade = Mathf.InverseLerp(_stripLoopLength * 0.5f, fadeStart, absRaw);
-            if (fade <= 0.01f)
+            if (ghostLeft >= ghostRight)
                 return;
 
             StripSegment ghost = Instantiate(source, transform);
             ghost.gameObject.name = source.gameObject.name + "_WrapGhost";
             ghost.SetConfig(source.GetConfig().Clone());
-            ghost.SetCenterX(wrappedGhostX);
-            ghost.SetWidth(_segmentHeight * fade);
+            ghost.SetCenterX(ghostCenterX);
+            ghost.SetWidth(_segmentHeight, true);
+            ghost.SetVisibleSpan(ghostLeft - ghostCenterX, ghostRight - ghostCenterX);
             ghost.SetVisible(true);
             ghost.SetSortingOrder(source.GetSortingOrder() - 1);
             ghost.HideStatusIcon();

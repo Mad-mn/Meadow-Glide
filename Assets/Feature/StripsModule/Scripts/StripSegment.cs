@@ -71,6 +71,11 @@ namespace Feature.StripsModule.Scripts {
             UpdateStatusIcon();
         }
 
+        public void SetVisibleSpan(float localLeftX, float localRightX) {
+            _lineRenderer.SetPosition(0, new Vector3(localLeftX, 0, 0));
+            _lineRenderer.SetPosition(1, new Vector3(localRightX, 0, 0));
+        }
+
         public void SetStatus(SegmentStatus status) {
             if (_currentConfig == null) return;
             _currentConfig.SegmentStatus = status;
