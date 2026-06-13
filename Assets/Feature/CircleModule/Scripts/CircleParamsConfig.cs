@@ -92,5 +92,30 @@ namespace Feature.CircleModule.Scripts {
             float halfGap = _distanceBetweenCircles * 0.5f;
             return isOuterEdge ? center - halfHeight - halfGap : center + halfHeight + halfGap;
         }
+
+        public float GetCenteredStripY(float stripIndex, int totalStripCount) {
+            float spacing = GetStripSpacing();
+            float totalHeight = (totalStripCount - 1) * spacing;
+            return -totalHeight * 0.5f + stripIndex * spacing;
+        }
+
+        public float GetCenteredStripVirtualIndex(float y, int totalStripCount) {
+            float spacing = GetStripSpacing();
+            float totalHeight = (totalStripCount - 1) * spacing;
+            return spacing <= 0 ? 0 : (y + totalHeight * 0.5f) / spacing;
+        }
+
+        public float GetCenteredStripYFromVirtualIndex(float virtualIndex, int totalStripCount) {
+            float spacing = GetStripSpacing();
+            float totalHeight = (totalStripCount - 1) * spacing;
+            return -totalHeight * 0.5f + virtualIndex * spacing;
+        }
+
+        public float GetCenteredStripBoundaryY(float stripIndex, int totalStripCount, bool isOuterEdge) {
+            float center = GetCenteredStripY(stripIndex, totalStripCount);
+            float halfHeight = StripHeight * 0.5f;
+            float halfGap = _distanceBetweenCircles * 0.5f;
+            return isOuterEdge ? center - halfHeight - halfGap : center + halfHeight + halfGap;
+        }
     }
 }

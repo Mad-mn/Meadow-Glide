@@ -39,6 +39,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly List<StripSegment> _ghosts = new List<StripSegment>();
         private List<StripController> _sortedStrips = new List<StripController>();
         private bool _isSnapping;
+        private int _totalStripCount;
 
         public bool IsSliding => _activeArea != null;
 
@@ -86,6 +87,10 @@ namespace Feature.SlideAreaModule.Scripts {
         public void RegisterStrip(StripController strip) {
             _strips.Add(strip);
             _sortedStrips = _strips.OrderBy(strip => strip.PositionIndex).ToList();
+        }
+
+        public void SetTotalStripCount(int count) {
+            _totalStripCount = count;
         }
 
         public void UpdateSegmentsInAreas() {
@@ -249,48 +254,48 @@ namespace Feature.SlideAreaModule.Scripts {
             int startIdx = _activeArea.StartCircleIndex;
             int endIdx = startIdx + subsetCount - 1;
 
-            float yStart = _circleParamsConfig.GetStripCenterY(startIdx);
-            float yEnd = _circleParamsConfig.GetStripCenterY(endIdx);
-            float yLimIn = (yStart + _circleParamsConfig.GetStripCenterY(startIdx - 1)) * 0.5f;
-            float yLimOut = (yEnd + _circleParamsConfig.GetStripCenterY(endIdx + 1)) * 0.5f;
+                float yStart = _circleParamsConfig.GetCenteredStripY(startIdx, _totalStripCount);
+                float yEnd = _circleParamsConfig.GetCenteredStripY(endIdx, _totalStripCount);
+                float yLimIn = (yEnd + _circleParamsConfig.GetCenteredStripY(endIdx + 1, _totalStripCount)) * 0.5f;
+                float yLimOut = (yStart + _circleParamsConfig.GetCenteredStripY(startIdx - 1, _totalStripCount)) * 0.5f;
 
-            float startVirtualIdx = _circleParamsConfig.GetStripVirtualIndex(_startY);
-            float currentVirtualIdx = _circleParamsConfig.GetStripVirtualIndex(currentY);
-            float deltaIndex = currentVirtualIdx - startVirtualIdx;
-            float uniformHeight = _circleParamsConfig.GetUniformSegmentThickness();
+                float startVirtualIdx = _circleParamsConfig.GetCenteredStripVirtualIndex(_startY, _totalStripCount);
+                float currentVirtualIdx = _circleParamsConfig.GetCenteredStripVirtualIndex(currentY, _totalStripCount);
+                float deltaIndex = currentVirtualIdx - startVirtualIdx;
+                float uniformHeight = _circleParamsConfig.GetUniformSegmentThickness();
 
-            for (int i = 0; i < count; i++) {
-                StripController homeStrip = GetStripByIndex(startIdx + i);
-                if (homeStrip == null)
-                    continue;
+                for (int i = 0; i < count; i++) {
+                    StripController homeStrip = GetStripByIndex(startIdx + i);
+                    if (homeStrip == null)
+                        continue;
 
-                float virtualSubsetIdx = i + deltaIndex;
-                float wrappedSubsetIdx = Mathf.Repeat(virtualSubsetIdx, subsetCount);
+                    float virtualSubsetIdx = i + deltaIndex;
+                    float wrappedSubsetIdx = Mathf.Repeat(virtualSubsetIdx, subsetCount);
 
-                StripSegment segment = _activeSegments[i];
-                float finalStripIdx = startIdx + wrappedSubsetIdx;
-                float y = _circleParamsConfig.GetStripYFromVirtualIndex(finalStripIdx);
-                float fade = GetGeometricFade(y, yStart, yEnd, yLimIn, yLimOut);
+                    StripSegment segment = _activeSegments[i];
+                    float finalStripIdx = startIdx + wrappedSubsetIdx;
+                    float y = _circleParamsConfig.GetCenteredStripYFromVirtualIndex(finalStripIdx, _totalStripCount);
+                    float fade = GetGeometricFade(y, yEnd, yStart, yLimIn, yLimOut);
 
-                segment.SetWidth(uniformHeight * fade, true);
-                segment.SetRadius(y - homeStrip.CenterY);
-                segment.SetVisible(fade > 0.01f);
+                    segment.SetWidth(uniformHeight * fade, true);
+                    segment.SetRadius(y - homeStrip.CenterY);
+                    segment.SetVisible(fade > 0.01f);
 
-                float mid = subsetCount / 2f;
-                float ghostSubsetIdx = wrappedSubsetIdx > mid
-                    ? wrappedSubsetIdx - subsetCount
-                    : wrappedSubsetIdx + subsetCount;
+                    float mid = subsetCount / 2f;
+                    float ghostSubsetIdx = wrappedSubsetIdx > mid
+                        ? wrappedSubsetIdx - subsetCount
+                        : wrappedSubsetIdx + subsetCount;
 
-                float finalGhostStripIdx = startIdx + ghostSubsetIdx;
-                float ghostY = _circleParamsConfig.GetStripYFromVirtualIndex(finalGhostStripIdx);
-                float ghostFade = GetGeometricFade(ghostY, yStart, yEnd, yLimIn, yLimOut);
+                    float finalGhostStripIdx = startIdx + ghostSubsetIdx;
+                    float ghostY = _circleParamsConfig.GetCenteredStripYFromVirtualIndex(finalGhostStripIdx, _totalStripCount);
+                    float ghostFade = GetGeometricFade(ghostY, yEnd, yStart, yLimIn, yLimOut);
 
-                StripSegment ghost = _ghosts[i];
-                ghost.SetWidth(uniformHeight * ghostFade, true);
-                ghost.SetRadius(ghostY - homeStrip.CenterY);
-                ghost.SetVisible(ghostFade > 0.01f);
-                ghost.HideStatusIcon();
-            }
+                    StripSegment ghost = _ghosts[i];
+                    ghost.SetWidth(uniformHeight * ghostFade, true);
+                    ghost.SetRadius(ghostY - homeStrip.CenterY);
+                    ghost.SetVisible(ghostFade > 0.01f);
+                    ghost.HideStatusIcon();
+                }
         }
 
         private static float GetGeometricFade(float y, float yStart, float yEnd, float yLimIn, float yLimOut) {
@@ -336,7 +341,7 @@ namespace Feature.SlideAreaModule.Scripts {
             float uniformHeight = _circleParamsConfig.GetUniformSegmentThickness();
 
             float firstSegCurrentY = GetStripByIndex(startIdx).CenterY + _activeSegments[0].Radius;
-            float currentVirtualIdx = _circleParamsConfig.GetStripVirtualIndex(firstSegCurrentY);
+            float currentVirtualIdx = _circleParamsConfig.GetCenteredStripVirtualIndex(firstSegCurrentY, _totalStripCount);
             float rawDeltaIndex = currentVirtualIdx - _baseIndices[0];
 
             float normalizedDeltaIndex = ((rawDeltaIndex % subsetCount) + subsetCount) % subsetCount;
@@ -354,10 +359,10 @@ namespace Feature.SlideAreaModule.Scripts {
             DisableGhosts(count, startIdx, subsetCount, currentVirtualIndices, targetVirtualIndices);
 
             int endIdx = startIdx + subsetCount - 1;
-            float yStart = _circleParamsConfig.GetStripCenterY(startIdx);
-            float yEnd = _circleParamsConfig.GetStripCenterY(endIdx);
-            float yLimIn = (yStart + _circleParamsConfig.GetStripCenterY(startIdx - 1)) * 0.5f;
-            float yLimOut = (yEnd + _circleParamsConfig.GetStripCenterY(endIdx + 1)) * 0.5f;
+            float yStart = _circleParamsConfig.GetCenteredStripY(startIdx, _totalStripCount);
+            float yEnd = _circleParamsConfig.GetCenteredStripY(endIdx, _totalStripCount);
+            float yLimIn = (yEnd + _circleParamsConfig.GetCenteredStripY(endIdx + 1, _totalStripCount)) * 0.5f;
+            float yLimOut = (yStart + _circleParamsConfig.GetCenteredStripY(startIdx - 1, _totalStripCount)) * 0.5f;
 
             while (elapsed < duration) {
                 elapsed += Time.deltaTime;
@@ -365,7 +370,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 t = 1f - Mathf.Pow(1f - t, 3f);
 
                 for (int i = 0; i < count; i++)
-                    SnapSegment(i, currentVirtualIndices, targetVirtualIndices, t, startIdx, yStart, yEnd, yLimIn, yLimOut, uniformHeight);
+                    SnapSegment(i, currentVirtualIndices, targetVirtualIndices, t, startIdx, yEnd, yStart, yLimIn, yLimOut, uniformHeight);
 
                 await UniTask.Yield();
             }
@@ -405,7 +410,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 return;
 
             float idx = Mathf.Lerp(currentVirtualIndices[i], targetVirtualIndices[i], t);
-            float y = _circleParamsConfig.GetStripYFromVirtualIndex(idx);
+            float y = _circleParamsConfig.GetCenteredStripYFromVirtualIndex(idx, _totalStripCount);
             float fade = GetGeometricFade(y, yStart, yEnd, yLimIn, yLimOut);
             float clampedY = Mathf.Clamp(y, yLimOut, yLimIn);
 
@@ -417,7 +422,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private void DisableGhosts(int count, int startIdx, int subsetCount, float[] currentVirtualIndices, float[] targetVirtualIndices) {
             for (int i = 0; i < count; i++) {
                 float stripCenter = GetStripByIndex(startIdx + i).CenterY;
-                float currentIdx = _circleParamsConfig.GetStripVirtualIndex(stripCenter + _activeSegments[i].Radius);
+                float currentIdx = _circleParamsConfig.GetCenteredStripVirtualIndex(stripCenter + _activeSegments[i].Radius, _totalStripCount);
                 float targetIdx = startIdx + i;
 
                 if (currentIdx - targetIdx > subsetCount / 2f)

@@ -35,7 +35,7 @@ namespace Feature.SlideAreaModule.Scripts {
             _circleParamsConfig = await _circleParamsConfigTask;
         }
 
-        public void SpawnSlideAreas(LevelConfig levelConfig) {
+        public void SpawnSlideAreas(LevelConfig levelConfig, int totalStripCount) {
             Clear();
 
             if (levelConfig.SlideAreaConfigs == null) return;
@@ -49,8 +49,8 @@ namespace Feature.SlideAreaModule.Scripts {
                     continue;
                 }
 
-                float innerBoundaryY = _circleParamsConfig.GetStripBoundaryY(config.endCircleIndex, true);
-                float outerBoundaryY = _circleParamsConfig.GetStripBoundaryY(config.startCircleIndex, false);
+                float innerBoundaryY = _circleParamsConfig.GetCenteredStripBoundaryY(config.endCircleIndex, totalStripCount, false);
+                float outerBoundaryY = _circleParamsConfig.GetCenteredStripBoundaryY(config.startCircleIndex, totalStripCount, true);
 
                 float segmentSpan = stripLoopLength / config.totalSegments;
                 float leftX = config.sectorIndex * segmentSpan - stripLoopLength * 0.5f;

@@ -5,7 +5,7 @@ using Feature.LevelModule.Scripts;
 namespace Feature.SlideAreaModule.Scripts {
     public interface ISlideAreaService {
         UniTask Initialize();
-        void SpawnSlideAreas(LevelConfig levelConfig);
+        void SpawnSlideAreas(LevelConfig levelConfig, int totalStripCount);
         void Clear();
     }
 }

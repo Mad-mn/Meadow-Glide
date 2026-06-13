@@ -59,7 +59,7 @@ namespace Feature.LevelInitializeModule {
             await _stripSpawnService.Initialize();
 
             SpawnStrips(levelData);
-            _slideAreaService.SpawnSlideAreas(levelData.LevelConfig);
+            _slideAreaService.SpawnSlideAreas(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count);
 
             await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
 
@@ -101,9 +101,12 @@ namespace Feature.LevelInitializeModule {
             _stripModel.Clear();
 
             var circleConfigs = levelData.LevelConfig.CircleConfigs;
+            int totalStripCount = circleConfigs.Count;
+            _slideSegmentService.SetTotalStripCount(totalStripCount);
+
             for (int i = 0; i < circleConfigs.Count; i++) {
                 CircleConfig config = circleConfigs[i];
-                StripController strip = _stripSpawnService.SpawnStrip(config, i);
+                StripController strip = _stripSpawnService.SpawnStrip(config, i, totalStripCount);
                 _spawnedStrips.Add(strip);
             }
         }

@@ -31,9 +31,9 @@ namespace Feature.StripsModule.Scripts {
             _stripControllerPrefab = await _stripControllerTask;
         }
 
-        public StripController SpawnStrip(CircleConfig config, int positionIndex) {
+        public StripController SpawnStrip(CircleConfig config, int positionIndex, int totalStripCount) {
             StripController strip = _instantiator.InstantiatePrefabForComponent<StripController>(_stripControllerPrefab);
-            float centerY = _circleParamsConfig.GetStripCenterY(positionIndex);
+            float centerY = _circleParamsConfig.GetCenteredStripY(positionIndex, totalStripCount);
             float segmentHeight = _circleParamsConfig.GetUniformSegmentThickness();
             float stripLoopLength = _circleParamsConfig.StripLoopLength;
 

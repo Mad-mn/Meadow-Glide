@@ -95,6 +95,7 @@ namespace Feature.StripsModule.Scripts {
             _lineRenderer.enabled = visible;
             if (_trigger != null) _trigger.SetActive(visible);
             _statusIcon.gameObject.SetActive(visible);
+            UpdateStatusIcon();
         }
 
         public int GetSortingOrder() => _lineRenderer.sortingOrder;
