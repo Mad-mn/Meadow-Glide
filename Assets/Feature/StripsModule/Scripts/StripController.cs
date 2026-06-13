@@ -83,7 +83,10 @@ namespace Feature.StripsModule.Scripts {
                 return null;
 
             float segmentSpan = GetSegmentSpan();
-            int slotIndex = Mod(Mathf.FloorToInt((columnIndex + _scrollOffset / segmentSpan)), SegmentCount);
+            var b = _scrollOffset / segmentSpan;
+            var a = Mathf.FloorToInt((columnIndex + b));
+           
+            int slotIndex = Mod(a, SegmentCount);
             return _spawnedSegments[slotIndex];
         }
 

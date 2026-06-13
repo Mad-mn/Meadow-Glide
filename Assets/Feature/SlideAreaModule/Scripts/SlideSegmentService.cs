@@ -455,9 +455,11 @@ namespace Feature.SlideAreaModule.Scripts {
 
                 StripController targetStrip = GetStripByIndex(startIdx + i);
                 float segmentSpan = targetStrip.GetSegmentSpan();
-                targetSlotIndices[i] = Mod(
-                    Mathf.FloorToInt((sectorIndex + targetStrip.ScrollOffset / segmentSpan)),
-                    targetStrip.SegmentCount);
+                var b = targetStrip.ScrollOffset / segmentSpan;
+                var a = Mathf.FloorToInt((sectorIndex + b));
+           
+                int slotIndex = Mod(a, targetStrip.SegmentCount);
+                targetSlotIndices[i] = slotIndex;
             }
 
             for (int i = 0; i < count; i++) {
