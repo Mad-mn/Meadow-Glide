@@ -7,6 +7,7 @@ namespace Feature.StripsModule.Scripts {
     public class StripAnimationController : MonoBehaviour {
         [SerializeField] private StripController _strip;
         [SerializeField] private float _segmentZoomDuration;
+        [SerializeField] private float _secondsDelayAfterCompleted = 2f;
 
         private bool _completedAnimationPlaying;
 
@@ -26,7 +27,7 @@ namespace Feature.StripsModule.Scripts {
                 segment.ZoomOut();
             }
 
-            yield return wait;
+            yield return new WaitForSeconds(_secondsDelayAfterCompleted);
             callback?.Invoke();
             _completedAnimationPlaying = false;
         }

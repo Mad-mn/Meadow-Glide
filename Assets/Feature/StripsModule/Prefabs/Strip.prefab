@@ -61,3 +61,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.StripsModule.Scripts.StripAnimationController
   _strip: {fileID: 5404229228989650961}
   _segmentZoomDuration: 0.1
+  _secondsDelayAfterCompleted: 1
