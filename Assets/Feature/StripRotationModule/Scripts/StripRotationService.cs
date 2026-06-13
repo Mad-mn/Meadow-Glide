@@ -80,7 +80,7 @@ namespace Feature.StripRotationModule.Scripts {
         private void OnPointerDown() {
             if (_moveTrackModel.MovesLeft <= 0)
                 return;
-            if (_interactionStateService.IsSlideActive)
+            if (_interactionStateService.IsSlideActive || _interactionStateService.InputBlocked)
                 return;
 
             TryStartRotation();

@@ -15,5 +15,6 @@ namespace Feature.UIServiceModule.Scripts {
         }
 
         public virtual void Show() { }
+        public virtual void Hide() { }
     }
 }

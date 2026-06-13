@@ -1,5 +1,6 @@
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
+using Feature.InputModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 
@@ -8,17 +9,30 @@ namespace Feature.ConfirmExitToMainMenuViewModule.Scripts {
         private readonly IViewService _viewService;
         private readonly IGameStateMachine _gameStateMachine;
         private readonly IAudioService _audioService;
+        private readonly IInteractionStateService _interactionStateService;
 
         public ConfirmExitToMainMenuPresenter(ConfirmExitToMainMenuView view,
-            IViewService viewService, IGameStateMachine gameStateMachine, IAudioService audioService) : base(view) {
+            IViewService viewService, IGameStateMachine gameStateMachine, IAudioService audioService,
+            IInteractionStateService interactionStateService) : base(view) {
             _viewService = viewService;
             _gameStateMachine = gameStateMachine;
             _audioService = audioService;
+            _interactionStateService = interactionStateService;
         }
 
         public override void Initialize() {
             View.YesButton.onClick.AddListener(ExitToMainMenu);
             View.NoButton.onClick.AddListener(CloseConfirmWindow);
+        }
+
+        public override void Show() {
+            base.Show();
+            _interactionStateService.InputBlocked = true;
+        }
+
+        public override void Hide() {
+            base.Hide();
+            _interactionStateService.InputBlocked = false;
         }
 
         private void CloseConfirmWindow() {

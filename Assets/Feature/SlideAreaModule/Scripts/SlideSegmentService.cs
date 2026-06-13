@@ -125,7 +125,7 @@ namespace Feature.SlideAreaModule.Scripts {
             if (_moveTrackModel.MovesLeft <= 0)
                 return;
 
-            if (_interactionState.IsRotationActive)
+            if (_interactionState.IsRotationActive || _interactionState.InputBlocked)
                 return;
 
             if (_isSnapping)

@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
+using Feature.InputModule.Scripts;
 using Feature.LevelInitializeModule;
 using Feature.LevelModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
@@ -13,19 +14,31 @@ namespace Feature.LoseViewModule.Scripts {
         private readonly ILevelInitializeService _levelInitializeService;
         private readonly IViewService _viewService;
         private readonly IMoveTrackService _moveTrackService;
+        private readonly IInteractionStateService _interactionStateService;
 
         public LosePresenter(LoseView view, IGameStateMachine gameStateMachine, ILevelInitializeService levelInitializeService,
-            IViewService viewService, IMoveTrackService moveTrackService) : base(view) {
+            IViewService viewService, IMoveTrackService moveTrackService, IInteractionStateService interactionStateService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _levelInitializeService = levelInitializeService;
             _viewService = viewService;
             _moveTrackService = moveTrackService;
+            _interactionStateService = interactionStateService;
         }
 
         public override void Initialize() {
             View.RestartButton.onClick.AddListener(OnNextButtonClick);
             View.MainMenuButton.onClick.AddListener(OnMainMenuButtonClick);
             View.AddMovesButton.onClick.AddListener(AddMovesButtonClick);
+        }
+
+        public override void Show() {
+            base.Show();
+            _interactionStateService.InputBlocked = true;
+        }
+
+        public override void Hide() {
+            base.Hide();
+            _interactionStateService.InputBlocked = false;
         }
 
         private void AddMovesButtonClick() {

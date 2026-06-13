@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using Feature.ConfirmExitToMainMenuViewModule.Scripts;
-using Feature.GameStateModule.Scripts;
 using Feature.LevelInitializeModule;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;

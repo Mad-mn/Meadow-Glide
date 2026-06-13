@@ -3,5 +3,6 @@ namespace Feature.UIServiceModule.Scripts {
         void Initialize();
         void Dispose();
         void Show();
+        void Hide();
     }
 }

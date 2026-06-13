@@ -119,6 +119,7 @@ namespace Feature.UIServiceModule.Scripts {
             if (!_activeViews.TryGetValue(viewType, out var active)) return;
 
             active.view.Hide();
+            active.presenter.Hide();
 
             if (active.view.DestroyOnClose) {
                 active.presenter?.Dispose();
