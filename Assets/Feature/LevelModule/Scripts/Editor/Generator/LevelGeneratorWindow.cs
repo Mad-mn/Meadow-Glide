@@ -229,52 +229,112 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             if (_currentLevel == null) return;
 
             var painter = mgc.painter2D;
-            var center = _previewArea.contentRect.center;
-            float maxRadius = Mathf.Min(_previewArea.contentRect.width, _previewArea.contentRect.height) / 2f - 20f;
+            Rect rect = _previewArea.contentRect;
+            Vector2 center = rect.center;
 
             var circles = _currentLevel.LevelConfig.CircleConfigs;
-            int count = circles.Count;
-            float ringThickness = maxRadius / (count + 1);
+            int stripeCount = circles.Count;
+            if (stripeCount == 0) return;
 
-            // Draw Areas background
-            foreach (var area in _currentLevel.LevelConfig.SlideAreaConfigs) {
-                float innerR = (area.startCircleIndex + 1) * ringThickness - ringThickness / 2f;
-                float outerR = (area.endCircleIndex + 1) * ringThickness + ringThickness / 2f;
-                
-                float angleStep = 360f / area.totalSegments;
-                float startA = area.sectorIndex * angleStep - 90f;
-                float endA = (area.sectorIndex + 1) * angleStep - 90f;
+            int totalSectors = circles[0].SegmentCount;
 
-                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
-                    painter.fillColor = new Color(1, 0.6f, 0, 0.25f);
-                    painter.strokeColor = Color.orange;
-                    painter.lineWidth = 2f;
-                } else {
-                    painter.fillColor = new Color(1, 1, 1, 0.1f);
-                }
+            CircleParamsConfig cfg = LoadCircleParamsConfig();
+            float segmentWidth = cfg != null ? cfg.GetUniformSegmentThickness() : 0.3f;
+            float distanceBetween = cfg != null ? cfg.DistanceBetweenCircles : 1f;
+            float spacing = segmentWidth + distanceBetween;
+            float stripLoopLength = cfg != null ? cfg.StripLoopLength : 4f * Mathf.PI;
 
+            float segmentSpan = stripLoopLength / totalSectors;
+            float totalHeight = (stripeCount - 1) * spacing;
+
+            float availableWidth = rect.width - 40f;
+            float availableHeight = rect.height - 40f;
+            float scaleX = availableWidth / stripLoopLength;
+            float scaleY = availableHeight / (totalHeight + segmentWidth);
+            float scale = Mathf.Min(scaleX, scaleY, 45f) * 1.5f;
+
+            float scaledLoopLength = stripLoopLength * scale;
+            float scaledSpacing = spacing * scale;
+            float scaledSegmentWidth = segmentWidth * scale;
+            float scaledSegmentSpan = segmentSpan * scale;
+
+            float originX = center.x - scaledLoopLength * 0.5f;
+            float originY = center.y + totalHeight * scale * 0.5f;
+
+            for (int s = 0; s < totalSectors; s++) {
+                float sectorCenterX = originX + (s + 0.5f) * scaledSegmentSpan;
+                float dotY = originY + scaledSpacing * 0.7f;
+                painter.fillColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
                 painter.BeginPath();
-                painter.Arc(center, outerR, Angle.Degrees(startA), Angle.Degrees(endA), ArcDirection.Clockwise);
-                painter.Arc(center, innerR, Angle.Degrees(endA), Angle.Degrees(startA), ArcDirection.CounterClockwise);
+                painter.Arc(new Vector2(sectorCenterX, dotY), 2f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
                 painter.Fill();
-                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
+            }
+
+            for (int i = 0; i < stripeCount; i++) {
+                float stripeY = originY - i * scaledSpacing;
+
+                for (int s = 0; s < totalSectors; s++) {
+                    var segment = circles[i].Segments[s];
+                    float segLeft = originX + s * scaledSegmentSpan;
+                    float segRight = segLeft + scaledSegmentSpan;
+                    float segTop = stripeY + scaledSegmentWidth * 0.5f;
+                    float segBottom = stripeY - scaledSegmentWidth * 0.5f;
+
+                    painter.fillColor = GetColor(segment.ColorType);
+                    DrawRect(painter, segLeft, segBottom, segRight, segTop);
+                    painter.Fill();
+
+                    painter.strokeColor = new Color(0, 0, 0, 0.3f);
+                    painter.lineWidth = 1f;
+                    DrawRect(painter, segLeft, segBottom, segRight, segTop);
                     painter.Stroke();
-                    
-                    // Draw allowed colors as small dots
+
+                    if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked) {
+                        float dotX = (segLeft + segRight) / 2f;
+                        float dotY = stripeY;
+                        painter.fillColor = Color.black;
+                        painter.BeginPath();
+                        painter.Arc(new Vector2(dotX, dotY), 5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                        painter.Fill();
+                        painter.strokeColor = Color.white;
+                        painter.lineWidth = 1f;
+                        painter.Stroke();
+                    }
+                }
+            }
+
+            float stripeBarWidth = scaledSegmentWidth * 0.4f;
+
+            foreach (var area in _currentLevel.LevelConfig.SlideAreaConfigs) {
+                float startY = originY - area.startCircleIndex * scaledSpacing;
+                float endY = originY - area.endCircleIndex * scaledSpacing;
+                float centerX = originX + (area.sectorIndex + 0.5f) * scaledSegmentSpan;
+                float barLeft = centerX - stripeBarWidth * 0.5f;
+                float barRight = centerX + stripeBarWidth * 0.5f;
+
+                painter.fillColor = new Color(1f, 1f, 1f, 0.7f);
+                DrawRect(painter, barLeft, endY, barRight, startY);
+                painter.Fill();
+
+                painter.strokeColor = new Color(0.3f, 0.3f, 0.3f, 0.8f);
+                painter.lineWidth = 1f;
+                DrawRect(painter, barLeft, endY, barRight, startY);
+                painter.Stroke();
+
+                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
                     if (area.Colors != null && area.Colors.Count > 0) {
-                        float midA = (startA + endA) / 2f;
+                        float midY = (startY + endY) / 2f;
                         float dotRadius = 4f;
-                        float spacing = 12f;
-                        float startDist = (innerR + outerR) / 2f - (area.Colors.Count - 1) * spacing / 2f;
-                        
+                        float dotSpacing = 12f;
+                        float dotsStartY = midY + (area.Colors.Count - 1) * dotSpacing * 0.5f;
+
                         for (int cIdx = 0; cIdx < area.Colors.Count; cIdx++) {
-                            float dist = startDist + cIdx * spacing;
-                            Vector2 dotPos = center + new Vector2(Mathf.Cos(midA * Mathf.Deg2Rad), Mathf.Sin(midA * Mathf.Deg2Rad)) * dist;
+                            float dotY = dotsStartY - cIdx * dotSpacing;
+                            Vector2 dotPos = new Vector2(centerX, dotY);
                             painter.fillColor = GetColor(area.Colors[cIdx]);
                             painter.BeginPath();
                             painter.Arc(dotPos, dotRadius, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
                             painter.Fill();
-                            // Border for dot
                             painter.strokeColor = Color.black;
                             painter.lineWidth = 1f;
                             painter.Stroke();
@@ -282,56 +342,29 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     }
                 }
             }
+        }
 
-            // Draw Sector Indices
-            int totalSectors = circles[0].SegmentCount;
-            float sectorAngleStep = 360f / totalSectors;
-            painter.fillColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
-            for (int s = 0; s < totalSectors; s++) {
-                float angle = s * sectorAngleStep + (sectorAngleStep / 2f) - 90f;
-                Vector2 pos = center + new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * (maxRadius + 10f);
-                painter.BeginPath();
-                painter.Arc(pos, 2f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
-                painter.Fill();
+        private static void DrawRect(Painter2D painter, float left, float bottom, float right, float top) {
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(left, bottom));
+            painter.LineTo(new Vector2(right, bottom));
+            painter.LineTo(new Vector2(right, top));
+            painter.LineTo(new Vector2(left, top));
+            painter.ClosePath();
+        }
+
+        private static CircleParamsConfig _cachedCircleParamsConfig;
+
+        private static CircleParamsConfig LoadCircleParamsConfig() {
+            if (_cachedCircleParamsConfig != null) return _cachedCircleParamsConfig;
+
+            var guids = AssetDatabase.FindAssets("t:CircleParamsConfig");
+            if (guids.Length > 0) {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                _cachedCircleParamsConfig = AssetDatabase.LoadAssetAtPath<CircleParamsConfig>(path);
             }
-
-            for (int i = 0; i < count; i++) {
-                float r = (i + 1) * ringThickness;
-                int sectors = circles[i].SegmentCount;
-                float angleStep = 360f / sectors;
-                
-                // Draw Ring Index Marker (small dot at start of ring)
-                Vector2 ringMarkerPos = center + new Vector2(0, -1) * (r + ringThickness * 0.35f);
-                painter.fillColor = new Color(1, 1, 1, 0.2f);
-                painter.BeginPath();
-                painter.Arc(ringMarkerPos, 1.5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
-                painter.Fill();
-
-                for (int s = 0; s < sectors; s++) {
-                    var segment = circles[i].Segments[s];
-                    painter.strokeColor = GetColor(segment.ColorType);
-                    painter.lineWidth = ringThickness * 0.7f;
-                    float startA = s * angleStep - 88f;
-                    float endA = (s + 1) * angleStep - 92f;
-
-                    painter.BeginPath();
-                    painter.Arc(center, r, Angle.Degrees(startA), Angle.Degrees(endA), ArcDirection.Clockwise);
-                    painter.Stroke();
-
-                    if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked) {
-                        painter.fillColor = Color.black;
-                        painter.strokeColor = Color.white;
-                        painter.lineWidth = 1f;
-                        float mid = (startA + endA) / 2f;
-                        Vector2 pos = center + new Vector2(Mathf.Cos(mid * Mathf.Deg2Rad), Mathf.Sin(mid * Mathf.Deg2Rad)) * r;
-                        painter.BeginPath();
-                        painter.Arc(pos, 5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
-                        painter.Fill();
-                        painter.Stroke();
-                    }
-                }
-            }
-}
+            return _cachedCircleParamsConfig;
+        }
 
         private Color GetColor(Feature.ColorServiceModule.Scripts.CircleColorType type) {
             switch (type) {
