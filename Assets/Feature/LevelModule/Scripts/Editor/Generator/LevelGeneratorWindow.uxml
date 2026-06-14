@@ -81,13 +81,21 @@
                     <ui:Toggle name="allowEmptySegments" value="false" class="field-input" />
                 </ui:VisualElement>
                 <ui:VisualElement class="field-row">
-                    <ui:Label text="Empty Chance:" class="field-label" />
-                    <ui:Slider name="emptyChance" low-value="0" high-value="1" value="0.3" class="field-input" />
-                </ui:VisualElement>
-                <ui:VisualElement class="field-row">
                     <ui:Label text="Empty Segments (Min/Max):" class="field-label" />
                     <uie:IntegerField name="minEmptySegments" value="2" class="field-input" />
                     <uie:IntegerField name="maxEmptySegments" value="5" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Intelligent Selection:" class="field-label" />
+                    <ui:Toggle name="useIntelligentEmpty" value="true" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Min Score Threshold:" class="field-label" />
+                    <ui:Slider name="emptyMinScore" low-value="0" high-value="10" value="3" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Top K for Solver Check:" class="field-label" />
+                    <uie:IntegerField name="emptyTopKForSolver" value="5" class="field-input" />
                 </ui:VisualElement>
             </ui:ScrollView>
             <ui:Button name="generateButton" text="Generate Level" class="primary-button" />

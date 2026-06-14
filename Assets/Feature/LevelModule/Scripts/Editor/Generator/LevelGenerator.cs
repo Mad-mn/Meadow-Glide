@@ -24,6 +24,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public bool AllowEmptySegments;
             public float EmptyChance;
             public int MinEmptySegments, MaxEmptySegments;
+            public bool UseIntelligentEmpty;
+            public float EmptyMinScore;
+            public int EmptyTopKForSolver;
             public int MaxAttempts;
             public int MaxIterations;
             public int Seed;
@@ -135,7 +138,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     int difficulty = solver.Solve(currentLevel, out _);
 
                     if (p.AllowEmptySegments) {
-                        ApplyEmptySegments(statuses, rings, sectors, rnd, p);
+                        ApplyEmptySegments(statuses, currentLevel.Colors, rings, sectors, areas, rnd, p);
                     }
 
                     var candidate = new RawLevelData {
@@ -353,29 +356,72 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             return solver.ApplyMove(state, move);
         }
 
-        private void ApplyEmptySegments(SegmentStatus[,] statuses, int rings, int sectors, Random rnd, GenerationParams p) {
+        private void ApplyEmptySegments(SegmentStatus[,] statuses, byte[,] colors, int rings, int sectors,
+            List<SlideAreaConfig> areas, Random rnd, GenerationParams p) {
             int totalSegments = rings * sectors;
             int targetEmpty = rnd.Next(p.MinEmptySegments, Math.Min(p.MaxEmptySegments + 1, totalSegments));
 
-            var candidates = new List<(int r, int s)>();
-            for (int r = 0; r < rings; r++) {
-                for (int s = 0; s < sectors; s++) {
-                    if (statuses[r, s] == SegmentStatus.Default) {
-                        candidates.Add((r, s));
-                    }
-                }
+            if (targetEmpty <= 0) return;
+
+            var scorer = new EmptySegmentScorer();
+            var scored = scorer.ScoreCandidates(colors, statuses, rings, sectors, areas);
+
+            List<EmptySegmentScorer.ScoredCandidate> selected;
+
+            if (p.UseIntelligentEmpty && scored.Count > 0) {
+                selected = scorer.SelectHybrid(
+                    scored, targetEmpty, p.EmptyMinScore,
+                    Math.Min(p.EmptyTopKForSolver, scored.Count),
+                    EvaluateCandidateWithSolver,
+                    colors, statuses, rings, sectors, areas, rnd);
+            } else {
+                selected = scorer.SelectByScore(scored, targetEmpty, p.EmptyMinScore, rnd);
             }
 
-            candidates = candidates.OrderBy(_ => rnd.Next()).ToList();
-
-            int emptied = 0;
-            foreach (var (r, s) in candidates) {
-                if (emptied >= targetEmpty) break;
-                if (rnd.NextDouble() < p.EmptyChance) {
-                    statuses[r, s] = SegmentStatus.Empty;
-                    emptied++;
-                }
+            foreach (var c in selected) {
+                statuses[c.RingIndex, c.SectorIndex] = SegmentStatus.Empty;
             }
+        }
+
+        private float EvaluateCandidateWithSolver(
+            byte[,] colors, SegmentStatus[,] statuses,
+            int rings, int sectors,
+            int testRing, int testSector,
+            List<SlideAreaConfig> areas,
+            EmptySegmentScorer.ScoredCandidate candidate) {
+
+            var testStatuses = (SegmentStatus[,])statuses.Clone();
+            testStatuses[testRing, testSector] = SegmentStatus.Empty;
+
+            var state = new LevelState(rings, sectors);
+            for (int r = 0; r < rings; r++)
+                for (int s = 0; s < sectors; s++)
+                    state.Colors[r, s] = colors[r, s];
+
+            var solver = new LevelSolver(areas, rings, sectors, 5000);
+            for (int r = 0; r < rings; r++)
+                for (int s = 0; s < sectors; s++)
+                    if (testStatuses[r, s] == SegmentStatus.Blocked)
+                        solver.SetLockedSegment(r, s, colors[r, s]);
+
+            int movesToSolve = solver.Solve(state, out _);
+
+            float score = 0f;
+
+            if (movesToSolve > 15) score += 3f;
+            else if (movesToSolve > 8) score += 2f;
+            else if (movesToSolve > 3) score += 1f;
+
+            int sameColorCount = 0;
+            for (int s = 0; s < sectors; s++) {
+                if (s != testSector && (CircleColorType)colors[testRing, s] == candidate.Color)
+                    sameColorCount++;
+            }
+
+            if (sameColorCount >= 2) score += 1f;
+            else if (sameColorCount == 0) score -= 1f;
+
+            return Mathf.Clamp(score, 0f, 10f);
         }
     }
 }

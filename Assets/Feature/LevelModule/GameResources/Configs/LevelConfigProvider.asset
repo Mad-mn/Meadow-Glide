@@ -154,4 +154,4 @@ MonoBehaviour:
   - LevelID: 69
     LevelConfig: {fileID: 11400000, guid: 7c250ce576fcf034b8eb7757f315bd60, type: 2}
   - LevelID: 70
-    LevelConfig: {fileID: 11400000, guid: 448e8b6271f496e4dbe49190c9b8b73a, type: 2}
+    LevelConfig: {fileID: 11400000, guid: ba9e0d9eb459ff54cb348600ee41ff82, type: 2}
