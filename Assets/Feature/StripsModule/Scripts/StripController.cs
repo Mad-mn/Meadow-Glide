@@ -84,12 +84,16 @@ namespace Feature.StripsModule.Scripts {
             if (_spawnedSegments.Count == 0)
                 return null;
 
-            float segmentSpan = GetSegmentSpan();
-            var b = _scrollOffset / segmentSpan;
-            var a = Mathf.FloorToInt((columnIndex + b));
-           
-            int slotIndex = Mod(a, SegmentCount);
+            int scrollSegments = GetScrollSegments();
+            int effectiveColumn = columnIndex + scrollSegments;
+            int slotIndex = Mod(effectiveColumn, SegmentCount);
             return _spawnedSegments[slotIndex];
+        }
+
+        public int GetScrollSegments() {
+            float segmentSpan = GetSegmentSpan();
+            if (segmentSpan <= 0f) return 0;
+            return Mathf.RoundToInt(_scrollOffset / segmentSpan);
         }
 
         public void SetScrollOffset(float offset, bool showWrapGhosts = false) {
