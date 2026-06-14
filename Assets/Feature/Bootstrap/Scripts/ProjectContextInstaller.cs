@@ -1,4 +1,5 @@
 using Feature.AddressableModule.Scripts.Installers;
+using Feature.AnimationModule.Scripts.Installers;
 using Feature.AssetBindingModule.Scripts.Installers;
 using Feature.CameraServiceModule.Scripts.Installers;
 using Feature.CircleModule.Scripts.Installers;
@@ -25,8 +26,9 @@ using Zenject;
 [CreateAssetMenu(fileName = "ProjectContextInstaller", menuName = "Installers/ProjectContextInstaller")]
 public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextInstaller>
 {
-    public override void InstallBindings()
+        public override void InstallBindings()
     {
+        AnimationModuleInstaller.Install(Container);
         AddressableModuleInstaller.Install(Container);
         AssetBindingModuleInstaller.Install(Container);
         CameraServiceModuleInstaller.Install(Container);

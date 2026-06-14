@@ -11,20 +11,22 @@ namespace Feature.StripsModule.Scripts {
         [SerializeField] private LineRenderer _lineRenderer;
         [SerializeField] private SpriteRenderer _statusIcon;
         [SerializeField] private SegmentAnimationController _animationController;
-        [SerializeField] private float _zoomScaleMultiplier = 2f;
+        [SerializeField] private float _statusIconSizeMultiplier = 0.6f;
 
         private SegmentConfig _currentConfig;
         private ISegmentStatusVisualDataProvider _visualDataProvider;
         private float _centerY;
         private float _halfSpan;
         private float _currentHeight;
-        private bool _zoomed;
 
         public float Radius => _centerY;
         public CircleColorType ColorType => _currentConfig != null ? _currentConfig.ColorType : CircleColorType.None;
         public bool IsBlocked => _currentConfig != null && _currentConfig.SegmentStatus == SegmentStatus.Blocked;
-        public float CurrentWight => _currentHeight;
-        public bool IsZoomed => _zoomed;
+        public float CurrentWight => _animationController != null && _animationController.IsZoomed
+            ? _animationController.ZoomedHeight
+            : _currentHeight;
+        public bool IsZoomed => _animationController != null && _animationController.IsZoomed;
+        public bool IsAnimating => _animationController != null && _animationController.IsAnimating;
 
         public void Initialize(SegmentConfig config, Color color, float height, float halfSpan,
             ISegmentStatusVisualDataProvider visualDataProvider) {
@@ -39,6 +41,9 @@ namespace Feature.StripsModule.Scripts {
             _lineRenderer.endColor = color;
             _lineRenderer.startWidth = height;
             _lineRenderer.endWidth = height;
+
+            if (_animationController != null)
+                _animationController.Initialize(height, _lineRenderer.sortingOrder);
 
             DrawHorizontalLine();
             SetupTriggerPosition();
@@ -64,9 +69,16 @@ namespace Feature.StripsModule.Scripts {
         }
 
         public void SetWidth(float height, bool zoomed = false) {
-            _currentHeight = zoomed ? height * _zoomScaleMultiplier : height;
+            if (_animationController != null && (_animationController.IsZoomed || _animationController.IsAnimating)) {
+                _animationController.SetBaseHeight(height);
+                return;
+            }
+
+            _currentHeight = height;
             _lineRenderer.startWidth = _currentHeight;
             _lineRenderer.endWidth = _currentHeight;
+            if (_animationController != null)
+                _animationController.SetBaseHeight(height);
             UpdateStatusIcon();
         }
 
@@ -108,6 +120,8 @@ namespace Feature.StripsModule.Scripts {
 
         public void SetSortingOrder(int order) {
             _lineRenderer.sortingOrder = order;
+            if (_animationController != null)
+                _animationController.SetBaseSortingOrder(order);
         }
 
         public void SetRadius(float y) {
@@ -124,21 +138,24 @@ namespace Feature.StripsModule.Scripts {
         }
 
         public void ZoomIn(bool force = false) {
-            if (_zoomed && !force)
-                return;
-
-            _lineRenderer.sortingOrder *= 2;
-            SetWidth(_currentHeight * _zoomScaleMultiplier);
-            _zoomed = true;
+            if (_animationController != null)
+                _animationController.ZoomIn(force);
         }
 
         public void ZoomOut() {
-            if (!_zoomed)
-                return;
+            if (_animationController != null)
+                _animationController.ZoomOut();
+        }
 
-            _lineRenderer.sortingOrder /= 2;
-            SetWidth(_currentHeight / _zoomScaleMultiplier);
-            _zoomed = false;
+        public void ForceResetZoom() {
+            if (_animationController != null)
+                _animationController.ForceResetZoom();
+        }
+
+        public void SetVisualWidth(float width) {
+            _currentHeight = width;
+            _lineRenderer.startWidth = width;
+            _lineRenderer.endWidth = width;
         }
 
         private void DrawHorizontalLine() {

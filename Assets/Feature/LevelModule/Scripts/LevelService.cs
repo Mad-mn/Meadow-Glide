@@ -17,11 +17,10 @@ namespace Feature.LevelModule.Scripts {
         private readonly LevelModel _levelModel;
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IViewService _viewService;
-        private readonly IInteractionStateService _interactionStateService;
         private LevelConfigProvider _levelConfigProvider;
 
         public LevelService(UniTask<LevelConfigProvider> levelConfigProviderTask, ISaveDataModel saveDataModel, ITutorialService tutorialService,
-            ISegmentStatusService segmentStatusService, LevelModel levelModel, MoveTrackModel moveTrackModel, IViewService viewService, IInteractionStateService interactionStateService) {
+            ISegmentStatusService segmentStatusService, LevelModel levelModel, MoveTrackModel moveTrackModel, IViewService viewService) {
             _levelConfigProviderTask = levelConfigProviderTask;
             _saveDataModel = saveDataModel;
             _tutorialService = tutorialService;
@@ -29,7 +28,6 @@ namespace Feature.LevelModule.Scripts {
             _levelModel = levelModel;
             _moveTrackModel = moveTrackModel;
             _viewService = viewService;
-            _interactionStateService = interactionStateService;
         }
 
         public async UniTask Initialize() {
@@ -46,7 +44,6 @@ namespace Feature.LevelModule.Scripts {
             _tutorialService.TryActivateTutorial();
             _segmentStatusService.UpdateStatus();
             _levelModel.StartLevel();
-            _interactionStateService.InputBlocked = false;
         }
 
         public void LevelEnded() {

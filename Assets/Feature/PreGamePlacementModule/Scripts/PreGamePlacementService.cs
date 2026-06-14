@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Feature.AnimationModule.Scripts;
 using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.ColorServiceModule.Scripts;
@@ -15,8 +16,6 @@ using Zenject;
 namespace Feature.PreGamePlacementModule.Scripts {
     public class PreGamePlacementService : IPreGamePlacementService, ITickable, IInitializable, IDisposable {
         private const float PoolSpacing = 1.5f;
-        private const float SelectScale = 1.3f;
-        private const float FlyDuration = 0.35f;
         private const float PoolBottomMargin = 1.5f;
 
         private readonly IInputService _inputService;
@@ -26,6 +25,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
         private readonly StripModel _stripModel;
         private readonly ICircleColorService _colorService;
         private readonly ISegmentStatusVisualDataProvider _statusVisualDataProvider;
+        private readonly IAnimationService _animationService;
         private readonly IInstantiator _instantiator;
         private readonly UniTask<StripController> _stripControllerTask;
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
@@ -55,6 +55,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
             StripModel stripModel,
             ICircleColorService colorService,
             ISegmentStatusVisualDataProvider statusVisualDataProvider,
+            IAnimationService animationService,
             IInstantiator instantiator,
             UniTask<StripController> stripControllerTask,
             UniTask<CircleParamsConfig> circleParamsConfigTask) {
@@ -65,6 +66,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
             _stripModel = stripModel;
             _colorService = colorService;
             _statusVisualDataProvider = statusVisualDataProvider;
+            _animationService = animationService;
             _instantiator = instantiator;
             _stripControllerTask = stripControllerTask;
             _circleParamsConfigTask = circleParamsConfigTask;
@@ -281,21 +283,12 @@ namespace Feature.PreGamePlacementModule.Scripts {
                 return;
             }
 
-            Vector3 startPos = piece.Strip.transform.position;
+            HighlightAllEmptySlots(false);
+
             Vector3 endPos = targetSegment.transform.position;
-
-            float elapsed = 0f;
-            while (elapsed < FlyDuration) {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / FlyDuration);
-                float eased = 1f - Mathf.Pow(1f - t, 3f);
-
-                piece.Strip.transform.position = Vector3.Lerp(startPos, endPos, eased);
-
-                await UniTask.Yield();
-            }
-
-            piece.Strip.transform.position = endPos;
+            var flyTcs = new UniTaskCompletionSource();
+            _animationService.PlayFly(piece.Strip.transform, endPos, () => flyTcs.TrySetResult());
+            await flyTcs.Task;
 
             SegmentConfig placedConfig = new SegmentConfig {
                 ColorType = piece.ColorType,
@@ -304,10 +297,16 @@ namespace Feature.PreGamePlacementModule.Scripts {
                 Angle = 0f
             };
 
+            targetSegment.ForceResetZoom();
             targetSegment.SetConfig(placedConfig);
             Color color = _colorService.GetColor(piece.ColorType);
             targetSegment.SetColor(color);
             targetSegment.SetWidth(_circleParamsConfig.GetUniformSegmentThickness());
+            targetSegment.SetVisible(false);
+
+            var landTcs = new UniTaskCompletionSource();
+            _animationService.PlayLand(targetSegment.transform, () => landTcs.TrySetResult());
+            await landTcs.Task;
             targetSegment.SetVisible(true);
 
             _emptySlots.Remove(slot);
@@ -321,8 +320,6 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
             if (_emptySlots.Count == 0)
                 MarkComplete();
-            else
-                HighlightAllEmptySlots(true);
         }
 
         private void MarkComplete() {

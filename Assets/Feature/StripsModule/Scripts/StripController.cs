@@ -249,6 +249,8 @@ namespace Feature.StripsModule.Scripts {
             ghost.SetVisible(true);
             ghost.SetSortingOrder(source.GetSortingOrder() - 1);
             ghost.HideStatusIcon();
+            if (source.IsZoomed)
+                ghost.SetVisualWidth(source.CurrentWight);
             _wrapGhosts.Add(ghost);
         }
 

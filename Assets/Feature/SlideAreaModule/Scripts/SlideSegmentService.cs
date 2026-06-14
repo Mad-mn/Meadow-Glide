@@ -155,6 +155,7 @@ namespace Feature.SlideAreaModule.Scripts {
                 PrepareSegments(_activeArea);
                 _slideAreaModel.ChangeSlideState(true);
                 PlaySoundAndVibrationOnInteract(true);
+                ZoomSlideSegments(true);
             }
         }
 
@@ -329,6 +330,7 @@ namespace Feature.SlideAreaModule.Scripts {
             if (count == 0 || _circleParamsConfig == null || _isBlockedByStatus) {
                 _slideAreaModel.ChangeSlideState(false);
                 ClearGhosts();
+                ZoomSlideSegments(false);
                 _activeSegments.Clear();
                 _baseIndices.Clear();
                 _isSnapping = false;
@@ -381,11 +383,22 @@ namespace Feature.SlideAreaModule.Scripts {
             UpdateSegmentsInAreas();
             _stripModel.SegmentsChanged();
             ClearGhosts();
+            ZoomSlideSegments(false);
             _activeSegments.Clear();
             _baseIndices.Clear();
             _slideAreaModel.ChangeSlideState(false);
             _isSnapping = false;
             _interactionState.IsSlideActive = false;
+        }
+
+        private void ZoomSlideSegments(bool zoom) {
+            foreach (var segment in _activeSegments) {
+                if (segment == null) continue;
+                if (zoom)
+                    segment.ZoomIn();
+                else
+                    segment.ZoomOut();
+            }
         }
 
         private void PlaySoundAndVibrationOnInteract(bool isSliding) {

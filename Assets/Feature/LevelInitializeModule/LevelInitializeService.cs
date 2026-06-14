@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
+using Feature.InputModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.PreGamePlacementModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
@@ -26,6 +27,7 @@ namespace Feature.LevelInitializeModule {
         private readonly ICircleControllerService _circleControllerService;
         private readonly StripModel _stripModel;
         private readonly IPreGamePlacementService _preGamePlacementService;
+        private readonly IInteractionStateService _interactionStateService;
 
         private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
@@ -40,7 +42,8 @@ namespace Feature.LevelInitializeModule {
             ITutorialService tutorialService,
             MoveTrackModel moveTrackModel,
             IStripSpawnService stripSpawnService,
-            IPreGamePlacementService preGamePlacementService) {
+            IPreGamePlacementService preGamePlacementService,
+            IInteractionStateService interactionStateService) {
             _slideAreaService = slideAreaService;
             _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
@@ -52,9 +55,12 @@ namespace Feature.LevelInitializeModule {
             _moveTrackModel = moveTrackModel;
             _stripSpawnService = stripSpawnService;
             _preGamePlacementService = preGamePlacementService;
+            _interactionStateService = interactionStateService;
         }
 
         public async UniTask Initialize() {
+            _interactionStateService.InputBlocked = false;
+
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);
             _viewService.ShowView<GameView>(ViewType.GameView);
