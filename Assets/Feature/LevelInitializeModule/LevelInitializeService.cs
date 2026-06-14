@@ -65,15 +65,15 @@ namespace Feature.LevelInitializeModule {
             SpawnStrips(levelData);
             _slideAreaService.SpawnSlideAreas(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count);
 
-            await _preGamePlacementService.StartPlacement(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count);
-
             await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
+            _preGamePlacementService.StartPlacement(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count).Forget();
 
             await UniTask.Delay(1);
             _levelService.LevelStarted();
         }
 
         public async UniTask Dispose() {
+            _preGamePlacementService.Cancel();
             _tutorialService.Deinitialize();
             _viewService.HideView(ViewType.GameView);
             _stripRotationService.Clear();

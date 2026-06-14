@@ -35,6 +35,8 @@ namespace Feature.StripsModule.Scripts {
                 CircleColorType stripColorType = CircleColorType.None;
                 bool completed = true;
                 foreach (StripSegment segment in _spawnedSegments) {
+                    if (segment.GetStatus() is SegmentStatus.Empty)
+                        return false;
                     if (stripColorType is CircleColorType.None) {
                         stripColorType = segment.ColorType;
                         continue;

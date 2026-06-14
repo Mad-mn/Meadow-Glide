@@ -14,10 +14,10 @@ using Zenject;
 
 namespace Feature.PreGamePlacementModule.Scripts {
     public class PreGamePlacementService : IPreGamePlacementService, ITickable, IInitializable, IDisposable {
-        private const float PoolY = -6f;
         private const float PoolSpacing = 1.5f;
         private const float SelectScale = 1.3f;
         private const float FlyDuration = 0.35f;
+        private const float PoolBottomMargin = 1.5f;
 
         private readonly IInputService _inputService;
         private readonly IInteractionStateService _interactionStateService;
@@ -26,6 +26,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
         private readonly StripModel _stripModel;
         private readonly ICircleColorService _colorService;
         private readonly ISegmentStatusVisualDataProvider _statusVisualDataProvider;
+        private readonly IInstantiator _instantiator;
         private readonly UniTask<StripController> _stripControllerTask;
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
 
@@ -54,6 +55,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
             StripModel stripModel,
             ICircleColorService colorService,
             ISegmentStatusVisualDataProvider statusVisualDataProvider,
+            IInstantiator instantiator,
             UniTask<StripController> stripControllerTask,
             UniTask<CircleParamsConfig> circleParamsConfigTask) {
             _inputService = inputService;
@@ -63,6 +65,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
             _stripModel = stripModel;
             _colorService = colorService;
             _statusVisualDataProvider = statusVisualDataProvider;
+            _instantiator = instantiator;
             _stripControllerTask = stripControllerTask;
             _circleParamsConfigTask = circleParamsConfigTask;
         }
@@ -151,6 +154,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
                             Radius = 0f,
                             Angle = 0f
                         });
+                        slot.Segment.SetColor(new Color(0.5f, 0.5f, 0.5f, 0.6f));
                         slot.Segment.SetWidth(_circleParamsConfig.GetUniformSegmentThickness());
                     }
                 }
@@ -176,13 +180,19 @@ namespace Feature.PreGamePlacementModule.Scripts {
                 return;
             }
 
+            float lowestStripeY = GetLowestStripeY();
+            float poolY = lowestStripeY - _circleParamsConfig.StripHeight - PoolBottomMargin;
+
             float totalWidth = (availableColors.Count - 1) * PoolSpacing;
             float startX = -totalWidth * 0.5f;
 
-            for (int i = 0; i < availableColors.Count; i++) {
-                Vector3 pos = new Vector3(startX + i * PoolSpacing, PoolY, 0);
+            int segmentsPerStripe = _emptySlots.Count > 0 ? _emptySlots[0].Strip.SegmentCount : 1;
+            float desiredSpan = _circleParamsConfig.StripLoopLength / segmentsPerStripe;
 
-                StripController poolStrip = UnityEngine.Object.Instantiate(_stripControllerPrefab);
+            for (int i = 0; i < availableColors.Count; i++) {
+                Vector3 pos = new Vector3(startX + i * PoolSpacing, poolY, 0);
+
+                StripController poolStrip = _instantiator.InstantiatePrefabForComponent<StripController>(_stripControllerPrefab);
                 poolStrip.gameObject.name = $"PoolPiece_{availableColors[i]}";
 
                 var dummyConfig = ScriptableObject.CreateInstance<CircleConfig>();
@@ -197,7 +207,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
                 };
 
                 poolStrip.Setup(dummyConfig, _circleParamsConfig.GetUniformSegmentThickness(),
-                    _circleParamsConfig.StripLoopLength, 0f, -1);
+                    desiredSpan, 0f, -1);
 
                 poolStrip.transform.position = pos;
 
@@ -207,6 +217,15 @@ namespace Feature.PreGamePlacementModule.Scripts {
                     OriginalPosition = pos,
                 });
             }
+        }
+
+        private float GetLowestStripeY() {
+            float lowestY = float.MaxValue;
+            foreach (var strip in _stripModel.Strips) {
+                if (strip.CenterY < lowestY)
+                    lowestY = strip.CenterY;
+            }
+            return lowestY;
         }
 
         private void SetSlotHighlight(EmptySlot slot, bool highlight) {
@@ -233,14 +252,18 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
             DeselectPiece();
             _selectedPiece = piece;
-            piece.Strip.transform.localScale = Vector3.one * SelectScale;
+            foreach (var segment in piece.Strip.SpawnedSegments) {
+                segment.ZoomIn(true);
+            }
             HighlightAllEmptySlots(true);
         }
 
         private void DeselectPiece() {
             if (_selectedPiece == null) return;
 
-            _selectedPiece.Strip.transform.localScale = Vector3.one;
+            foreach (var segment in _selectedPiece.Strip.SpawnedSegments) {
+                segment.ZoomOut();
+            }
             _selectedPiece = null;
             HighlightAllEmptySlots(false);
         }
@@ -269,14 +292,10 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
                 piece.Strip.transform.position = Vector3.Lerp(startPos, endPos, eased);
 
-                float scale = Mathf.Lerp(SelectScale, 1f, eased);
-                piece.Strip.transform.localScale = Vector3.one * scale;
-
                 await UniTask.Yield();
             }
 
             piece.Strip.transform.position = endPos;
-            piece.Strip.transform.localScale = Vector3.one;
 
             SegmentConfig placedConfig = new SegmentConfig {
                 ColorType = piece.ColorType,
@@ -287,6 +306,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
             targetSegment.SetConfig(placedConfig);
             Color color = _colorService.GetColor(piece.ColorType);
+            targetSegment.SetColor(color);
             targetSegment.SetWidth(_circleParamsConfig.GetUniformSegmentThickness());
             targetSegment.SetVisible(true);
 

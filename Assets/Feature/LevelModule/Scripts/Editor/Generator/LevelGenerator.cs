@@ -21,6 +21,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public bool AllowFilterColors;
             public float FilterColorsChance;
             public int MinFilterColors, MaxFilterColors;
+            public bool AllowEmptySegments;
+            public float EmptyChance;
+            public int MinEmptySegments, MaxEmptySegments;
             public int MaxAttempts;
             public int MaxIterations;
             public int Seed;
@@ -130,6 +133,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
                     progress?.Report($"Attempt {attempt}: Calculating difficulty...");
                     int difficulty = solver.Solve(currentLevel, out _);
+
+                    if (p.AllowEmptySegments) {
+                        ApplyEmptySegments(statuses, rings, sectors, rnd, p);
+                    }
 
                     var candidate = new RawLevelData {
                         Rings = rings,
@@ -344,6 +351,31 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private LevelState ApplyMove(LevelState state, Move move, LevelSolver solver) {
             if (move.Type == MoveType.Rotate) return state.Rotate(move.Index, move.Offset);
             return solver.ApplyMove(state, move);
+        }
+
+        private void ApplyEmptySegments(SegmentStatus[,] statuses, int rings, int sectors, Random rnd, GenerationParams p) {
+            int totalSegments = rings * sectors;
+            int targetEmpty = rnd.Next(p.MinEmptySegments, Math.Min(p.MaxEmptySegments + 1, totalSegments));
+
+            var candidates = new List<(int r, int s)>();
+            for (int r = 0; r < rings; r++) {
+                for (int s = 0; s < sectors; s++) {
+                    if (statuses[r, s] == SegmentStatus.Default) {
+                        candidates.Add((r, s));
+                    }
+                }
+            }
+
+            candidates = candidates.OrderBy(_ => rnd.Next()).ToList();
+
+            int emptied = 0;
+            foreach (var (r, s) in candidates) {
+                if (emptied >= targetEmpty) break;
+                if (rnd.NextDouble() < p.EmptyChance) {
+                    statuses[r, s] = SegmentStatus.Empty;
+                    emptied++;
+                }
+            }
         }
     }
 }

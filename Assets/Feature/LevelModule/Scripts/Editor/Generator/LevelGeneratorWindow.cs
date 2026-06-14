@@ -147,6 +147,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 MaxFilterColors = rootVisualElement.Q<IntegerField>("maxFilterColors").value,
                 MinAreaSpan = rootVisualElement.Q<IntegerField>("minAreaSpan").value,
                 MaxAreaSpan = rootVisualElement.Q<IntegerField>("maxAreaSpan").value,
+                AllowEmptySegments = rootVisualElement.Q<Toggle>("allowEmptySegments").value,
+                EmptyChance = rootVisualElement.Q<Slider>("emptyChance").value,
+                MinEmptySegments = rootVisualElement.Q<IntegerField>("minEmptySegments").value,
+                MaxEmptySegments = rootVisualElement.Q<IntegerField>("maxEmptySegments").value,
                 MaxAttempts = rootVisualElement.Q<IntegerField>("maxAttempts").value,
                 MaxIterations = rootVisualElement.Q<IntegerField>("maxIterations").value,
                 Seed = _seedField.value,
@@ -280,25 +284,39 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     float segTop = stripeY + scaledSegmentWidth * 0.5f;
                     float segBottom = stripeY - scaledSegmentWidth * 0.5f;
 
-                    painter.fillColor = GetColor(segment.ColorType);
-                    DrawRect(painter, segLeft, segBottom, segRight, segTop);
-                    painter.Fill();
-
-                    painter.strokeColor = new Color(0, 0, 0, 0.3f);
-                    painter.lineWidth = 1f;
-                    DrawRect(painter, segLeft, segBottom, segRight, segTop);
-                    painter.Stroke();
-
-                    if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked) {
-                        float dotX = (segLeft + segRight) / 2f;
-                        float dotY = stripeY;
-                        painter.fillColor = Color.black;
-                        painter.BeginPath();
-                        painter.Arc(new Vector2(dotX, dotY), 5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                    if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Empty) {
+                        painter.fillColor = new Color(0.4f, 0.4f, 0.4f, 0.5f);
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
                         painter.Fill();
-                        painter.strokeColor = Color.white;
-                        painter.lineWidth = 1f;
+
+                        painter.strokeColor = new Color(0.6f, 0.6f, 0.6f, 0.7f);
+                        painter.lineWidth = 2f;
+                            //painter.strokePattern = new DashPattern(new float[] { 4f, 4f });
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
                         painter.Stroke();
+                        //painter.strokePattern = default;
+                    }
+                    else {
+                        painter.fillColor = GetColor(segment.ColorType);
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
+                        painter.Fill();
+
+                        painter.strokeColor = new Color(0, 0, 0, 0.3f);
+                        painter.lineWidth = 1f;
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
+                        painter.Stroke();
+
+                        if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked) {
+                            float dotX = (segLeft + segRight) / 2f;
+                            float dotY = stripeY;
+                            painter.fillColor = Color.black;
+                            painter.BeginPath();
+                            painter.Arc(new Vector2(dotX, dotY), 5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                            painter.Fill();
+                            painter.strokeColor = Color.white;
+                            painter.lineWidth = 1f;
+                            painter.Stroke();
+                        }
                     }
                 }
             }

@@ -53,6 +53,11 @@ namespace Feature.StripsModule.Scripts {
             UpdateStatusIcon();
         }
 
+        public void SetColor(Color color) {
+            _lineRenderer.startColor = color;
+            _lineRenderer.endColor = color;
+        }
+
         public void TriggerBlockedAnimation() {
             if (_animationController != null)
                 _animationController.TriggerBlockedAnimation();
@@ -148,7 +153,7 @@ namespace Feature.StripsModule.Scripts {
         }
 
         private void UpdateStatusIcon() {
-            if (_statusIcon == null || _visualDataProvider == null) return;
+            if (_statusIcon == null) return;
 
             bool shouldBeVisible = _currentConfig != null &&
                                    _currentConfig.SegmentStatus != SegmentStatus.Default &&
@@ -156,6 +161,11 @@ namespace Feature.StripsModule.Scripts {
                                    _currentHeight > 0.001f;
 
             if (!shouldBeVisible) {
+                _statusIcon.gameObject.SetActive(false);
+                return;
+            }
+
+            if (_visualDataProvider == null) {
                 _statusIcon.gameObject.SetActive(false);
                 return;
             }
@@ -168,6 +178,7 @@ namespace Feature.StripsModule.Scripts {
 
             _statusIcon.gameObject.SetActive(true);
             _statusIcon.sprite = visualData.StatusIcon;
+            _statusIcon.color = Color.white;
             _statusIcon.transform.localPosition = Vector3.zero;
             _statusIcon.transform.localRotation = Quaternion.identity;
 
@@ -175,8 +186,8 @@ namespace Feature.StripsModule.Scripts {
             if (_statusIcon.sprite != null) {
                 float spriteSize = _statusIcon.sprite.bounds.size.x;
                 if (spriteSize > 0) {
-                    float s = targetSize / spriteSize;
-                    _statusIcon.transform.localScale = new Vector3(s, s, 1f);
+                    float sz = targetSize / spriteSize;
+                    _statusIcon.transform.localScale = new Vector3(sz, sz, 1f);
                 }
             }
             else {
