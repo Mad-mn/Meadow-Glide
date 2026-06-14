@@ -129,7 +129,7 @@ MonoBehaviour:
     endCircleIndex: 2
     sectorIndex: 0
     totalSegments: 5
-    SlideAreaStatus: 1
+    SlideAreaStatus: 0
     Colors: 070000000300000002000000
   _difficulty: 8
   _difficultyMultiplier: 2
