@@ -4,5 +4,6 @@ namespace Feature.StatusModule.Scripts.Segments {
         Blocked = 1,
         Horizontal = 2,
         Vertical = 3,
+        Empty = 4,
     }
 }

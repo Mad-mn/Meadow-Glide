@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.PreGamePlacementModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
 using Feature.StripRotationModule.Scripts;
 using Feature.StripsModule.Scripts;
@@ -24,6 +25,7 @@ namespace Feature.LevelInitializeModule {
         private readonly ISlideSegmentService _slideSegmentService;
         private readonly ICircleControllerService _circleControllerService;
         private readonly StripModel _stripModel;
+        private readonly IPreGamePlacementService _preGamePlacementService;
 
         private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
@@ -37,7 +39,8 @@ namespace Feature.LevelInitializeModule {
             ILevelService levelService,
             ITutorialService tutorialService,
             MoveTrackModel moveTrackModel,
-            IStripSpawnService stripSpawnService) {
+            IStripSpawnService stripSpawnService,
+            IPreGamePlacementService preGamePlacementService) {
             _slideAreaService = slideAreaService;
             _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
@@ -48,6 +51,7 @@ namespace Feature.LevelInitializeModule {
             _tutorialService = tutorialService;
             _moveTrackModel = moveTrackModel;
             _stripSpawnService = stripSpawnService;
+            _preGamePlacementService = preGamePlacementService;
         }
 
         public async UniTask Initialize() {
@@ -60,6 +64,8 @@ namespace Feature.LevelInitializeModule {
 
             SpawnStrips(levelData);
             _slideAreaService.SpawnSlideAreas(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count);
+
+            await _preGamePlacementService.StartPlacement(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count);
 
             await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
 

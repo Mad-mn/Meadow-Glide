@@ -24,6 +24,7 @@ namespace Feature.StripsModule.Scripts {
         public CircleColorType ColorType => _currentConfig != null ? _currentConfig.ColorType : CircleColorType.None;
         public bool IsBlocked => _currentConfig != null && _currentConfig.SegmentStatus == SegmentStatus.Blocked;
         public float CurrentWight => _currentHeight;
+        public bool IsZoomed => _zoomed;
 
         public void Initialize(SegmentConfig config, Color color, float height, float halfSpan,
             ISegmentStatusVisualDataProvider visualDataProvider) {

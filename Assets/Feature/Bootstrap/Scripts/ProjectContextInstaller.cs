@@ -7,6 +7,7 @@ using Feature.GameStateModule.Scripts.Installers;
 using Feature.InputModule.Scripts.Installers;
 using Feature.LevelInitializeModule.Scripts.Installers;
 using Feature.LevelModule.Scripts.Installers;
+using Feature.PreGamePlacementModule.Scripts.Installers;
 using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.SlideAreaModule.Scripts.Installers;
@@ -46,5 +47,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         StripRotationModuleInstaller.Install(Container);
         StatusModuleInstaller.Install(Container);
         VibrationModuleInstaller.Install(Container);
+        PreGamePlacementModuleInstaller.Install(Container);
     }
 }
