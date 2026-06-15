@@ -11,6 +11,7 @@ using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using Feature.TutorialModule.Scripts;
 using Feature.UIServiceModule.Scripts;
+using Feature.UndoModule.Scripts;
 using UnityEngine;
 using Zenject;
 
@@ -28,6 +29,7 @@ namespace Feature.LevelInitializeModule {
         private readonly StripModel _stripModel;
         private readonly IPreGamePlacementService _preGamePlacementService;
         private readonly IInteractionStateService _interactionStateService;
+        private readonly IUndoService _undoService;
 
         private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
@@ -43,7 +45,8 @@ namespace Feature.LevelInitializeModule {
             MoveTrackModel moveTrackModel,
             IStripSpawnService stripSpawnService,
             IPreGamePlacementService preGamePlacementService,
-            IInteractionStateService interactionStateService) {
+            IInteractionStateService interactionStateService,
+            IUndoService undoService) {
             _slideAreaService = slideAreaService;
             _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
@@ -56,10 +59,12 @@ namespace Feature.LevelInitializeModule {
             _stripSpawnService = stripSpawnService;
             _preGamePlacementService = preGamePlacementService;
             _interactionStateService = interactionStateService;
+            _undoService = undoService;
         }
 
         public async UniTask Initialize() {
             _interactionStateService.ResetInputBlock();
+            _undoService.Clear();
 
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);

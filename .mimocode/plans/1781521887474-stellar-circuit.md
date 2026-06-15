@@ -1,254 +1,387 @@
-# Player Inventory / Progression Save System
+# Undo System Design & Implementation Plan
 
 ## Overview
 
-Introduce a dedicated `PlayerInventoryModule` that manages persistent player resources (coins today, boosters/currencies later) independently from level progress saves. The system uses a dictionary-based save model that is inherently extensible to future resource types.
+Implement a Command Pattern-based undo system that records player actions and replays them in reverse with smooth animations. The system is extensible for future mechanics without requiring rewrites.
 
 ---
 
-## Architecture
+## Architecture Decision: Command Pattern (Option B)
 
-### New Types
+### Why NOT Full Board Snapshots (Option A)
 
-| Type | File | Purpose |
-|------|------|---------|
-| `ResourceType` enum | `Assets/Feature/PlayerInventoryModule/Scripts/ResourceType.cs` | Identifies resource kinds (Coins=1, future: Hint=2, etc.) |
-| `PlayerInventoryData` | `Assets/Feature/SaveDataModule/Scripts/SavedData/PlayerInventoryData.cs` | Serializable save model: `Dictionary<ResourceType, int>` balances |
-| `IPlayerInventoryService` | `Assets/Feature/PlayerInventoryModule/Scripts/IPlayerInventoryService.cs` | Public API for resource operations |
-| `PlayerInventoryService` | `Assets/Feature/PlayerInventoryModule/Scripts/PlayerInventoryService.cs` | Implementation: reads/writes via SaveDataModel, enforces invariants |
-| `PlayerInventoryModel` | `Assets/Feature/PlayerInventoryModule/Scripts/PlayerInventoryModel.cs` | In-memory state + events (OnBalanceChanged) |
-| `PlayerInventoryModuleInstaller` | `Assets/Feature/PlayerInventoryModule/Scripts/Installers/PlayerInventoryModuleInstaller.cs` | Zenject bindings |
+| Factor | Assessment |
+|--------|------------|
+| Memory | High — stores entire board state per move |
+| Animation | Hard — no "from" state to animate from |
+| Extensibility | Poor — adding new state requires snapshot changes |
+| Performance | Degrades with board size |
 
-### Modified Types
+### Why NOT Hybrid (Option C)
 
-| File | Change |
-|------|--------|
-| `Assets/Feature/SaveDataModule/Scripts/SaveDataType.cs` | Add `PlayerInventory = 4` to enum |
-| `Assets/Feature/SaveDataModule/Scripts/SaveDataService.cs` | Add `PlayerInventoryData` loading in `LoadAll()` |
-| `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs` | Register `PlayerInventoryModuleInstaller` |
-| `Assets/Feature/CircleModule/Scripts/CircleControllerService.cs` | Use `IPlayerInventoryService.Add()` instead of direct mutation |
+| Factor | Assessment |
+|--------|------------|
+| Complexity | Over-engineered for current 2-action game |
+| Maintenance | Two systems to maintain |
+| Consistency | Inconsistent undo behavior between action types |
+
+### Why Command Pattern (Option B) ✅
+
+| Factor | Assessment |
+|--------|------------|
+| Memory | Low — only stores changed data per action |
+| Animation | Easy — has explicit "from" and "to" states |
+| Extensibility | Excellent — new mechanics implement one interface |
+| Performance | Constant time per action |
+| Architecture | Clean separation of concerns |
 
 ---
 
-## Detailed Design
+## Current Player Actions Analysis
 
-### 1. ResourceType Enum
+### 1. Stripe Rotation
+
+**Trigger**: Horizontal drag on a strip (`StripRotationService`)
+
+**State Changes**:
+- `StripController.ScrollOffset` changes (float representing rotation position)
+- `MoveTrackModel.MovesLeft` decrements (if offset actually changed)
+
+**Animation**: 0.25s ease-out snap to nearest segment position
+
+**Data Needed for Undo**:
+- Reference to `StripController`
+- Previous `ScrollOffset` value
+- Whether a move was consumed
+
+### 2. Segment Slide
+
+**Trigger**: Vertical drag in a SlideArea (`SlideSegmentService`)
+
+**State Changes**:
+- Segments move between strips (parent changes via `ApplyShift()`)
+- `StripController._spawnedSegments` lists change
+- `MoveTrackModel.MovesLeft` decrements (if positions actually changed)
+
+**Animation**: 0.2s ease-out snap to target strip positions
+
+**Data Needed for Undo** (MUST capture BEFORE `ApplyShift()`):
+- List of affected segments
+- Their original strip references (before shift)
+- Their original indices in those strips
+- Their original radii (before `SetRadius(0f)` is called)
+- Whether a move was consumed
+
+---
+
+## Proposed Architecture
+
+### Module Structure
+
+```
+Assets/Feature/UndoModule/Scripts/
+├── IUndoService.cs              # Public interface
+├── UndoService.cs               # Implementation
+├── Actions/
+│   ├── IUndoableAction.cs       # Action interface
+│   ├── RotationUndoAction.cs    # Rotation-specific undo
+│   └── SlideUndoAction.cs       # Slide-specific undo
+└── Installers/
+    └── UndoModuleInstaller.cs   # Zenject bindings
+```
+
+### IUndoableAction Interface
 
 ```csharp
-namespace Feature.PlayerInventoryModule.Scripts {
-    public enum ResourceType {
-        Coins = 1,
-        // Future:
-        // Hint = 2,
-        // ExtraMoves = 3,
-        // Undo = 4,
+namespace Feature.UndoModule.Scripts.Actions {
+    public interface IUndoableAction {
+        UniTask ExecuteReverse();  // Animate the reverse action
+        void RestoreState();       // Restore game state (after animation)
     }
 }
 ```
 
-Adding a new resource = adding one enum value. No other code changes needed in the inventory system itself.
+**Design Rationale**:
+- `ExecuteReverse()` returns `UniTask` for async animation
+- `RestoreState()` is called after animation completes
+- Separation allows animation to finish before state is finalized
+- New mechanics implement this interface to participate in undo
 
-### 2. PlayerInventoryData (Save Model)
-
-```csharp
-[Serializable]
-public class PlayerInventoryData : ISaveData {
-    // Dictionary keyed by ResourceType, values are amounts
-    // Serialized by BinaryFormatter
-    public Dictionary<ResourceType, int> Balances = new Dictionary<ResourceType, int>();
-}
-```
-
-- Lives in `Assets/Feature/SaveDataModule/Scripts/SavedData/` alongside existing data classes
-- Implements `ISaveData` (marker interface for the save system)
-- `[Serializable]` for BinaryFormatter support
-- Dictionary approach means new resource types require zero structural changes
-
-### 3. SaveDataType Addition
+### IUndoService Interface
 
 ```csharp
-public enum SaveDataType {
-    PlayerProgress = 1,
-    Settings = 2,
-    Statistics = 3,
-    PlayerInventory = 4  // NEW
-}
-```
-
-### 4. SaveDataService.LoadAll() Update
-
-Add one line to `LoadAll()`:
-
-```csharp
-_model.Set(SaveDataType.PlayerInventory,
-    LoadFromDisk<PlayerInventoryData>(SaveDataType.PlayerInventory));
-```
-
-This loads the inventory from disk into the in-memory dictionary at bootstrap.
-
-### 5. PlayerInventoryModel (In-Memory State)
-
-```csharp
-public class PlayerInventoryModel {
-    public event Action<ResourceType, int> OnBalanceChanged;
-    public bool IsLoaded { get; private set; }
-
-    private Dictionary<ResourceType, int> _balances = new Dictionary<ResourceType, int>();
-
-    public int GetBalance(ResourceType type) {
-        return _balances.TryGetValue(type, out var amount) ? amount : 0;
-    }
-
-    public void SetBalance(ResourceType type, int amount) {
-        _balances[type] = amount;
-        OnBalanceChanged?.Invoke(type, amount);
-    }
-
-    public Dictionary<ResourceType, int> GetAll() => new Dictionary<ResourceType, int>(_balances);
-
-    public void LoadFrom(Dictionary<ResourceType, int> source) {
-        _balances = new Dictionary<ResourceType, int>(source);
-        IsLoaded = true;
+namespace Feature.UndoModule.Scripts {
+    public interface IUndoService {
+        void Record(IUndoableAction action);
+        UniTask Undo();
+        bool CanUndo { get; }
+        void Clear();
     }
 }
 ```
 
-- Plain C# class, no MonoBehaviour
-- Fires `OnBalanceChanged` event whenever a balance changes (for UI binding)
-- Acts as the single source of truth at runtime
-
-### 6. IPlayerInventoryService Interface
+### UndoService Implementation
 
 ```csharp
-public interface IPlayerInventoryService {
-    int GetBalance(ResourceType type);
-    bool HasEnough(ResourceType type, int amount);
-    bool TrySpend(ResourceType type, int amount);
-    void Add(ResourceType type, int amount);
-}
-```
+namespace Feature.UndoModule.Scripts {
+    public class UndoService : IUndoService {
+        private readonly Stack<IUndoableAction> _undoStack = new();
+        private readonly IInteractionStateService _interactionState;
+        private bool _isUndoing;
 
-### 7. PlayerInventoryService Implementation
+        public bool CanUndo => _undoStack.Count > 0 && !_isUndoing;
 
-```csharp
-public class PlayerInventoryService : IPlayerInventoryService {
-    private readonly PlayerInventoryModel _model;
-    private readonly ISaveDataModel _saveDataModel;
-    private readonly ISaveDataService _saveDataService;
+        public void Record(IUndoableAction action) {
+            _undoStack.Push(action);
+        }
 
-    public PlayerInventoryService(
-        PlayerInventoryModel model,
-        ISaveDataModel saveDataModel,
-        ISaveDataService saveDataService) {
-        _model = model;
-        _saveDataModel = saveDataModel;
-        _saveDataService = saveDataService;
-    }
+        public async UniTask Undo() {
+            if (!CanUndo) return;
 
-    // No IInitializable — SaveDataService.LoadAll() already populates SaveDataModel
-    // with PlayerInventoryData. The model is loaded on first GetBalance() call.
-    private void EnsureLoaded() {
-        if (_model.IsLoaded) return;
-        var data = _saveDataModel.Get<PlayerInventoryData>(SaveDataType.PlayerInventory);
-        _model.LoadFrom(data.Balances);
-    }
+            _isUndoing = true;
+            _interactionState.BlockInput();
 
-    public int GetBalance(ResourceType type) {
-        EnsureLoaded();
-        return _model.GetBalance(type);
-    }
+            var action = _undoStack.Pop();
+            await action.ExecuteReverse();
+            action.RestoreState();
 
-    public bool HasEnough(ResourceType type, int amount) {
-        EnsureLoaded();
-        return _model.GetBalance(type) >= amount;
-    }
+            _interactionState.UnblockInput();
+            _isUndoing = false;
+        }
 
-    public bool TrySpend(ResourceType type, int amount) {
-        EnsureLoaded();
-        if (!HasEnough(type, amount)) return false;
-        var current = _model.GetBalance(type);
-        _model.SetBalance(type, current - amount);
-        Persist();
-        return true;
-    }
-
-    public void Add(ResourceType type, int amount) {
-        EnsureLoaded();
-        var current = _model.GetBalance(type);
-        _model.SetBalance(type, current + amount);
-        Persist();
-    }
-
-    private void Persist() {
-        var data = _saveDataModel.Get<PlayerInventoryData>(SaveDataType.PlayerInventory);
-        data.Balances = _model.GetAll();
-        _saveDataService.Save(SaveDataType.PlayerInventory);
+        public void Clear() {
+            _undoStack.Clear();
+        }
     }
 }
 ```
 
-**Key design decisions:**
-- `TrySpend` returns bool (fails gracefully if insufficient) — prevents external balance checks
-- `Add` always persists immediately — no deferred saves
-- `Persist()` syncs model state back to save data model, then flushes to disk
-- All balance mutations go through the service — consumers never touch `PlayerInventoryData` directly
-
-### 8. PlayerInventoryModuleInstaller
+### RotationUndoAction
 
 ```csharp
-public class PlayerInventoryModuleInstaller : Installer<PlayerInventoryModuleInstaller> {
-    public override void InstallBindings() {
-        Container.BindInterfacesAndSelfTo<PlayerInventoryModel>().AsSingle();
-        Container.BindInterfacesAndSelfTo<PlayerInventoryService>().AsSingle();
+namespace Feature.UndoModule.Scripts.Actions {
+    public class RotationUndoAction : IUndoableAction {
+        private readonly StripController _strip;
+        private readonly float _previousOffset;
+        private readonly float _currentOffset;
+        private readonly bool _consumedMove;
+        private readonly MoveTrackModel _moveTrackModel;
+        private readonly ISlideSegmentService _slideSegmentService;
+
+        public RotationUndoAction(
+            StripController strip,
+            float previousOffset,
+            float currentOffset,
+            bool consumedMove,
+            MoveTrackModel moveTrackModel,
+            ISlideSegmentService slideSegmentService) {
+            _strip = strip;
+            _previousOffset = previousOffset;
+            _currentOffset = currentOffset;
+            _consumedMove = consumedMove;
+            _moveTrackModel = moveTrackModel;
+            _slideSegmentService = slideSegmentService;
+        }
+
+        public async UniTask ExecuteReverse() {
+            // Animate from currentOffset to previousOffset
+            // Uses same animation as StripRotationService.SnapStrip()
+            float duration = 0.25f;
+            float elapsed = 0f;
+
+            while (elapsed < duration) {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                t = 1f - Mathf.Pow(1f - t, 3f); // Ease-out cubic
+                float offset = Mathf.Lerp(_currentOffset, _previousOffset, t);
+                _strip.SetScrollOffset(offset, true);
+                await UniTask.Yield();
+            }
+
+            _strip.SetScrollOffset(_previousOffset, false);
+            _strip.ClearWrapGhosts();
+            _slideSegmentService.UpdateSegmentsInAreas();  // Match original SnapStrip behavior
+        }
+
+        public void RestoreState() {
+            if (_consumedMove)
+                _moveTrackModel.AddMoves(1);
+        }
     }
 }
 ```
 
-### 9. ProjectContextInstaller Registration
-
-Add to `InstallBindings()`:
+### SlideUndoAction
 
 ```csharp
-PlayerInventoryModuleInstaller.Install(Container);
-```
+namespace Feature.UndoModule.Scripts.Actions {
+    public class SlideUndoAction : IUndoableAction {
+        private readonly List<SegmentRestoreData> _segmentData;
+        private readonly bool _consumedMove;
+        private readonly MoveTrackModel _moveTrackModel;
+        private readonly StripModel _stripModel;
+        private readonly ISlideSegmentService _slideSegmentService;
 
-Also register EconomyConfig in `AssetBindingModuleInstaller`:
+        public SlideUndoAction(
+            List<SegmentRestoreData> segmentData,
+            bool consumedMove,
+            MoveTrackModel moveTrackModel,
+            StripModel stripModel,
+            ISlideSegmentService slideSegmentService) {
+            _segmentData = segmentData;
+            _consumedMove = consumedMove;
+            _moveTrackModel = moveTrackModel;
+            _stripModel = stripModel;
+            _slideSegmentService = slideSegmentService;
+        }
 
-```csharp
-Container.BindAddressableAsset<EconomyConfig>(AddressConstants.EconomyConfig);
-```
+        public async UniTask ExecuteReverse() {
+            // Animate segments back to original strips
+            float duration = 0.2f;
+            float elapsed = 0f;
 
-### 10. CircleControllerService Integration
+            // Store current positions for animation
+            float[] startRadii = new float[_segmentData.Count];
+            for (int i = 0; i < _segmentData.Count; i++) {
+                startRadii[i] = _segmentData[i].Segment.Radius;
+            }
 
-Replace direct `PlayerProgressData.Level++` mutation pattern in `ApplyWin()`:
+            while (elapsed < duration) {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                t = 1f - Mathf.Pow(1f - t, 3f);
 
-```csharp
-// BEFORE:
-_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level++;
-_saveDataService.Save(SaveDataType.PlayerProgress);
+                for (int i = 0; i < _segmentData.Count; i++) {
+                    var data = _segmentData[i];
+                    float y = Mathf.Lerp(startRadii[i], data.OriginalRadius, t);
+                    data.Segment.SetRadius(y);
+                }
+                await UniTask.Yield();
+            }
+        }
 
-// AFTER (coins addition added alongside existing level save):
-_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level++;
-_saveDataService.Save(SaveDataType.PlayerProgress);
+        public void RestoreState() {
+            // Move segments back to original strips
+            // NOTE: Do NOT call ChangeSlideState(false) here — it would trigger
+            // MoveTrackService.CheckForSpendStepBySlide() and consume another move.
+            // The MoveTrackService already consumed the move during the original slide.
+            foreach (var data in _segmentData) {
+                data.SourceStrip.RemoveSegment(data.Segment);
+                data.OriginalStrip.AddSegment(data.Segment, data.OriginalIndex);
+            }
 
-_inventoryService.Add(ResourceType.Coins, _economyConfig.LevelWinReward);
-```
+            _stripModel.SegmentsChanged();
+            _slideSegmentService.UpdateSegmentsInAreas();
 
-The `PlayerInventoryService` is injected via constructor. The `_inventoryService.Add()` call handles persistence internally.
+            if (_consumedMove)
+                _moveTrackModel.AddMoves(1);
+        }
+    }
 
-### 11. Economy Config (avoid hardcoding)
-
-Create `Assets/Feature/PlayerInventoryModule/Configs/EconomyConfig.cs`:
-
-```csharp
-[CreateAssetMenu(fileName = "EconomyConfig", menuName = "Configs/EconomyConfig")]
-public class EconomyConfig : ScriptableObject {
-    public int LevelWinReward = 50;
-    // Future: HintCost, ExtraMovesCost, UndoCost, etc.
+    public struct SegmentRestoreData {
+        public StripSegment Segment;
+        public StripController OriginalStrip;  // Captured BEFORE ApplyShift
+        public StripController SourceStrip;    // Current strip (after shift)
+        public int OriginalIndex;              // Index in OriginalStrip BEFORE shift
+        public float OriginalRadius;           // Radius BEFORE SetRadius(0f)
+    }
 }
 ```
 
-Load via Addressables and inject as `UniTask<EconomyConfig>` (follows existing pattern from LevelConfigProvider).
+---
+
+## Integration Points
+
+### 1. StripRotationService — Record Rotation
+
+In `SnapStrip()`, after animation completes:
+
+```csharp
+// After _interactionStateService.IsRotationActive = false;
+if (Mathf.Abs(targetOffset - _initialScrollOffset) > 0.01f) {
+    var action = new RotationUndoAction(
+        activeStrip,
+        _initialScrollOffset,
+        targetOffset,
+        true,
+        _moveTrackModel,
+        _slideSegmentService  // For UpdateSegmentsInAreas()
+    );
+    _undoService.Record(action);
+}
+```
+
+**Constructor injection** — add `IUndoService undoService` parameter:
+```csharp
+public StripRotationService(IInputService inputService, MoveTrackModel moveTrackModel,
+    IInteractionStateService interactionStateService, IAudioService audioService,
+    IVibrationService vibrationService, StripModel stripModel,
+    ISlideSegmentService slideSegmentService, ICameraService cameraService,
+    IUndoService undoService) {
+    // ... existing assignments ...
+    _undoService = undoService;
+}
+```
+
+### 2. SlideSegmentService — Record Slide
+
+In `SnapSegments()`, BEFORE `ApplyShift()`:
+
+```csharp
+// CRITICAL: Capture original state BEFORE ApplyShift() mutates it
+List<SegmentRestoreData> segmentData = null;
+if (shift != 0) {
+    segmentData = new List<SegmentRestoreData>();
+    for (int i = 0; i < _activeSegments.Count; i++) {
+        StripController originalStrip = GetStripByIndex(startIdx + i);
+        segmentData.Add(new SegmentRestoreData {
+            Segment = _activeSegments[i],
+            OriginalStrip = originalStrip,
+            SourceStrip = _activeSegments[i].GetComponentInParent<StripController>(),
+            OriginalIndex = i,
+            OriginalRadius = _activeSegments[i].Radius  // Before SetRadius(0f)
+        });
+    }
+}
+
+ApplyShift(area, shift);  // This mutates strip assignments
+
+// After snap animation completes:
+if (segmentData != null) {
+    var action = new SlideUndoAction(
+        segmentData,
+        true,
+        _moveTrackModel,
+        _stripModel,
+        this  // ISlideSegmentService for UpdateSegmentsInAreas()
+    );
+    _undoService.Record(action);
+}
+```
+
+**Constructor injection** — add `IUndoService undoService` parameter:
+```csharp
+public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState,
+    ICameraService cameraService, UniTask<CircleParamsConfig> circleParamsConfigTask,
+    StripModel stripModel, SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel,
+    LevelModel levelModel, IAudioService audioService, IVibrationService vibrationService,
+    IUndoService undoService) {
+    // ... existing assignments ...
+    _undoService = undoService;
+}
+```
+
+### 3. LevelInitializeService — Clear on Level Start
+
+In `Initialize()`:
+
+```csharp
+_undoService.Clear();
+```
+
+### 4. UndoButton — Trigger Undo
+
+New UI element that calls `_undoService.Undo()` when pressed.
 
 ---
 
@@ -256,47 +389,106 @@ Load via Addressables and inject as `UniTask<EconomyConfig>` (follows existing p
 
 | # | File | Action |
 |---|------|--------|
-| 1 | `Assets/Feature/PlayerInventoryModule/Scripts/ResourceType.cs` | CREATE |
-| 2 | `Assets/Feature/PlayerInventoryModule/Scripts/IPlayerInventoryService.cs` | CREATE |
-| 3 | `Assets/Feature/PlayerInventoryModule/Scripts/PlayerInventoryModel.cs` | CREATE |
-| 4 | `Assets/Feature/PlayerInventoryModule/Scripts/PlayerInventoryService.cs` | CREATE |
-| 5 | `Assets/Feature/PlayerInventoryModule/Scripts/Installers/PlayerInventoryModuleInstaller.cs` | CREATE |
-| 5b | `Assets/Feature/PlayerInventoryModule/Configs/EconomyConfig.cs` | CREATE |
-| 5c | `Assets/Feature/AssetBindingModule/Scripts/AssetBindingModuleInstaller.cs` | EDIT (register EconomyConfig) |
-| 6 | `Assets/Feature/SaveDataModule/Scripts/SaveDataType.cs` | EDIT (add enum value) |
-| 7 | `Assets/Feature/SaveDataModule/Scripts/SavedData/PlayerInventoryData.cs` | CREATE (new file, separate from PlayerProgressData) |
-| 8 | `Assets/Feature/SaveDataModule/Scripts/SaveDataService.cs` | EDIT (add load in LoadAll) |
-| 9 | `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs` | EDIT (register installer) |
-| 10 | `Assets/Feature/CircleModule/Scripts/CircleControllerService.cs` | EDIT (inject + call inventory service) |
+| 1 | `Assets/Feature/UndoModule/Scripts/IUndoService.cs` | CREATE |
+| 2 | `Assets/Feature/UndoModule/Scripts/UndoService.cs` | CREATE |
+| 3 | `Assets/Feature/UndoModule/Scripts/Actions/IUndoableAction.cs` | CREATE |
+| 4 | `Assets/Feature/UndoModule/Scripts/Actions/RotationUndoAction.cs` | CREATE |
+| 5 | `Assets/Feature/UndoModule/Scripts/Actions/SlideUndoAction.cs` | CREATE |
+| 6 | `Assets/Feature/UndoModule/Scripts/Installers/UndoModuleInstaller.cs` | CREATE |
+| 7 | `Assets/Feature/StripRotationModule/Scripts/StripRotationService.cs` | EDIT (inject IUndoService, record undo in SnapStrip) |
+| 8 | `Assets/Feature/SlideAreaModule/Scripts/SlideSegmentService.cs` | EDIT (inject IUndoService, capture state before ApplyShift, record undo) |
+| 9 | `Assets/Feature/LevelInitializeModule/LevelInitializeService.cs` | EDIT (inject IUndoService, clear on level start) |
+| 10 | `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs` | EDIT (register UndoModuleInstaller) |
 
 ---
 
-## How Future Resources Are Added
+## How Future Mechanics Integrate
 
-1. Add enum value to `ResourceType` (e.g., `Hint = 2`)
-2. Use the existing API: `_inventoryService.Add(ResourceType.Hint, 1)` or `_inventoryService.TrySpend(ResourceType.Hint, 1)`
-3. No changes to save system, model, or service needed
+### Example: Destroyed Segments
+
+```csharp
+public class DestroyUndoAction : IUndoableAction {
+    private readonly StripSegment _segment;
+    private readonly StripController _strip;
+    private readonly int _index;
+
+    public async UniTask ExecuteReverse() {
+        // Recreate segment
+        // Animate appearing
+    }
+
+    public void RestoreState() {
+        // Re-add to strip
+    }
+}
+```
+
+### Example: Frozen Segments
+
+```csharp
+public class FreezeUndoAction : IUndoableAction {
+    private readonly StripSegment _segment;
+    private readonly bool _wasFrozen;
+
+    public async UniTask ExecuteReverse() {
+        // Animate unfreeze visual
+    }
+
+    public void RestoreState() {
+        _segment.SetStatus(_wasFrozen ? SegmentStatus.Frozen : SegmentStatus.Default);
+    }
+}
+```
+
+### Integration Pattern
+
+1. Implement `IUndoableAction`
+2. In the mechanic's service, call `_undoService.Record(action)` after the action completes
+3. No other changes needed — the undo system handles the rest
 
 ---
 
-## How Direct Mutation Is Prevented
+## Visual Requirements
 
-- `PlayerInventoryData.Balances` is a public field (required for BinaryFormatter serialization) but is only accessed by `PlayerInventoryService.Persist()`
-- All consumers inject `IPlayerInventoryService`, not `PlayerInventoryData`
-- The service enforces invariants (no negative balances via `TrySpend`)
-- Events propagate balance changes to UI without exposing internals
+### Undo Animation Quality
+
+- **Rotation**: Smooth ease-out cubic (0.25s) — matches existing snap animation
+- **Slide**: Smooth ease-out cubic (0.2s) — matches existing snap animation
+- **Input blocked** during undo — prevents conflicting actions
+- **Sound/Vibration** — optional: play reverse sound during undo
+
+### Player Feedback
+
+- Undo button disabled when stack is empty
+- Visual indicator of undo stack depth (optional: "3 undos remaining")
+- Clear animation shows what was undone
 
 ---
 
-## Initial Balance
+## Memory Efficiency
 
-New and existing players both start with **0 coins**. No migration bonus. `PlayerInventoryData` defaults to an empty dictionary; `GetBalance()` returns 0 for missing keys.
+### Per Action Memory Cost
+
+| Action Type | Data Stored | Size |
+|-------------|-------------|------|
+| Rotation | StripController ref, 2 floats, 1 bool, 1 ref | ~40 bytes |
+| Slide | N segments × (refs + int + float) | ~80-120 bytes |
+
+### Stack Depth Recommendation
+
+- Cap at 20-30 actions (configurable)
+- Oldest actions automatically removed
+- Memory usage: ~2-3 KB for 30 actions
+
+---
 
 ## Verification
 
-1. **Compile check**: Build the project — no compile errors
-2. **Save/load test**: Launch game, verify `playerinventory_save.dat` is created in persistent data path
-3. **Coin award test**: Complete a level, verify coin balance increases by 50
-4. **Persistence test**: Close and relaunch game, verify coin balance persists
-5. **Independence test**: Modify level progress, verify inventory save is unaffected
-6. **Editor tools**: Use `Tools/Save Data/Open Persistent Data Path` to inspect the new `.dat` file exists
+1. **Compile check**: Build project — no errors
+2. **Rotation undo**: Rotate strip, press undo, verify smooth reverse animation
+3. **Slide undo**: Slide segments, press undo, verify segments return to original strips
+4. **Multiple undo**: Perform 3 actions, undo all 3, verify correct reverse order
+5. **Move restore**: Verify `MovesLeft` increments after undo
+6. **Input blocking**: Verify no input during undo animation
+7. **Level clear**: Start new level, verify undo stack is cleared
+8. **UI state**: Verify undo button enables/disables correctly

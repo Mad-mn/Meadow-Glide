@@ -20,6 +20,7 @@ using Feature.StripsModule.Scripts.Installers;
 using Feature.TrackMoveModule.Scripts.Installers;
 using Feature.TutorialModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
+using Feature.UndoModule.Scripts.Installers;
 using Feature.VibrationModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
@@ -52,5 +53,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         VibrationModuleInstaller.Install(Container);
         PreGamePlacementModuleInstaller.Install(Container);
         PlayerInventoryModuleInstaller.Install(Container);
+        UndoModuleInstaller.Install(Container);
     }
 }

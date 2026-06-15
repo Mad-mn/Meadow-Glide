@@ -8,6 +8,8 @@ using Feature.SlideAreaModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
+using Feature.UndoModule.Scripts;
+using Feature.UndoModule.Scripts.Actions;
 using UnityEngine;
 using Zenject;
 using AudioType = Feature.SoundModule.Scripts.AudioType;
@@ -25,6 +27,7 @@ namespace Feature.StripRotationModule.Scripts {
         private readonly StripModel _stripModel;
         private readonly ISlideSegmentService _slideSegmentService;
         private readonly ICameraService _cameraService;
+        private readonly IUndoService _undoService;
 
         private readonly List<StripController> _strips = new List<StripController>();
 
@@ -38,7 +41,7 @@ namespace Feature.StripRotationModule.Scripts {
 
         public StripRotationService(IInputService inputService, MoveTrackModel moveTrackModel, IInteractionStateService interactionStateService,
             IAudioService audioService, IVibrationService vibrationService, StripModel stripModel, ISlideSegmentService slideSegmentService,
-            ICameraService cameraService) {
+            ICameraService cameraService, IUndoService undoService) {
             _inputService = inputService;
             _moveTrackModel = moveTrackModel;
             _interactionStateService = interactionStateService;
@@ -47,6 +50,7 @@ namespace Feature.StripRotationModule.Scripts {
             _stripModel = stripModel;
             _slideSegmentService = slideSegmentService;
             _cameraService = cameraService;
+            _undoService = undoService;
         }
 
         public void Register(StripController strip) {
@@ -186,6 +190,19 @@ namespace Feature.StripRotationModule.Scripts {
             _slideSegmentService.UpdateSegmentsInAreas();
             _stripModel.CircleRotationStatusChanges(activeStrip, false);
             _interactionStateService.IsRotationActive = false;
+
+            if (Mathf.Abs(targetOffset - _initialScrollOffset) > 0.01f) {
+                var action = new RotationUndoAction(
+                    activeStrip,
+                    _initialScrollOffset,
+                    targetOffset,
+                    true,
+                    _moveTrackModel,
+                    _slideSegmentService,
+                    _stripModel
+                );
+                _undoService.Record(action);
+            }
         }
 
         private async UniTaskVoid TryChangeScaleWithDelay() {

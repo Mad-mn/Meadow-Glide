@@ -11,6 +11,8 @@ using Feature.SoundModule.Scripts;
 using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
+using Feature.UndoModule.Scripts;
+using Feature.UndoModule.Scripts.Actions;
 using UnityEngine;
 using Zenject;
 using AudioType = Feature.SoundModule.Scripts.AudioType;
@@ -27,6 +29,7 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly LevelModel _levelModel;
         private readonly IAudioService _audioService;
         private readonly IVibrationService _vibrationService;
+        private readonly IUndoService _undoService;
         private CircleParamsConfig _circleParamsConfig;
         private readonly List<StripController> _strips = new List<StripController>();
 
@@ -45,7 +48,7 @@ namespace Feature.SlideAreaModule.Scripts {
 
         public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState, ICameraService cameraService,
             UniTask<CircleParamsConfig> circleParamsConfigTask, StripModel stripModel, SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel,
-            LevelModel levelModel, IAudioService audioService, IVibrationService vibrationService) {
+            LevelModel levelModel, IAudioService audioService, IVibrationService vibrationService, IUndoService undoService) {
             _inputService = inputService;
             _interactionState = interactionState;
             _cameraService = cameraService;
@@ -56,6 +59,7 @@ namespace Feature.SlideAreaModule.Scripts {
             _levelModel = levelModel;
             _audioService = audioService;
             _vibrationService = vibrationService;
+            _undoService = undoService;
         }
 
         public async void Initialize() {
@@ -351,7 +355,37 @@ namespace Feature.SlideAreaModule.Scripts {
                 normalizedDeltaIndex -= subsetCount;
 
             int shift = Mathf.RoundToInt(normalizedDeltaIndex);
+
+            // CRITICAL: Capture original state BEFORE ApplyShift() mutates it
+            List<SegmentRestoreData> segmentData = null;
+            if (shift != 0) {
+                segmentData = new List<SegmentRestoreData>();
+                for (int i = 0; i < _activeSegments.Count; i++) {
+                    StripController originalStrip = GetStripByIndex(startIdx + i);
+                    int scrollSegments = originalStrip.GetScrollSegments();
+                    int effectiveColumn = area.SectorIndex + scrollSegments;
+                    int slotIndex = Mod(effectiveColumn, originalStrip.SegmentCount);
+                    segmentData.Add(new SegmentRestoreData {
+                        Segment = _activeSegments[i],
+                        OriginalStrip = originalStrip,
+                        OriginalIndex = slotIndex
+                    });
+                }
+            }
+
             ApplyShift(area, shift);
+
+            // Capture SourceStrip AFTER ApplyShift — this is where the segment actually lives now
+            if (segmentData != null) {
+                for (int i = 0; i < segmentData.Count; i++) {
+                    segmentData[i] = new SegmentRestoreData {
+                        Segment = segmentData[i].Segment,
+                        OriginalStrip = segmentData[i].OriginalStrip,
+                        SourceStrip = segmentData[i].Segment.GetComponentInParent<StripController>(),
+                        OriginalIndex = segmentData[i].OriginalIndex
+                    };
+                }
+            }
 
             const float duration = 0.2f;
             float elapsed = 0f;
@@ -389,6 +423,17 @@ namespace Feature.SlideAreaModule.Scripts {
             _slideAreaModel.ChangeSlideState(false);
             _isSnapping = false;
             _interactionState.IsSlideActive = false;
+
+            if (segmentData != null) {
+                var action = new SlideUndoAction(
+                    segmentData,
+                    true,
+                    _moveTrackModel,
+                    _stripModel,
+                    this
+                );
+                _undoService.Record(action);
+            }
         }
 
         private void ZoomSlideSegments(bool zoom) {
