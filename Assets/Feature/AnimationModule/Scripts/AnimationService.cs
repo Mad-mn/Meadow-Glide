@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Feature.AnimationModule.Scripts {
     public class AnimationService : IAnimationService {
         private const float FlyDuration = 0.35f;
-        private const float ArcHeightMultiplier = 0.5f;
+        private const float ArcHeightMultiplier = 0.3f;
         private const float ArcHeightMin = 0.5f;
         private const float FlyScaleTarget = 0.7f;
         private const float FlyScaleDurationMultiplier = 0.8f;

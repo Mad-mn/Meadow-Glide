@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Feature.AnimationModule.Scripts;
 using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
@@ -17,6 +18,9 @@ namespace Feature.PreGamePlacementModule.Scripts {
     public class PreGamePlacementService : IPreGamePlacementService, ITickable, IInitializable, IDisposable {
         private const float PoolSpacing = 1.5f;
         private const float PoolBottomMargin = 1.5f;
+        private const float ShakeDuration = 0.3f;
+        private const float ShakeStrength = 0.05f;
+        private const int ShakeVibrato = 15;
 
         private readonly IInputService _inputService;
         private readonly IInteractionStateService _interactionStateService;
@@ -305,7 +309,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
             targetSegment.SetVisible(false);
 
             var landTcs = new UniTaskCompletionSource();
-            _animationService.PlayLand(targetSegment.transform, () => landTcs.TrySetResult());
+            _animationService.PlayLand(piece.Strip.transform, () => landTcs.TrySetResult());
             await landTcs.Task;
             targetSegment.SetVisible(true);
 
@@ -390,6 +394,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
                 }
 
                 DeselectPiece();
+                ShakePoolPieces();
             }
             else {
                 foreach (var piece in _poolPieces) {
@@ -399,6 +404,15 @@ namespace Feature.PreGamePlacementModule.Scripts {
                         return;
                     }
                 }
+
+                ShakePoolPieces();
+            }
+        }
+
+        private void ShakePoolPieces() {
+            foreach (var piece in _poolPieces) {
+                if (piece.Strip == null) continue;
+                piece.Strip.transform.DOShakePosition(ShakeDuration, ShakeStrength, ShakeVibrato, 90f, false, true);
             }
         }
 
