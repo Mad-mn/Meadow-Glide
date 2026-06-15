@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Feature.LoseViewModule.Scripts;
+using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.StripsModule.Scripts;
@@ -17,6 +18,8 @@ namespace Feature.CircleModule.Scripts {
         private readonly ISaveDataModel _saveDataModel;
         private readonly ISaveDataService _saveDataService;
         private readonly MoveTrackModel _moveTrackModel;
+        private readonly IPlayerInventoryService _inventoryService;
+        private readonly IEconomyDataProvider _economyDataProvider;
 
         private List<StripController> _filledStrips = new List<StripController>();
 
@@ -24,12 +27,15 @@ namespace Feature.CircleModule.Scripts {
         private bool _isLose;
 
         public CircleControllerService(StripModel stripModel, IViewService viewService,
-            ISaveDataModel saveDataModel, ISaveDataService saveDataService, MoveTrackModel moveTrackModel) {
+            ISaveDataModel saveDataModel, ISaveDataService saveDataService, MoveTrackModel moveTrackModel,
+            IPlayerInventoryService inventoryService, IEconomyDataProvider economyDataProvider) {
             _stripModel = stripModel;
             _viewService = viewService;
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _moveTrackModel = moveTrackModel;
+            _inventoryService = inventoryService;
+            _economyDataProvider = economyDataProvider;
         }
 
         public void Initialize() {
@@ -83,6 +89,7 @@ namespace Feature.CircleModule.Scripts {
             _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
                 .Level++;
             _saveDataService.Save(SaveDataType.PlayerProgress);
+            _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
             _viewService.ShowView<WinLevel>(ViewType.WinLevel);
         }
 

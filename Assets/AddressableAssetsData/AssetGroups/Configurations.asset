@@ -30,6 +30,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 814f9948fdda12540ab5cf4825460b51
+    m_Address: EconomyConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 874585107a9d166498e380dbcd28d69c
     m_Address: SegmentStatusVisualConfig
     m_ReadOnly: 0

@@ -5,6 +5,7 @@ using Feature.GameViewModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
+using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.StateModule.Scripts.Base;
@@ -25,12 +26,13 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IAudioDataProvider _audioDataProvider;
         private readonly IAudioService _audioService;
         private readonly IVibrationService _vibrationService;
+        private readonly IEconomyDataProvider _economyDataProvider;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
             ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
             ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
-            IVibrationService vibrationService) {
+            IVibrationService vibrationService, IEconomyDataProvider economyDataProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -40,6 +42,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _audioDataProvider = audioDataProvider;
             _audioService = audioService;
             _vibrationService = vibrationService;
+            _economyDataProvider = economyDataProvider;
         }
 
         public void Enter() {
@@ -67,6 +70,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _segmentsVisualDataProvider.Initialize();
             await _slideAreaDataProvider.Initialize();
             await _audioDataProvider.Initialize();
+            await _economyDataProvider.Initialize();
         }
     }
 }

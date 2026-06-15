@@ -8,6 +8,7 @@ using Feature.GameStateModule.Scripts.Installers;
 using Feature.InputModule.Scripts.Installers;
 using Feature.LevelInitializeModule.Scripts.Installers;
 using Feature.LevelModule.Scripts.Installers;
+using Feature.PlayerInventoryModule.Scripts.Installers;
 using Feature.PreGamePlacementModule.Scripts.Installers;
 using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
@@ -50,5 +51,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         StatusModuleInstaller.Install(Container);
         VibrationModuleInstaller.Install(Container);
         PreGamePlacementModuleInstaller.Install(Container);
+        PlayerInventoryModuleInstaller.Install(Container);
     }
 }

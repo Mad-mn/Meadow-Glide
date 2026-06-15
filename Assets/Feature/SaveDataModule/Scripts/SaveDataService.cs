@@ -25,7 +25,7 @@ namespace Feature.SaveDataModule.Scripts
         {
             _model.Set(SaveDataType.PlayerProgress, LoadFromDisk<PlayerProgressData>(SaveDataType.PlayerProgress));
             _model.Set(SaveDataType.Settings, LoadFromDisk<PlayerSettingsData>(SaveDataType.Settings));
-            // Add other types here
+            _model.Set(SaveDataType.PlayerInventory, LoadFromDisk<PlayerInventoryData>(SaveDataType.PlayerInventory));
             Debug.Log("All save data loaded into Model.");
         }
 

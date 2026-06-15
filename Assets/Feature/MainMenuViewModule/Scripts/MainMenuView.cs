@@ -10,6 +10,7 @@ namespace Feature.MainMenuViewModule.Scripts {
         [SerializeField] private TMP_Text _levelText;
         [field: SerializeField] public Button SettingsButton { get; private set; }
         [field: SerializeField] public Button DebugButton { get; private set; }
+        [field: SerializeField] public TMP_Text CoinsCountText { get; private set; }
         
         public Button PlayButton => _playButton;
         public void LevelText(string text) => _levelText.text = text;

@@ -1,6 +1,7 @@
 using Feature.DebugViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
+using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SettingsViewModule.Scripts;
@@ -15,13 +16,15 @@ namespace Feature.MainMenuViewModule.Scripts {
         private readonly SaveDataModel _saveDataModel;
         private readonly IViewService _viewService;
         private readonly IAudioService _audioService;
+        private readonly IPlayerInventoryService _playerInventoryService;
 
-        public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel,
-            IViewService viewService, IAudioService audioService) : base(view) {
+        public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel, IViewService viewService,
+            IAudioService audioService, IPlayerInventoryService playerInventoryService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _viewService = viewService;
             _audioService = audioService;
+            _playerInventoryService = playerInventoryService;
         }
 
         public override void Initialize() {
@@ -33,6 +36,12 @@ namespace Feature.MainMenuViewModule.Scripts {
         public override void Show() {
             base.Show();
             SetupText();
+            UpdateCoinsCountTxt();
+        }
+
+        private void UpdateCoinsCountTxt() {
+            View.CoinsCountText.text = _playerInventoryService.GetBalance(ResourceType.Coins)
+                .ToString();
         }
 
         private void OnSettingsClick() {

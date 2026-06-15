@@ -8,6 +8,7 @@ public static class AddressConstants
     public const string CircleSegmentPrefab = "CircleSegmentPrefab";
     public const string ConfirmExitToMainMenuView = "ConfirmExitToMainMenuView";
     public const string DebugView = "DebugView";
+    public const string EconomyConfig = "EconomyConfig";
     public const string FingerHint = "FingerHint";
     public const string GameView = "GameView";
     public const string GircleModule = "GircleModule";

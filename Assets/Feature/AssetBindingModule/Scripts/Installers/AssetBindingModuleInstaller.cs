@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using Feature.CircleModule.Scripts;
 using Feature.ColorServiceModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.PlayerInventoryModule.Configs;
 using Feature.SlideAreaModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.StatusModule.Scripts;
@@ -24,6 +25,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<SlideAreaStatusDataConfig>(AddressConstants.SlideAreaStatusDataConfig);
             Container.BindAddressableAsset<TutorialAssetsConfig>(AddressConstants.TutorialAssetsConfig);
             Container.BindAddressableAsset<AudioConfig>(AddressConstants.AudioConfig);
+            Container.BindAddressableAsset<EconomyConfig>(AddressConstants.EconomyConfig);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             

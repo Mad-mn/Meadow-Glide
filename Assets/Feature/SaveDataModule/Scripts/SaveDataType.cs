@@ -4,6 +4,7 @@ namespace Feature.SaveDataModule.Scripts
     {
         PlayerProgress = 1,
         Settings = 2,
-        Statistics = 3
+        Statistics = 3,
+        PlayerInventory = 4
     }
 }
