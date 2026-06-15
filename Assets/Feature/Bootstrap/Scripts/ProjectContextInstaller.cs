@@ -17,6 +17,7 @@ using Feature.SoundModule.Scripts.Installers;
 using Feature.StatusModule.Scripts.Installers;
 using Feature.StripRotationModule.Scripts.Installers;
 using Feature.StripsModule.Scripts.Installers;
+using Feature.ToolModule.Scripts.Installers;
 using Feature.TrackMoveModule.Scripts.Installers;
 using Feature.TutorialModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
@@ -54,5 +55,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         PreGamePlacementModuleInstaller.Install(Container);
         PlayerInventoryModuleInstaller.Install(Container);
         UndoModuleInstaller.Install(Container);
+        ToolModuleInstaller.Install(Container);
     }
 }

@@ -4,6 +4,7 @@ using Feature.LevelInitializeModule;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SoundModule.Scripts;
+using Feature.ToolButtonViewModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using Feature.UndoModule.Scripts;
@@ -15,33 +16,41 @@ namespace Feature.GameViewModule.Scripts {
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IAudioService _audioService;
         private readonly ILevelInitializeService _levelInitializeService;
-        private readonly IUndoService _undoService;
 
         public GamePresenter(GameView view, IViewService viewService, SaveDataModel saveDataModel,
-            MoveTrackModel moveTrackModel, IAudioService audioService, ILevelInitializeService levelInitializeService,
-            IUndoService undoService) : base(view) {
+            MoveTrackModel moveTrackModel, IAudioService audioService, ILevelInitializeService levelInitializeService) : base(view) {
             _viewService = viewService;
             _saveDataModel = saveDataModel;
             _moveTrackModel = moveTrackModel;
             _audioService = audioService;
             _levelInitializeService = levelInitializeService;
-            _undoService = undoService;
         }
 
         public override void Initialize() {
             View.MainMenuButton.onClick.AddListener(ShowConfirmExitToMainMenu);
             View.ResetLevelButton.onClick.AddListener(ResetLevelButtonClicked);
-            View.UndoButton.onClick.AddListener(UndoButtonClicked);
             _moveTrackModel.OnMovesChanged += UpdateMovesChangedsText;
+            _viewService.PrewarmView<ToolButtonView>(ViewType.ToolButtonView);
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+            _viewService.ReleasePrewarmedView(ViewType.ToolButtonView);
+        }
+
+        public override void Show() {
+            _viewService.ShowView<ToolButtonView>(ViewType.ToolButtonView);
+            SetupText();
+        }
+
+        public override void Hide() {
+            base.Hide();
+            _viewService.HideView(ViewType.ToolButtonView);
         }
 
         private void ResetLevelButtonClicked() {
             _audioService.PlaySound(AudioType.ButtonClick);
             _levelInitializeService.ReloadScene().Forget();
-        }
-
-        public override void Show() {
-            SetupText();
         }
 
         private void SetupText() {
@@ -57,13 +66,6 @@ namespace Feature.GameViewModule.Scripts {
         private void ShowConfirmExitToMainMenu() {
             _audioService.PlaySound(AudioType.ButtonClick);
             _viewService.ShowView<ConfirmExitToMainMenuView>(ViewType.ConfirmExitToMainMenuView);
-        }
-
-        private void UndoButtonClicked() {
-            if(!_undoService.CanUndo)
-                return;
-            
-            _undoService.Undo();
         }
     }
 }

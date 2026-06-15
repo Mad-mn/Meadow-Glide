@@ -37,3 +37,6 @@ MonoBehaviour:
   - ViewType: 9
     Address: SettingsView
     PresenterTypeName: Feature.SettingsViewModule.Scripts.SettingsPresenter
+  - ViewType: 10
+    Address: ToolButtonView
+    PresenterTypeName: Feature.ToolButtonViewModule.Scripts.ToolButtonPresenter

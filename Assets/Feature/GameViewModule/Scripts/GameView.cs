@@ -7,7 +7,6 @@ namespace Feature.GameViewModule.Scripts {
     public class GameView : ViewBase {
         [SerializeField] private Button _mainMenuButton;
         [field: SerializeField] public Button ResetLevelButton { get; private set; }
-        [field: SerializeField] public Button UndoButton { get; private set; }
         [SerializeField] private TMP_Text _levelTxt;
         [SerializeField] private TMP_Text _moveCountTxt;
         

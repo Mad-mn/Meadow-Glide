@@ -12,6 +12,7 @@ using Feature.StateModule.Scripts.Base;
 using Feature.StatusModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
 using Feature.StatusModule.Scripts.SlideAreas;
+using Feature.ToolModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
 
@@ -27,12 +28,14 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IAudioService _audioService;
         private readonly IVibrationService _vibrationService;
         private readonly IEconomyDataProvider _economyDataProvider;
+        private readonly IToolConfigProvider _toolConfigProvider;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
             ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
             ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
-            IVibrationService vibrationService, IEconomyDataProvider economyDataProvider) {
+            IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
+            IToolConfigProvider toolConfigProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -43,6 +46,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _audioService = audioService;
             _vibrationService = vibrationService;
             _economyDataProvider = economyDataProvider;
+            _toolConfigProvider = toolConfigProvider;
         }
 
         public void Enter() {
@@ -71,6 +75,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _slideAreaDataProvider.Initialize();
             await _audioDataProvider.Initialize();
             await _economyDataProvider.Initialize();
+            await _toolConfigProvider.Initialize();
         }
     }
 }

@@ -31,6 +31,7 @@ public static class AddressConstants
     public const string SlideAreaStatusDataConfig = "SlideAreaStatusDataConfig";
     public const string Strip = "Strip";
     public const string StripSegmentPrefab = "StripSegmentPrefab";
+    public const string ToolConfig = "ToolConfig";
     public const string TutorialAssetsConfig = "TutorialAssetsConfig";
     public const string UIRoot = "UIRoot";
     public const string ViewSettings = "ViewSettings";

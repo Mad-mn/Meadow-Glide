@@ -9,5 +9,6 @@ namespace Feature.UIServiceModule.Scripts {
         ConfirmExitToMainMenuView = 7,
         DebugView = 8,
         SettingsView = 9,
+        ToolButtonView = 10,
 }
 }
