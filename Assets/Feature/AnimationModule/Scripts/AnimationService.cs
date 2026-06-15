@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -45,6 +46,13 @@ namespace Feature.AnimationModule.Scripts {
             sequence.Append(target.DOPunchScale(punch, duration, vibrato, elasticity));
             sequence.OnComplete(() => onComplete?.Invoke());
             return sequence;
+        }
+
+        public void PlayShake(IEnumerable<Transform> targets, float duration, float strength, int vibrato) {
+            foreach (var target in targets) {
+                if (target == null) continue;
+                target.DOShakePosition(duration, strength, vibrato);
+            }
         }
     }
 }

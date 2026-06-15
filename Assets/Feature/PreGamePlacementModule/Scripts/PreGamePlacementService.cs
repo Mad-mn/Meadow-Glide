@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using Feature.AnimationModule.Scripts;
 using Feature.CameraServiceModule.Scripts;
 using Feature.CircleModule.Scripts;
@@ -410,10 +409,10 @@ namespace Feature.PreGamePlacementModule.Scripts {
         }
 
         private void ShakePoolPieces() {
-            foreach (var piece in _poolPieces) {
-                if (piece.Strip == null) continue;
-                piece.Strip.transform.DOShakePosition(ShakeDuration, ShakeStrength, ShakeVibrato, 90f, false, true);
-            }
+            var transforms = _poolPieces
+                .Where(p => p.Strip != null)
+                .Select(p => p.Strip.transform);
+            _animationService.PlayShake(transforms, ShakeDuration, ShakeStrength, ShakeVibrato);
         }
 
         private class EmptySlot {
