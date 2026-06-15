@@ -59,7 +59,7 @@ namespace Feature.LevelInitializeModule {
         }
 
         public async UniTask Initialize() {
-            _interactionStateService.InputBlocked = false;
+            _interactionStateService.ResetInputBlock();
 
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);

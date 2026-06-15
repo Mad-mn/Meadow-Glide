@@ -102,7 +102,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
             _isPlacing = true;
             _totalStripCount = totalStripCount;
-            _interactionStateService.InputBlocked = true;
+            _interactionStateService.BlockInput();
 
             CollectEmptySlots(levelConfig);
             InitializeEmptySlotVisuals();
@@ -112,14 +112,14 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
             Cleanup();
             _isPlacing = false;
-            _interactionStateService.InputBlocked = false;
+            _interactionStateService.UnblockInput();
         }
 
         public void Cancel() {
             if (!_isPlacing) return;
             Cleanup();
             _isPlacing = false;
-            _interactionStateService.InputBlocked = false;
+            _interactionStateService.UnblockInput();
             _onComplete?.Invoke();
         }
 

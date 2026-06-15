@@ -25,12 +25,12 @@ namespace Feature.WinLevelModule.Scripts {
 
         public override void Show() {
             base.Show();
-            _interactionStateService.InputBlocked = true;
+            _interactionStateService.BlockInput();
         }
 
         public override void Hide() {
             base.Hide();
-            _interactionStateService.InputBlocked = false;
+            _interactionStateService.UnblockInput();
         }
 
         private void OnMainMenuButtonClick() {
