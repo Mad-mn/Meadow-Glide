@@ -35,6 +35,11 @@ namespace Feature.ConfirmBuyViewModule.Scripts {
             View.YesButton.onClick.AddListener(OnYesButtonClick);
         }
 
+        public override void Dispose() {
+            base.Dispose();
+            _viewModel.OnSetupTransactionId -= SetupTransactionId;
+        }
+
         public override void Show() {
             base.Show();
             _interactionStateService.BlockInput();
