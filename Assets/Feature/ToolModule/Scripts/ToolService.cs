@@ -31,6 +31,7 @@ namespace Feature.ToolModule.Scripts {
 
             ITool tool = GetTool(toolType);
             tool?.Execute();
+            _playerInventoryService.TrySpend(GetResourceType(toolType), 1);
         }
 
         private ITool GetTool(ToolType toolType) {

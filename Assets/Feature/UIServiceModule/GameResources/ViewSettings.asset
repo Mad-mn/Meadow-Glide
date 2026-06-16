@@ -40,3 +40,6 @@ MonoBehaviour:
   - ViewType: 10
     Address: ToolButtonView
     PresenterTypeName: Feature.ToolButtonViewModule.Scripts.ToolButtonPresenter
+  - ViewType: 11
+    Address: ConfirmBuyView
+    PresenterTypeName: Feature.ConfirmBuyViewModule.Scripts.ConfirmBuyPresenter

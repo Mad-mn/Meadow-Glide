@@ -10,5 +10,6 @@ namespace Feature.UIServiceModule.Scripts {
         DebugView = 8,
         SettingsView = 9,
         ToolButtonView = 10,
+        ConfirmBuyView = 11,
 }
 }

@@ -43,6 +43,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         SaveDataModuleInstaller.Install(Container);
         SceneLoadModuleInstaller.Install(Container);
         UIModuleInstaller.Install(Container);
+        ViewModelsInstaller.Install(Container);
         CircleColorModuleInstaller.Install(Container);
         LevelModuleInstaller.Install(Container);
         LevelInitializeModuleInstaller.Install(Container);
