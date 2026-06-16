@@ -1,3 +1,5 @@
+using Feature.TransactionModule.Scripts;
+
 namespace Feature.PlayerInventoryModule.Scripts
 {
     public interface IPlayerInventoryService

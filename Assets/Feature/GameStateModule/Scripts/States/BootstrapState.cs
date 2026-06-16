@@ -13,6 +13,7 @@ using Feature.StatusModule.Scripts;
 using Feature.StatusModule.Scripts.Segments;
 using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.ToolModule.Scripts;
+using Feature.TransactionModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
 
@@ -29,13 +30,14 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IVibrationService _vibrationService;
         private readonly IEconomyDataProvider _economyDataProvider;
         private readonly IToolConfigProvider _toolConfigProvider;
+        private readonly ITransactionConfigsProvider _transactionConfigsProvider;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
             ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
             ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
             IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
-            IToolConfigProvider toolConfigProvider) {
+            IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -47,6 +49,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _vibrationService = vibrationService;
             _economyDataProvider = economyDataProvider;
             _toolConfigProvider = toolConfigProvider;
+            _transactionConfigsProvider = transactionConfigsProvider;
         }
 
         public void Enter() {
@@ -76,6 +79,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _audioDataProvider.Initialize();
             await _economyDataProvider.Initialize();
             await _toolConfigProvider.Initialize();
+            await _transactionConfigsProvider.Initialize();
         }
     }
 }

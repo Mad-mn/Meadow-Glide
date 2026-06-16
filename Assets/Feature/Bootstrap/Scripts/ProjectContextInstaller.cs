@@ -19,6 +19,7 @@ using Feature.StripRotationModule.Scripts.Installers;
 using Feature.StripsModule.Scripts.Installers;
 using Feature.ToolModule.Scripts.Installers;
 using Feature.TrackMoveModule.Scripts.Installers;
+using Feature.TransactionModule.Scripts.Installers;
 using Feature.TutorialModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
 using Feature.UndoModule.Scripts.Installers;
@@ -56,5 +57,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         PlayerInventoryModuleInstaller.Install(Container);
         UndoModuleInstaller.Install(Container);
         ToolModuleInstaller.Install(Container);
+        TransactionModuleInstaller.Install(Container);
     }
 }

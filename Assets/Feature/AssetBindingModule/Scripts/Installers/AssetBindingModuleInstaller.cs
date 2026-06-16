@@ -10,6 +10,7 @@ using Feature.StatusModule.Scripts.Segments;
 using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.StripsModule.Scripts;
 using Feature.ToolModule.Scripts;
+using Feature.TransactionModule.Scripts.Configs;
 using Feature.TutorialModule.Scripts.Configs;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
@@ -28,6 +29,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<AudioConfig>(AddressConstants.AudioConfig);
             Container.BindAddressableAsset<EconomyConfig>(AddressConstants.EconomyConfig);
             Container.BindAddressableAsset<ToolConfig>(AddressConstants.ToolConfig);
+            Container.BindAddressableAsset<TransactionConfigs>(AddressConstants.TransactionConfigs);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             

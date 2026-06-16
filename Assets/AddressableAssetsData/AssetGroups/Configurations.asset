@@ -45,6 +45,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a85a4b798dbbccc4787488e59c17f616
+    m_Address: TransactionConfigs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cc696bb2a42db254387c5a959c4a6251
     m_Address: TutorialAssetsConfig
     m_ReadOnly: 0

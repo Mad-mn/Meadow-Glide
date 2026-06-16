@@ -1,9 +1,10 @@
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.TransactionModule.Scripts;
 
 namespace Feature.PlayerInventoryModule.Scripts
 {
-    public class PlayerInventoryService : IPlayerInventoryService
+    public class PlayerInventoryService : IPlayerInventoryService, IResourceStorage
     {
         private readonly PlayerInventoryModel _model;
         private readonly ISaveDataModel _saveDataModel;
@@ -53,6 +54,14 @@ namespace Feature.PlayerInventoryModule.Scripts
             EnsureLoaded();
             var current = _model.GetBalance(type);
             _model.SetBalance(type, current + amount);
+            Persist();
+        }
+
+        public void Spend(ResourceType type, int amount)
+        {
+            EnsureLoaded();
+            var current = _model.GetBalance(type);
+            _model.SetBalance(type, current - amount);
             Persist();
         }
 
