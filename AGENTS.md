@@ -23,7 +23,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**25 module installers** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
+**27 module installers** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)
@@ -42,6 +42,13 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 | `Tools/UI/Create View Module` | Scaffolds a new MVP View module (View + Presenter + installer registration) |
 | `Tools/Save Data/Clear All Saves` | Clears all save data |
 | `Tools/Save Data/Open Persistent Data Path` | Opens persistent data folder |
+
+## Project Constraints
+
+- **No CI/CD** — builds are manual via Unity Editor. No automated pipelines, no test scripts.
+- **No project tests** — `com.unity.test-framework` is installed but unused. Only Zenject plugin tests exist.
+- **Monolithic assembly** — no project-specific `.asmdef` files. All project code compiles into `Assembly-CSharp`.
+- **Target platforms** — Android and iOS (mobile-first performance).
 
 ## Code Style
 
@@ -92,9 +99,15 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 | Circle geometry docs | `Assets/Docs/CircleGeometrySystem.md` |
 | Level generation docs | `Assets/Docs/LevelGenerationSystem.md` |
 
+## Level Data
+
+- `Assets/ScriptableObjects/Levels/` — hand-crafted level configs (newBalance)
+- `Assets/ScriptableObjects/GeneratedLevels/` — procedurally generated levels (A* solver)
+- Level configs loaded via Addressables as `UniTask<LevelConfigProvider>` (lazy)
+
 ## Adding a New Feature Module
 
 1. Create `Assets/Feature/<Name>Module/Scripts/` directory structure
 2. Create an installer class and register it in `ProjectContextInstaller.cs`
-3. For new UI views: use `Tools/UI/Create View Module` to scaffold
+3. For new UI views: use `Tools/UI/Create View Module` to scaffold — this also updates `ViewType` enum and `ViewSettings` ScriptableObject
 4. Add any new Addressable assets, then run `Tools/GenerateAdresablesNames`
