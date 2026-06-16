@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.TransactionModule.Scripts.Configs.TransactionConfigs
   _configs:
   - {fileID: 11400000, guid: e16d2882b9297024aae85ac5f4b47589, type: 2}
+  - {fileID: 11400000, guid: 3c90c66aa10bf4a41b0d7a8c26af6322, type: 2}

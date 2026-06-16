@@ -43,7 +43,7 @@ namespace Feature.PlayerInventoryModule.Scripts
         {
             EnsureLoaded();
             if (_model.GetBalance(type) < amount) return false;
-            var current = _model.GetBalance(type);
+            int current = _model.GetBalance(type);
             _model.SetBalance(type, current - amount);
             Persist();
             return true;
@@ -52,14 +52,21 @@ namespace Feature.PlayerInventoryModule.Scripts
         public void Add(ResourceType type, int amount)
         {
             EnsureLoaded();
-            var current = _model.GetBalance(type);
+            if(!ConfirmForAdd(type))
+                return;
+            
+            int current = _model.GetBalance(type);
             _model.SetBalance(type, current + amount);
             Persist();
         }
 
+        private bool ConfirmForAdd(ResourceType type) {
+            return type is not (ResourceType.ExtraMoves or ResourceType.None);
+        }
+
         private void Persist()
         {
-            var data = _saveDataModel.Get<PlayerInventoryData>(SaveDataType.PlayerInventory);
+            PlayerInventoryData data = _saveDataModel.Get<PlayerInventoryData>(SaveDataType.PlayerInventory);
             data.Balances = _model.GetAll();
             _saveDataService.Save(SaveDataType.PlayerInventory);
         }

@@ -1,10 +1,12 @@
 using Cysharp.Threading.Tasks;
+using Feature.ConfirmBuyViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.InputModule.Scripts;
 using Feature.LevelInitializeModule;
 using Feature.LevelModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
+using Feature.TransactionModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
 
@@ -15,14 +17,19 @@ namespace Feature.LoseViewModule.Scripts {
         private readonly IViewService _viewService;
         private readonly IMoveTrackService _moveTrackService;
         private readonly IInteractionStateService _interactionStateService;
+        private readonly ConfirmBuyViewModel _confirmBuyViewModel;
+        private readonly ITransactionConfigsProvider _transactionConfigsProvider;
 
         public LosePresenter(LoseView view, IGameStateMachine gameStateMachine, ILevelInitializeService levelInitializeService,
-            IViewService viewService, IMoveTrackService moveTrackService, IInteractionStateService interactionStateService) : base(view) {
+            IViewService viewService, IMoveTrackService moveTrackService, IInteractionStateService interactionStateService,
+            ConfirmBuyViewModel confirmBuyViewModel, ITransactionConfigsProvider transactionConfigsProvider) : base(view) {
             _gameStateMachine = gameStateMachine;
             _levelInitializeService = levelInitializeService;
             _viewService = viewService;
             _moveTrackService = moveTrackService;
             _interactionStateService = interactionStateService;
+            _confirmBuyViewModel = confirmBuyViewModel;
+            _transactionConfigsProvider = transactionConfigsProvider;
         }
 
         public override void Initialize() {
@@ -42,8 +49,16 @@ namespace Feature.LoseViewModule.Scripts {
         }
 
         private void AddMovesButtonClick() {
-            _viewService.HideView(ViewType.LoseView);
-            _moveTrackService.AddMoves(5);
+            _viewService.ShowView<ConfirmBuyView>(ViewType.ConfirmBuyView);
+            _confirmBuyViewModel.SetupTransactionId(TransactionId.BuyExtraMoves);
+            _confirmBuyViewModel.OnConfirmSuccess += OnConfirmSuccess;
+
+            void OnConfirmSuccess() {
+                _confirmBuyViewModel.OnConfirmSuccess -= OnConfirmSuccess;
+                _viewService.HideView(ViewType.LoseView);
+                _moveTrackService.AddMoves(_transactionConfigsProvider.GetConfig(TransactionId.BuyExtraMoves).Rewards[0].Amount);
+            }
+            
         }
 
         private void OnMainMenuButtonClick() {
