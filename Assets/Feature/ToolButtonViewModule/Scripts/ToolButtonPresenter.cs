@@ -1,12 +1,15 @@
 using Feature.ToolModule.Scripts;
+using Feature.TransactionModule.Scripts;
 using Feature.UIServiceModule.Scripts;
-using UnityEngine;
 
 namespace Feature.ToolButtonViewModule.Scripts {
     public class ToolButtonPresenter : PresenterBase<ToolButtonView> {
         private readonly IToolService _toolService;
-        public ToolButtonPresenter(ToolButtonView view, IToolService toolService) : base(view) {
+        private readonly IPriceDataProvider _priceDataProvider;
+
+        public ToolButtonPresenter(ToolButtonView view, IToolService toolService, IPriceDataProvider priceDataProvider) : base(view) {
             _toolService = toolService;
+            _priceDataProvider = priceDataProvider;
         }
 
         public override void Initialize() {
@@ -17,9 +20,7 @@ namespace Feature.ToolButtonViewModule.Scripts {
 
         public override void Show() {
             base.Show();
-            foreach (ToolButton toolButton in View.ToolButtons) {
-                toolButton.LockIcon.SetActive(CheckForLock(toolButton.ToolType));
-            }
+            SetupView();
         }
 
         private void OnButtonClick(ToolType toolType) {
@@ -27,6 +28,21 @@ namespace Feature.ToolButtonViewModule.Scripts {
                 return;
 
             _toolService.ExecuteTool(toolType);
+        }
+
+        private void SetupView() {
+            foreach (ToolButton toolButton in View.ToolButtons) {
+                toolButton.SetupView(GetToolButtonViewData(toolButton.ToolType));
+            }
+        }
+
+        private ToolButtonViewData GetToolButtonViewData(ToolType toolButtonToolType) {
+            return new ToolButtonViewData() {
+                HasTool = _toolService.HasTool(toolButtonToolType), 
+                Amount = _toolService.GetToolAmount(toolButtonToolType),
+                Price = _priceDataProvider.GetPrice(TransactionId.BuyUndo),
+                Blocked = CheckForLock(toolButtonToolType)
+            };
         }
 
         private bool CheckForLock(ToolType toolType) {

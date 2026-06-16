@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using Feature.PlayerInventoryModule.Scripts;
 using Feature.TransactionModule.Scripts.Configs;
 
 namespace Feature.TransactionModule.Scripts {
     public class TransactionService : ITransactionService {
-        private readonly IResourceStorage _storage;
+        private readonly IPlayerInventoryService _storage;
         private readonly ITransactionConfigsProvider _configsProvider;
         private readonly TransactionValidator _validator;
         private readonly TransactionExecutor _executor;
 
-        public TransactionService(IResourceStorage storage, ITransactionConfigsProvider configsProvider) {
+        public TransactionService(IPlayerInventoryService storage, ITransactionConfigsProvider configsProvider) {
             _storage = storage;
             _configsProvider = configsProvider;
             _validator = new TransactionValidator(storage);

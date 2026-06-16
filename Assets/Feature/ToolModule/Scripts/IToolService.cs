@@ -5,5 +5,6 @@ namespace Feature.ToolModule.Scripts {
         void ExecuteTool(ToolType toolType);
         bool CanUseTool(ToolType toolType);
         bool HasTool(ToolType toolType);
+        int GetToolAmount(ToolType toolType);
     }
 }

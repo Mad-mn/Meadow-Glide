@@ -1,21 +1,22 @@
 using System.Collections.Generic;
+using Feature.PlayerInventoryModule.Scripts;
 using Feature.TransactionModule.Scripts.Configs;
 
 namespace Feature.TransactionModule.Scripts
 {
     public class TransactionExecutor
     {
-        public void ApplyCosts(TransactionConfig config, IResourceStorage storage)
+        public void ApplyCosts(TransactionConfig config, IPlayerInventoryService storage)
         {
             if (config.Costs == null) return;
 
             foreach (var cost in config.Costs)
             {
-                storage.Spend(cost.Type, cost.Amount);
+                storage.TrySpend(cost.Type, cost.Amount);
             }
         }
 
-        public List<ResourceAmount> ApplyRewards(TransactionConfig config, IResourceStorage storage)
+        public List<ResourceAmount> ApplyRewards(TransactionConfig config, IPlayerInventoryService storage)
         {
             var appliedRewards = new List<ResourceAmount>();
 

@@ -11,6 +11,9 @@ namespace Feature.TransactionModule.Scripts.Installers
 
             Container.BindInterfacesAndSelfTo<TransactionService>()
                 .AsSingle();
+            
+            Container.BindInterfacesAndSelfTo<PriceDataProvider>()
+                .AsSingle();
         }
     }
 }

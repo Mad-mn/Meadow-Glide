@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: BuyUndo
   m_EditorClassIdentifier: Assembly-CSharp::Feature.TransactionModule.Scripts.Configs.TransactionConfig
   TransactionId: 1
-  DisplayName: 
   FailureMessage: 
   Costs:
   - Type: 1
     Amount: 50
   Rewards:
   - Type: 2
-    Amount: 1
+    Amount: 3

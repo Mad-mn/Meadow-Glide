@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.ToolModule.Scripts.Factory;
@@ -13,13 +14,16 @@ namespace Feature.ToolModule.Scripts {
         private readonly IToolConfigProvider _toolConfigProvider;
         private readonly SaveDataModel _saveData;
         private readonly IToolFactory _toolFactory;
+        private readonly IPlayerInventoryService _playerInventoryService;
 
         private readonly Dictionary<ToolType, ITool> _tools = new();
         
-        public ToolService(IToolConfigProvider toolConfigProvider, SaveDataModel saveData, IToolFactory toolFactory) {
+        public ToolService(IToolConfigProvider toolConfigProvider, SaveDataModel saveData, IToolFactory toolFactory,
+            IPlayerInventoryService playerInventoryService) {
             _toolConfigProvider = toolConfigProvider;
             _saveData = saveData;
             _toolFactory = toolFactory;
+            _playerInventoryService = playerInventoryService;
         }
         public void ExecuteTool(ToolType toolType) {
             if(!CanUseTool(toolType))
@@ -54,8 +58,27 @@ namespace Feature.ToolModule.Scripts {
                 .UnlockLevel;
         }
 
-        public bool HasTool(ToolType toolType) =>
-            throw new System.NotImplementedException();
+        public bool HasTool(ToolType toolType) {
+            return _playerInventoryService.HasEnough(GetResourceType(toolType), 1);
+        }
+
+        public int GetToolAmount(ToolType toolButtonToolType) {
+            if (!HasTool(toolButtonToolType))
+                return 0;
+            
+            return _playerInventoryService.GetBalance(GetResourceType(toolButtonToolType));
+        }
+
+        private ResourceType GetResourceType(ToolType toolType) {
+            switch (toolType) {
+                case ToolType.Undo:
+                    return ResourceType.UndoTokens;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(toolType), toolType, null);
+            }
+
+            return ResourceType.None;
+        }
 
         private ToolData GetToolData(ToolType toolType) {
             ToolData data = _toolConfigProvider.Tools.FirstOrDefault(data => data.ToolType == toolType);

@@ -5,9 +5,9 @@ namespace Feature.TransactionModule.Scripts
 {
     public class TransactionValidator
     {
-        private readonly IResourceStorage _storage;
+        private readonly IPlayerInventoryService _storage;
 
-        public TransactionValidator(IResourceStorage storage)
+        public TransactionValidator(IPlayerInventoryService storage)
         {
             _storage = storage;
         }
