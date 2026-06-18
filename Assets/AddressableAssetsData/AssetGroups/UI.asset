@@ -45,6 +45,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b13159f517cf9b4098391a5f4879326
+    m_Address: DailyChallengeCompleteView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 72921a07c40dda34ea467317082afeba
     m_Address: SettingsView
     m_ReadOnly: 0

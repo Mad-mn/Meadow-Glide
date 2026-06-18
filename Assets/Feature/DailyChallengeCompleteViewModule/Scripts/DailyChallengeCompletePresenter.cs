@@ -26,6 +26,7 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
         private readonly IAnimationService _animationService;
         private readonly MoveTrackModel _moveTrackModel;
         private readonly ILevelInitializeService _levelInitializeService;
+        private readonly IViewService _viewService;
 
         private IEnumerator _showRoutine;
 
@@ -39,7 +40,8 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             ICoroutineRunner coroutineRunner,
             IAnimationService animationService,
             MoveTrackModel moveTrackModel,
-            ILevelInitializeService levelInitializeService) : base(view) {
+            ILevelInitializeService levelInitializeService,
+            IViewService viewService) : base(view) {
             _challengeService = challengeService;
             _configProvider = configProvider;
             _resourceInfoProvider = resourceInfoProvider;
@@ -49,6 +51,7 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             _animationService = animationService;
             _moveTrackModel = moveTrackModel;
             _levelInitializeService = levelInitializeService;
+            _viewService = viewService;
         }
 
         public override void Initialize() {
@@ -193,11 +196,13 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
         }
 
         private void OnMainMenuButtonClick() {
+            _viewService.HideView(ViewType.DailyChallengeCompleteView);
             _challengeService.Deactivate();
             _gameStateMachine.EnterState(typeof(MainMenuState));
         }
 
         private void OnRestartButtonClick() {
+            _viewService.HideView(ViewType.DailyChallengeCompleteView);
             _levelInitializeService.ReloadScene().Forget();
         }
     }

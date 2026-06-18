@@ -1,45 +1,26 @@
 using System;
 using System.Collections.Generic;
-using Feature.ChallengeModule.Scripts;
-using Feature.LoseViewModule.Scripts;
-using Feature.PlayerInventoryModule.Scripts;
-using Feature.SaveDataModule.Scripts;
-using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.LevelResultModule.Scripts;
 using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
-using Feature.TransactionModule.Scripts;
-using Feature.UIServiceModule.Scripts;
-using Feature.WinLevelModule.Scripts;
 using Zenject;
 
 namespace Feature.CircleModule.Scripts {
     public class CircleControllerService : ICircleControllerService, IInitializable, IDisposable {
         private readonly StripModel _stripModel;
-        private readonly IViewService _viewService;
-        private readonly ISaveDataModel _saveDataModel;
-        private readonly ISaveDataService _saveDataService;
         private readonly MoveTrackModel _moveTrackModel;
-        private readonly IPlayerInventoryService _inventoryService;
-        private readonly IEconomyDataProvider _economyDataProvider;
-        private readonly IChallengeService _challengeService;
+        private readonly ILevelResultService _levelResultService;
 
         private List<StripController> _filledStrips = new List<StripController>();
 
         private bool _isWin;
         private bool _isLose;
 
-        public CircleControllerService(StripModel stripModel, IViewService viewService,
-            ISaveDataModel saveDataModel, ISaveDataService saveDataService, MoveTrackModel moveTrackModel,
-            IPlayerInventoryService inventoryService, IEconomyDataProvider economyDataProvider,
-            IChallengeService challengeService) {
+        public CircleControllerService(StripModel stripModel, MoveTrackModel moveTrackModel,
+            ILevelResultService levelResultService) {
             _stripModel = stripModel;
-            _viewService = viewService;
-            _saveDataModel = saveDataModel;
-            _saveDataService = saveDataService;
             _moveTrackModel = moveTrackModel;
-            _inventoryService = inventoryService;
-            _economyDataProvider = economyDataProvider;
-            _challengeService = challengeService;
+            _levelResultService = levelResultService;
         }
 
         public void Initialize() {
@@ -60,6 +41,7 @@ namespace Feature.CircleModule.Scripts {
             _filledStrips.Clear();
             _isWin = false;
             _isLose = false;
+            _levelResultService.Reset();
         }
 
         private void CheckForMatchResult() {
@@ -71,7 +53,8 @@ namespace Feature.CircleModule.Scripts {
             if (_filledStrips.Count != _stripModel.Strips.Count || _stripModel.Strips.Count <= 0)
                 return false;
 
-            ApplyWin();
+            _levelResultService.OnLevelWon();
+            _isWin = true;
             return true;
         }
 
@@ -81,27 +64,8 @@ namespace Feature.CircleModule.Scripts {
                     return;
 
                 _isLose = true;
-                _viewService.ShowView<LoseView>(ViewType.LoseView);
+                _levelResultService.OnLevelLost();
             }
-        }
-
-        private void ApplyWin() {
-            if (_isWin)
-                return;
-
-            _isWin = true;
-
-            if (_challengeService.IsActive) {
-                int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                _challengeService.OnChallengeCompleted(_moveTrackModel.MaxMovesForCurrentLevel, movesUsed);
-            }
-            else {
-                _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level++;
-                _saveDataService.Save(SaveDataType.PlayerProgress);
-                _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
-            }
-
-            _viewService.ShowView<WinLevel>(ViewType.WinLevel);
         }
 
         private void ApplyResultForStrip(StripController strip, bool stripFull) {
