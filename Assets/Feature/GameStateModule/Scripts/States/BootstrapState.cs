@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Feature.CameraServiceModule.Scripts;
+using Feature.ChallengeModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
@@ -31,13 +32,15 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IEconomyDataProvider _economyDataProvider;
         private readonly IToolConfigProvider _toolConfigProvider;
         private readonly ITransactionConfigsProvider _transactionConfigsProvider;
+        private readonly IChallengeConfigProvider _challengeConfigProvider;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
             ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
             ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
             IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
-            IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider) {
+            IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider,
+            IChallengeConfigProvider challengeConfigProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -50,6 +53,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _economyDataProvider = economyDataProvider;
             _toolConfigProvider = toolConfigProvider;
             _transactionConfigsProvider = transactionConfigsProvider;
+            _challengeConfigProvider = challengeConfigProvider;
         }
 
         public void Enter() {
@@ -80,6 +84,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _economyDataProvider.Initialize();
             await _toolConfigProvider.Initialize();
             await _transactionConfigsProvider.Initialize();
+            await _challengeConfigProvider.Initialize();
         }
     }
 }

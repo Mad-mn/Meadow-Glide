@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Feature.ChallengeModule.Scripts;
 using Feature.LoseViewModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
@@ -20,6 +21,7 @@ namespace Feature.CircleModule.Scripts {
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IPlayerInventoryService _inventoryService;
         private readonly IEconomyDataProvider _economyDataProvider;
+        private readonly IChallengeService _challengeService;
 
         private List<StripController> _filledStrips = new List<StripController>();
 
@@ -28,7 +30,8 @@ namespace Feature.CircleModule.Scripts {
 
         public CircleControllerService(StripModel stripModel, IViewService viewService,
             ISaveDataModel saveDataModel, ISaveDataService saveDataService, MoveTrackModel moveTrackModel,
-            IPlayerInventoryService inventoryService, IEconomyDataProvider economyDataProvider) {
+            IPlayerInventoryService inventoryService, IEconomyDataProvider economyDataProvider,
+            IChallengeService challengeService) {
             _stripModel = stripModel;
             _viewService = viewService;
             _saveDataModel = saveDataModel;
@@ -36,6 +39,7 @@ namespace Feature.CircleModule.Scripts {
             _moveTrackModel = moveTrackModel;
             _inventoryService = inventoryService;
             _economyDataProvider = economyDataProvider;
+            _challengeService = challengeService;
         }
 
         public void Initialize() {
@@ -86,10 +90,17 @@ namespace Feature.CircleModule.Scripts {
                 return;
 
             _isWin = true;
-            _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
-                .Level++;
-            _saveDataService.Save(SaveDataType.PlayerProgress);
-            _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
+
+            if (_challengeService.IsActive) {
+                int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
+                _challengeService.OnChallengeCompleted(_moveTrackModel.MaxMovesForCurrentLevel, movesUsed);
+            }
+            else {
+                _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level++;
+                _saveDataService.Save(SaveDataType.PlayerProgress);
+                _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
+            }
+
             _viewService.ShowView<WinLevel>(ViewType.WinLevel);
         }
 

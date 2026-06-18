@@ -1,7 +1,9 @@
+using System;
 using Feature.PlayerInventoryModule.Scripts;
 
 namespace Feature.TransactionModule.Scripts
 {
+    [Serializable]
     public struct ResourceAmount
     {
         public ResourceType Type;

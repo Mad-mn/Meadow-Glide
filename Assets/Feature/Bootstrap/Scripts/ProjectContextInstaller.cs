@@ -2,6 +2,7 @@ using Feature.AddressableModule.Scripts.Installers;
 using Feature.AnimationModule.Scripts.Installers;
 using Feature.AssetBindingModule.Scripts.Installers;
 using Feature.CameraServiceModule.Scripts.Installers;
+using Feature.ChallengeModule.Scripts.Installers;
 using Feature.CircleModule.Scripts.Installers;
 using Feature.ColorServiceModule.Scripts.Installers;
 using Feature.GameStateModule.Scripts.Installers;
@@ -14,6 +15,7 @@ using Feature.SaveDataModule.Scripts.Installers;
 using Feature.SceneLoadModule.Scripts.Installers;
 using Feature.SlideAreaModule.Scripts.Installers;
 using Feature.SoundModule.Scripts.Installers;
+using Feature.StarModule.Scripts.Installers;
 using Feature.StatusModule.Scripts.Installers;
 using Feature.StripRotationModule.Scripts.Installers;
 using Feature.StripsModule.Scripts.Installers;
@@ -59,5 +61,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         UndoModuleInstaller.Install(Container);
         ToolModuleInstaller.Install(Container);
         TransactionModuleInstaller.Install(Container);
+        StarModuleInstaller.Install(Container);
+        ChallengeModuleInstaller.Install(Container);
     }
 }

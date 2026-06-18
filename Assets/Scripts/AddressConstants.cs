@@ -6,7 +6,9 @@ public static class AddressConstants
     public const string CircleColorProvider = "CircleColorProvider";
     public const string CircleParamsConfig = "CircleParamsConfig";
     public const string CircleSegmentPrefab = "CircleSegmentPrefab";
+    public const string ConfirmBuyView = "ConfirmBuyView";
     public const string ConfirmExitToMainMenuView = "ConfirmExitToMainMenuView";
+    public const string DailyChallengeConfigs = "DailyChallengeConfigs";
     public const string DebugView = "DebugView";
     public const string EconomyConfig = "EconomyConfig";
     public const string FingerHint = "FingerHint";

@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Feature.ChallengeModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.ColorServiceModule.Scripts;
 using Feature.LevelModule.Scripts;
@@ -30,6 +31,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<EconomyConfig>(AddressConstants.EconomyConfig);
             Container.BindAddressableAsset<ToolConfig>(AddressConstants.ToolConfig);
             Container.BindAddressableAsset<TransactionConfigs>(AddressConstants.TransactionConfigs);
+            Container.BindAddressableAsset<ChallengeConfigs>(AddressConstants.DailyChallengeConfigs);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             
