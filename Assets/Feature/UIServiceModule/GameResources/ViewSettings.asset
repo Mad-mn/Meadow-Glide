@@ -46,3 +46,6 @@ MonoBehaviour:
   - ViewType: 12
     Address: DailyChallengeStartView
     PresenterTypeName: Feature.DailyChallengeStartViewModule.Scripts.DailyChallengeStartPresenter
+  - ViewType: 13
+    Address: DailyChallengeCompleteView
+    PresenterTypeName: Feature.DailyChallengeCompleteViewModule.Scripts.DailyChallengeCompletePresenter

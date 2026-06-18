@@ -12,13 +12,13 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
 
         private readonly List<ChallengeRewardView> _spawnedRewards = new List<ChallengeRewardView>();
 
-        public void Setup(StarRewardEntry rewardEntry, IResourceInfoProvider resourceInfoProvider, bool isComplited) {
+        public void Setup(StarRewardEntry rewardEntry, IResourceInfoProvider resourceInfoProvider, bool isCompleted) {
             Clear();
 
             if (rewardEntry == null || rewardEntry.Rewards == null)
                 return;
 
-            _checkmark.SetActive(isComplited);
+            _checkmark.SetActive(isCompleted);
             foreach (ResourceAmount reward in rewardEntry.Rewards) {
                 ResourceInfo info = resourceInfoProvider.GetInfo(reward.Type);
                 Sprite icon = info != null ? info.Icon : null;
@@ -27,6 +27,14 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
                 rewardView.Setup(icon, reward.Amount);
                 _spawnedRewards.Add(rewardView);
             }
+        }
+
+        public void ShowCheckmark() {
+            _checkmark.SetActive(true);
+        }
+
+        public void HideCheckmark() {
+            _checkmark.SetActive(false);
         }
 
         public void Clear() {

@@ -80,6 +80,7 @@ namespace Feature.ChallengeModule.Scripts {
                 data.TodayStarsEarned = _session.StarsEarned;
             }
 
+            ClaimNewRewards(data);
             SaveDailyData(data);
         }
 
@@ -100,6 +101,12 @@ namespace Feature.ChallengeModule.Scripts {
 
         public List<ResourceAmount> ClaimReward() {
             DailyChallengeData data = GetOrCreateDailyData();
+            List<ResourceAmount> claimed = ClaimNewRewards(data);
+            SaveDailyData(data);
+            return claimed;
+        }
+
+        private List<ResourceAmount> ClaimNewRewards(DailyChallengeData data) {
             List<ResourceAmount> claimed = new List<ResourceAmount>();
 
             ChallengeConfig config = _configProvider.GetConfig(ChallengeType.Daily);
@@ -118,8 +125,6 @@ namespace Feature.ChallengeModule.Scripts {
             }
 
             data.ClaimedStarsThreshold = data.TodayStarsEarned;
-            SaveDailyData(data);
-
             return claimed;
         }
 
