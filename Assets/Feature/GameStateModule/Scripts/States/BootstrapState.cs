@@ -5,6 +5,7 @@ using Feature.ChallengeModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
+using Feature.LocalizationModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
@@ -34,6 +35,7 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly ITransactionConfigsProvider _transactionConfigsProvider;
         private readonly IChallengeConfigProvider _challengeConfigProvider;
         private readonly IResourceInfoProvider _resourceInfoProvider;
+        private readonly ILocalizationService _localizationService;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
@@ -41,7 +43,7 @@ namespace Feature.GameStateModule.Scripts.States {
             ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
             IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
             IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider,
-            IChallengeConfigProvider challengeConfigProvider, IResourceInfoProvider resourceInfoProvider) {
+            IChallengeConfigProvider challengeConfigProvider, IResourceInfoProvider resourceInfoProvider, ILocalizationService localizationService) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -56,6 +58,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _transactionConfigsProvider = transactionConfigsProvider;
             _challengeConfigProvider = challengeConfigProvider;
             _resourceInfoProvider = resourceInfoProvider;
+            _localizationService = localizationService;
         }
 
         public void Enter() {
@@ -67,6 +70,7 @@ namespace Feature.GameStateModule.Scripts.States {
 
         private async UniTaskVoid Initialize() {
             _saveDataService.LoadAll();
+            _localizationService.Initialize();
             await _cameraService.Initialize();
             await _viewService.Initialize();
             _viewService.ShowView<LoadingView>(ViewType.LoadingView);

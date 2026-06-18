@@ -12,6 +12,7 @@ using Feature.InputModule.Scripts.Installers;
 using Feature.LevelInitializeModule.Scripts.Installers;
 using Feature.LevelModule.Scripts.Installers;
 using Feature.LevelResultModule.Scripts.Installers;
+using Feature.LocalizationModule.Scripts.Installers;
 using Feature.PlayerInventoryModule.Scripts.Installers;
 using Feature.PreGamePlacementModule.Scripts.Installers;
 using Feature.SaveDataModule.Scripts.Installers;
@@ -69,5 +70,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         CoroutineRunnerInstaller.Install(Container);
         LevelResultModuleInstaller.Install(Container);
         DailyChallengeStartViewModuleInstaller.Install(Container);
+        LocalizationModuleInstaller.Install(Container);
     }
 }

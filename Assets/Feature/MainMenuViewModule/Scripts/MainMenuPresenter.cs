@@ -2,6 +2,8 @@ using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.DebugViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
+using Feature.LocalizationModule.Scripts;
+using Feature.LocalizationModule.Scripts.Data;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
@@ -9,6 +11,7 @@ using Feature.SettingsViewModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.TransactionModule.Scripts;
 using Feature.UIServiceModule.Scripts;
+using JetBrains.Annotations;
 using AudioType = Feature.SoundModule.Scripts.AudioType;
 
 namespace Feature.MainMenuViewModule.Scripts {
@@ -18,14 +21,16 @@ namespace Feature.MainMenuViewModule.Scripts {
         private readonly IViewService _viewService;
         private readonly IAudioService _audioService;
         private readonly IPlayerInventoryService _playerInventoryService;
+        private readonly ILocalizationService _localizationService;
 
         public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel, IViewService viewService,
-            IAudioService audioService, IPlayerInventoryService playerInventoryService) : base(view) {
+            IAudioService audioService, [CanBeNull] IPlayerInventoryService playerInventoryService, ILocalizationService localizationService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _viewService = viewService;
             _audioService = audioService;
             _playerInventoryService = playerInventoryService;
+            _localizationService = localizationService;
         }
 
         public override void Initialize() {
@@ -60,7 +65,7 @@ namespace Feature.MainMenuViewModule.Scripts {
         }
 
         private void SetupText() {
-            View.LevelText($"LEVEL {_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level}");
+            View.LevelText($"{_localizationService.Get(LocalizationKey.Global_Level)} {_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level}");
         }
 
         private void StartSimpleGame() {

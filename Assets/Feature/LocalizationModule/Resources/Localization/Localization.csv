@@ -1,0 +1,11 @@
+﻿Id,Key,Ukrainian,English,Polish,German,French,Spanish,Italian,Portuguese,Japanese,Korean,Chinese,Turkish,Arabic,Hindi
+1,Global_Play,Грати,Play,Graj,Spelen,Jouer,Jugar,Giocare,Jogar,プレイ,플레이,게임,Oyna,لعبة,खेलें
+2,Global_Settings,Налаштування,Settings,Ustawienia,Einstellungen,Paramètres,Configuración,Impostazioni,Configurações,設定,설정,설정,Ayarlar,إعدادات,सेटिंग्स
+3,DailyChallenge_Title,Щоденний виклик,Daily Challenge,Wyzwanie Dnia,Tagesherausforderung,Défi du Jour,Reto del Día,Sfida del Giorno,Desafio Diário,デイリーチャレン지,일일 챌린지,每日挑战,Günlük Mücadele,تحدي اليوم,दैनिक चुनौती
+4,Global_Level,Рівень,Level,Poziom,Stufe,Niveau,Nivel,Livello,Nível,レベル,레벨,レベル,Seviye,مستوى,स्तर
+5,Settings_Sound,Звук,Sound,Dźwięk,Ton,Sonido,Sonoro,Som,Sonido,サウンド,사운드,声音,Ses,Ses,ध्वनि
+6,Settings_Vibration,Вібрація,Vibration,Wibracje,Vibration,Vibratione,Vibración,Vibrazione,Vibração,バイブレーション,진동,振动,titreş,titreşme,कंपन
+7,Settings_Language,Мова,Language,Język,Sprache,Langue,Idioma,Lingua,Idioma,言語,언어,语言,Dil,اللغة,भाषा
+8,Global_Moves,Ходів,Moves,Ruchów,Züge,Mouvements,Movidas,Mosse,Movimentos,手数,이동,移动,Hamle,حركات,चालें
+9,Lose_Title,Ходи закінчились,Moves are out,Brak ruchów,Züge aufgebraucht,Plus de coups,Sin movidas,Nessuna mossa,Sem movimentos,手がありません,이동 불가,无可用移动,Hamle bitti,لا حركات,चालें समाप्त
+10,DailyChallenge_Locked,Доступно з 12 рівня,Available from level 12,Dostępne od poziomu 12,Ab Level 12 verfügbar,Disponible au niveau 12,Disponible desde el nivel 12,Disponibile dal livello 12,Disponível a partir do nível 12,レベル12から利用可能,레벨 12부터 이용 가능,12关解锁,12. seviyeden itibaren متاح,متاح من المستوى 12,स्तर 12 से उपलब्ध
