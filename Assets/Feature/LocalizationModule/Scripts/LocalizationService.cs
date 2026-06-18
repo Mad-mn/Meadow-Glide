@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Feature.LocalizationModule.Scripts.Data;
 using Feature.SaveDataModule.Scripts;
+using Feature.SaveDataModule.Scripts.SavedData;
 using UnityEngine;
 
 namespace Feature.LocalizationModule.Scripts
@@ -9,19 +10,19 @@ namespace Feature.LocalizationModule.Scripts
     {
         private readonly ILocalizationDatabase _database;
         private readonly ISaveDataService _saveDataService;
+        private readonly SaveDataModel _saveDataModel;
 
         private Language _currentLanguage = Language.English;
         private Dictionary<LocalizationKey, string> _currentLanguageCache;
         private bool _isInitialized;
 
-        private const string LANGUAGE_SAVE_KEY = "Localization_Language";
-
         public Language CurrentLanguage => _currentLanguage;
 
-        public LocalizationService(ILocalizationDatabase database, ISaveDataService saveDataService)
+        public LocalizationService(ILocalizationDatabase database, ISaveDataService saveDataService, SaveDataModel saveDataModel)
         {
             _database = database;
             _saveDataService = saveDataService;
+            _saveDataModel = saveDataModel;
         }
 
         public void Initialize()
@@ -117,17 +118,14 @@ namespace Feature.LocalizationModule.Scripts
 
         private void LoadSavedLanguage()
         {
-            string savedLang = PlayerPrefs.GetString(LANGUAGE_SAVE_KEY, Language.English.ToString());
-            if (System.Enum.TryParse<Language>(savedLang, true, out var lang))
-            {
-                _currentLanguage = lang;
-            }
+            var settings = _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings);
+            _currentLanguage = settings.SelectedLanguage;
         }
 
         private void SaveLanguage()
         {
-            PlayerPrefs.SetString(LANGUAGE_SAVE_KEY, _currentLanguage.ToString());
-            PlayerPrefs.Save();
+            _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings).SelectedLanguage = _currentLanguage;
+            _saveDataService.Save(SaveDataType.Settings);
         }
     }
 }
