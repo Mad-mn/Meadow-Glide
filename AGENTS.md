@@ -23,7 +23,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**27 module installers** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
+**32 module installers** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)
@@ -42,6 +42,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 | `Tools/UI/Create View Module` | Scaffolds a new MVP View module (View + Presenter + installer registration) |
 | `Tools/Save Data/Clear All Saves` | Clears all save data |
 | `Tools/Save Data/Open Persistent Data Path` | Opens persistent data folder |
+| `Tools/Automatic UI Anchoring/Anchor Selected UI Objects` | Quick-anchors selected UI elements (F1 shortcut) |
 
 ## Project Constraints
 
@@ -77,13 +78,12 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 
 ## Gotchas
 
-- `DestroyImmediate` is used in play mode in `CircleController.ClearCircle()` (line 145) and `StripController.ClearStrip()` (line 276) — should be `Destroy()`.
+- `DestroyImmediate` is used in play mode in `CircleController.ClearCircle()` (line 145) — should be `Destroy()`.
 - `FindObjectOfType` called on every audio play in `AudioService.GetMonoBehaviour()` (line 193) — no caching.
 - `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) every frame while dragging.
-- `BinaryFormatter` in `SaveDataService` (lines 84, 104) — deprecated, insecure, not supported on IL2CPP/WebGL.
+- `BinaryFormatter` in `SaveDataService` (lines 85, 105) — deprecated, insecure, not supported on IL2CPP/WebGL.
 - `Debug.LogError` fires in `StripController.BuildStrip()` (line 146) during normal gameplay when references are missing.
-- Duplicate lose-check logic in both `CircleControllerService.CheckForLose()` (line 74) and `LevelService.CheckForLose()` (line 53).
-- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 14) — auto-generated, fix the Addressable address.
+- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 17) — auto-generated, fix the Addressable address.
 
 ## Key File Paths
 
