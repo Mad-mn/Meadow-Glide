@@ -1,3 +1,4 @@
+using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.DebugViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
@@ -31,6 +32,7 @@ namespace Feature.MainMenuViewModule.Scripts {
             View.PlayButton.onClick.AddListener(StartSimpleGame);
             View.DebugButton.onClick.AddListener(ShowDebugWindow);
             View.SettingsButton.onClick.AddListener(OnSettingsClick);
+            View.DailyChallengeButton.onClick.AddListener(OnDailyChallengeClick);
         }
 
         public override void Show() {
@@ -51,6 +53,10 @@ namespace Feature.MainMenuViewModule.Scripts {
 
         private void ShowDebugWindow() {
             _viewService.ShowView<DebugView>(ViewType.DebugView);
+        }
+
+        private void OnDailyChallengeClick() {
+            _viewService.ShowView<DailyChallengeStartView>(ViewType.DailyChallengeStartView);
         }
 
         private void SetupText() {

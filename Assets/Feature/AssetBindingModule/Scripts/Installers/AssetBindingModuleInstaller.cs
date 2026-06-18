@@ -2,8 +2,10 @@ using Cysharp.Threading.Tasks;
 using Feature.ChallengeModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.ColorServiceModule.Scripts;
+using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.PlayerInventoryModule.Configs;
+using Feature.PlayerInventoryModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.StatusModule.Scripts;
@@ -32,6 +34,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<ToolConfig>(AddressConstants.ToolConfig);
             Container.BindAddressableAsset<TransactionConfigs>(AddressConstants.TransactionConfigs);
             Container.BindAddressableAsset<ChallengeConfigs>(AddressConstants.DailyChallengeConfigs);
+            Container.BindAddressableAsset<ResourceInfoConfig>(AddressConstants.ResourceInfoConfig);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             

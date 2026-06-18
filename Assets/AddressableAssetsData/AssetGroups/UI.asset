@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 262b1422a261dd44e9d795c505f71bee
+    m_Address: DailyChallengeStartView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3688563366627f14397b6a4e1dfbe407
     m_Address: CircleSegmentPrefab
     m_ReadOnly: 0

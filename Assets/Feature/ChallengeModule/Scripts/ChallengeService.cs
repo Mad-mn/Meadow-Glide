@@ -33,12 +33,13 @@ namespace Feature.ChallengeModule.Scripts {
             _starCalculator = starCalculator;
         }
 
-        public bool IsDailyChallengeAvailable(int currentLevel) {
+        public bool IsDailyChallengeAvailable() {
+            int playerLevel = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level;
             ChallengeConfig config = _configProvider.GetConfig(ChallengeType.Daily);
             if (config == null)
                 return false;
 
-            return currentLevel >= config.UnlockLevel;
+            return playerLevel >= config.UnlockLevel;
         }
 
         public LevelData GetCurrentLevel() {
@@ -128,6 +129,12 @@ namespace Feature.ChallengeModule.Scripts {
             _session.CurrentLevelConfig = null;
             _session.StarsEarned = 0;
             _session.IsCompleted = false;
+        }
+
+        public TimeSpan GetTimeUntilNextDay() {
+            DateTime now = DateTime.Now;
+            DateTime tomorrow = DateTime.Today.AddDays(1);
+            return tomorrow - now;
         }
 
         private DailyChallengeData GetOrCreateDailyData() {

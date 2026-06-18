@@ -9,6 +9,7 @@ public static class AddressConstants
     public const string ConfirmBuyView = "ConfirmBuyView";
     public const string ConfirmExitToMainMenuView = "ConfirmExitToMainMenuView";
     public const string DailyChallengeConfigs = "DailyChallengeConfigs";
+    public const string ResourceInfoConfig = "ResourceInfoConfig";
     public const string DebugView = "DebugView";
     public const string EconomyConfig = "EconomyConfig";
     public const string FingerHint = "FingerHint";

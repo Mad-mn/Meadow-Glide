@@ -43,3 +43,6 @@ MonoBehaviour:
   - ViewType: 11
     Address: ConfirmBuyView
     PresenterTypeName: Feature.ConfirmBuyViewModule.Scripts.ConfirmBuyPresenter
+  - ViewType: 12
+    Address: DailyChallengeStartView
+    PresenterTypeName: Feature.DailyChallengeStartViewModule.Scripts.DailyChallengeStartPresenter

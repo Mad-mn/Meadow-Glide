@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Feature.ChallengeModule.Scripts;
 using Feature.ConfirmExitToMainMenuViewModule.Scripts;
 using Feature.LevelInitializeModule;
 using Feature.SaveDataModule.Scripts;
@@ -16,14 +17,17 @@ namespace Feature.GameViewModule.Scripts {
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IAudioService _audioService;
         private readonly ILevelInitializeService _levelInitializeService;
+        private readonly IChallengeService _challengeService;
 
         public GamePresenter(GameView view, IViewService viewService, SaveDataModel saveDataModel,
-            MoveTrackModel moveTrackModel, IAudioService audioService, ILevelInitializeService levelInitializeService) : base(view) {
+            MoveTrackModel moveTrackModel, IAudioService audioService, ILevelInitializeService levelInitializeService,
+            IChallengeService challengeService) : base(view) {
             _viewService = viewService;
             _saveDataModel = saveDataModel;
             _moveTrackModel = moveTrackModel;
             _audioService = audioService;
             _levelInitializeService = levelInitializeService;
+            _challengeService = challengeService;
         }
 
         public override void Initialize() {
@@ -54,7 +58,7 @@ namespace Feature.GameViewModule.Scripts {
         }
 
         private void SetupText() {
-            string lvlText = $"Level {_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level}";
+            string lvlText = _challengeService.IsActive? "Daily Challenge" : $"Level {_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level}";
             View.SetLevelText(lvlText);
             UpdateMovesChangedsText();
         }

@@ -33,6 +33,7 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IToolConfigProvider _toolConfigProvider;
         private readonly ITransactionConfigsProvider _transactionConfigsProvider;
         private readonly IChallengeConfigProvider _challengeConfigProvider;
+        private readonly IResourceInfoProvider _resourceInfoProvider;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
@@ -40,7 +41,7 @@ namespace Feature.GameStateModule.Scripts.States {
             ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
             IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
             IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider,
-            IChallengeConfigProvider challengeConfigProvider) {
+            IChallengeConfigProvider challengeConfigProvider, IResourceInfoProvider resourceInfoProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -54,6 +55,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _toolConfigProvider = toolConfigProvider;
             _transactionConfigsProvider = transactionConfigsProvider;
             _challengeConfigProvider = challengeConfigProvider;
+            _resourceInfoProvider = resourceInfoProvider;
         }
 
         public void Enter() {
@@ -85,6 +87,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _toolConfigProvider.Initialize();
             await _transactionConfigsProvider.Initialize();
             await _challengeConfigProvider.Initialize();
+            await _resourceInfoProvider.Initialize();
         }
     }
 }
