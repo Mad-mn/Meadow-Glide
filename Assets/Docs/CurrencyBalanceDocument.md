@@ -246,12 +246,8 @@
 - [x] Показувати баланс монет на GameView
 - [x] Зберігати баланс в SaveData
 - [x] Hint System — ВІДМІНЕНО (не підходить до механіки)
-- [ ] Daily Challenge: пул рівнів (30-50 складних)
-- [ ] Daily Challenge: UI (кнопка на MainMenu, таймер, прев'ю)
-- [ ] Daily Challenge: нагороди (монети + BonusUndos)
-- [ ] Daily Challenge: збереження стану (зірки, таймер)
-- [ ] Додати `BonusUndos` в `PlayerProgressData`
-- [ ] Undo: логіка використання бонусних undo перед покупкою
+- [x] Daily Challenge: реалізація (пул рівнів — пізніше)
+- [ ] Daily Challenge: нагенерувати 30-50 складних рівнів
 
 ---
 
