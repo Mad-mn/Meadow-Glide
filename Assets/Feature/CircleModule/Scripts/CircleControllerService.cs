@@ -25,10 +25,17 @@ namespace Feature.CircleModule.Scripts {
 
         public void Initialize() {
             _stripModel.OnStripCompletedStatusChanged += OnStripCompletedStatusChanged;
+            _moveTrackModel.OnMovesChanged += OnMovesChanged;
         }
 
         public void Dispose() {
             _stripModel.OnStripCompletedStatusChanged -= OnStripCompletedStatusChanged;
+            _moveTrackModel.OnMovesChanged -= OnMovesChanged;
+        }
+
+        private void OnMovesChanged() {
+            if (!_isWin)
+                CheckForLose();
         }
 
         private void OnStripCompletedStatusChanged(StripController strip, bool isCompleted) {
