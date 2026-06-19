@@ -11,19 +11,23 @@ namespace Feature.ToolButtonViewModule.Scripts {
         private readonly IPriceDataProvider _priceDataProvider;
         private readonly IViewService _viewService;
         private readonly ConfirmBuyViewModel _confirmBuyViewModel;
+        private readonly ToolButtonsViewModel _viewModel;
 
         public ToolButtonPresenter(ToolButtonView view, IToolService toolService, IPriceDataProvider priceDataProvider,
-            IViewService viewService, ConfirmBuyViewModel confirmBuyViewModel) : base(view) {
+            IViewService viewService, ConfirmBuyViewModel confirmBuyViewModel, ToolButtonsViewModel viewModel) : base(view) {
             _toolService = toolService;
             _priceDataProvider = priceDataProvider;
             _viewService = viewService;
             _confirmBuyViewModel = confirmBuyViewModel;
+            _viewModel = viewModel;
         }
 
         public override void Initialize() {
             foreach (ToolButton toolButton in View.ToolButtons) {
                 toolButton.OnButtonClick += OnButtonClick;
             }
+
+            _viewModel.SetToolButtons(View.ToolButtons);
         }
 
         public override void Show() {

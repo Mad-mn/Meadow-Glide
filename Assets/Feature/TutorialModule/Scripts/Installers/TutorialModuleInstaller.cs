@@ -1,4 +1,5 @@
 using Feature.TutorialModule.Scripts.Factory;
+using Feature.TutorialViewModule.Scripts;
 using Zenject;
 
 namespace Feature.TutorialModule.Scripts.Installers {
@@ -9,6 +10,8 @@ namespace Feature.TutorialModule.Scripts.Installers {
             Container.BindInterfacesAndSelfTo<TutorialFactory>()
                 .AsSingle();
             Container.BindInterfacesAndSelfTo<TutorialAssetProvider>()
+                .AsSingle();
+            Container.BindInterfacesAndSelfTo<TutorialViewModel>()
                 .AsSingle();
         }
     }

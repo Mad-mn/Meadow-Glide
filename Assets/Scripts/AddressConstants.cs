@@ -8,8 +8,9 @@ public static class AddressConstants
     public const string CircleSegmentPrefab = "CircleSegmentPrefab";
     public const string ConfirmBuyView = "ConfirmBuyView";
     public const string ConfirmExitToMainMenuView = "ConfirmExitToMainMenuView";
+    public const string DailyChallengeCompleteView = "DailyChallengeCompleteView";
     public const string DailyChallengeConfigs = "DailyChallengeConfigs";
-    public const string ResourceInfoConfig = "ResourceInfoConfig";
+    public const string DailyChallengeStartView = "DailyChallengeStartView";
     public const string DebugView = "DebugView";
     public const string EconomyConfig = "EconomyConfig";
     public const string FingerHint = "FingerHint";
@@ -28,6 +29,7 @@ public static class AddressConstants
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_CopyPositions_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/CopyPositions.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_restructure_bvh_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/restructure_bvh.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_scatter_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/scatter.compute";
+    public const string ResourceInfoConfig = "ResourceInfoConfig";
     public const string SegmentStatusVisualConfig = "SegmentStatusVisualConfig";
     public const string SettingsView = "SettingsView";
     public const string SlideArea = "SlideArea";
@@ -38,6 +40,7 @@ public static class AddressConstants
     public const string ToolConfig = "ToolConfig";
     public const string TransactionConfigs = "TransactionConfigs";
     public const string TutorialAssetsConfig = "TutorialAssetsConfig";
+    public const string TutorialView = "TutorialView";
     public const string UIRoot = "UIRoot";
     public const string ViewSettings = "ViewSettings";
     public const string WinLevel = "WinLevel";

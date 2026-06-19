@@ -13,5 +13,6 @@ namespace Feature.UIServiceModule.Scripts {
         ConfirmBuyView = 11,
         DailyChallengeStartView = 12,
         DailyChallengeCompleteView = 13,
+        TutorialView = 14,
 }
 }

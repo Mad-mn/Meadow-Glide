@@ -23,7 +23,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**32 module installers** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
+**33 module installers** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)

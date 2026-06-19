@@ -19,6 +19,7 @@ namespace Feature.TutorialModule.Scripts.Tutorials {
 
         private void ActivateNext() {
             if(CheckForCompleteAll()) {
+                _currentState?.Exit();
                 OnComplete?.Invoke();
                 return;
             }

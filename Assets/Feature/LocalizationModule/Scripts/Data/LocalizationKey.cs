@@ -20,5 +20,6 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Reward_Resource_Coins = 17,
         Reward_Title = 18,
         Win_Title = 19,
-}
+        Tutorial_UndoMove = 20,
+    }
 }

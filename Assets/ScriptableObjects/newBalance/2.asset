@@ -133,4 +133,4 @@ MonoBehaviour:
     Colors: 
   _difficulty: 6
   _difficultyMultiplier: 2
-  <TutorialLevelConfig>k__BackingField: {fileID: 0}
+  <TutorialLevelConfig>k__BackingField: {fileID: 11400000, guid: c03d3e592280700439eaba6b654fe8f4, type: 2}

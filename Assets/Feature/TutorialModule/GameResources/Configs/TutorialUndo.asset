@@ -9,9 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d77ca2eabc2642f693e7883bba5781a0, type: 3}
-  m_Name: ToolConfig
-  m_EditorClassIdentifier: Assembly-CSharp::Feature.ToolModule.Scripts.ToolConfig
-  _tools:
-  - ToolType: 1
-    UnlockLevel: 2
+  m_Script: {fileID: 11500000, guid: 9f28715736b544279cbb0e85a2f1fff2, type: 3}
+  m_Name: TutorialUndo
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.TutorialModule.Scripts.Configs.TutorialLevelConfig
+  <TutorialType>k__BackingField: 3
+  _assetsForTutorial: 
