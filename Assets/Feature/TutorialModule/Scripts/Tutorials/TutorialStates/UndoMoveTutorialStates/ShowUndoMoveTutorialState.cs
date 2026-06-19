@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Feature.AnimationModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
 using Feature.ToolButtonViewModule.Scripts;
@@ -12,14 +13,11 @@ using UnityEngine;
 
 namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.UndoMoveTutorialStates {
     public class ShowUndoMoveTutorialState : ITutorialState {
-        private const float SHAKE_DURATION = 2f;
-        private const float EXPLODE_DURATION = 0.3f;
-        private const float SHAKE_MAX_STRENGTH = 8f;
-
         private readonly IViewService _viewService;
         private readonly ToolButtonsViewModel _toolButtonsViewModel;
         private readonly IInputService _inputService;
         private readonly TutorialViewModel _tutorialViewModel;
+        private readonly IAnimationService _animationService;
 
         public event Action OnComplete;
 
@@ -35,11 +33,13 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.UndoMoveTutori
             IViewService viewService,
             ToolButtonsViewModel toolButtonsViewModel,
             IInputService inputService,
-            TutorialViewModel tutorialViewModel) {
+            TutorialViewModel tutorialViewModel,
+            IAnimationService animationService) {
             _viewService = viewService;
             _toolButtonsViewModel = toolButtonsViewModel;
             _inputService = inputService;
             _tutorialViewModel = tutorialViewModel;
+            _animationService = animationService;
         }
 
         public void Enter() {
@@ -103,25 +103,7 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.UndoMoveTutori
             if (_undoButton == null || _undoButton.LockIcon == null)
                 return;
 
-            _undoButton.LockIcon.SetActive(true);
-
-            CanvasGroup canvasGroup = _undoButton.LockIcon.GetComponent<CanvasGroup>();
-            if (canvasGroup == null)
-                canvasGroup = _undoButton.LockIcon.AddComponent<CanvasGroup>();
-
-            canvasGroup.alpha = 1f;
-            canvasGroup.blocksRaycasts = false;
-
-            Transform iconTransform = _undoButton.LockIcon.transform;
-            iconTransform.localScale = Vector3.one;
-
-            _lockAnimation = DOTween.Sequence();
-            _lockAnimation.Append(iconTransform.DOShakePosition(SHAKE_DURATION, new Vector3(SHAKE_MAX_STRENGTH, SHAKE_MAX_STRENGTH, 0), 20, 90, false, true));
-            _lockAnimation.Join(iconTransform.DOShakeScale(SHAKE_DURATION, new Vector3(0.15f, 0.15f, 0), 10, 90, false));
-            _lockAnimation.AppendCallback(() => {
-                iconTransform.DOScale(Vector3.one * 1.8f, EXPLODE_DURATION).SetEase(Ease.OutQuad);
-                canvasGroup.DOFade(0f, EXPLODE_DURATION).SetEase(Ease.OutQuad);
-            });
+            _lockAnimation = _animationService.PlayLockIconBreak(_undoButton.LockIcon);
         }
 
         private void HandlePointerDown() {

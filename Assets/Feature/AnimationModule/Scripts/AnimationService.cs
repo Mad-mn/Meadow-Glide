@@ -54,5 +54,33 @@ namespace Feature.AnimationModule.Scripts {
                 target.DOShakePosition(duration, strength, vibrato);
             }
         }
+
+        public Sequence PlayLockIconBreak(GameObject lockIcon, float shakeDuration = 2f, float explodeDuration = 0.3f) {
+            if (lockIcon == null)
+                return null;
+
+            lockIcon.SetActive(true);
+
+            CanvasGroup canvasGroup = lockIcon.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+                canvasGroup = lockIcon.AddComponent<CanvasGroup>();
+
+            canvasGroup.alpha = 1f;
+            canvasGroup.blocksRaycasts = false;
+
+            Transform iconTransform = lockIcon.transform;
+            iconTransform.localScale = Vector3.one;
+
+            const float shakeStrength = 8f;
+            Sequence sequence = DOTween.Sequence();
+            sequence.Append(iconTransform.DOShakePosition(shakeDuration, new Vector3(shakeStrength, shakeStrength, 0), 20, 90, false, true));
+            sequence.Join(iconTransform.DOShakeScale(shakeDuration, new Vector3(0.15f, 0.15f, 0), 10, 90, false));
+            sequence.AppendCallback(() => {
+                iconTransform.DOScale(Vector3.one * 1.8f, explodeDuration).SetEase(Ease.OutQuad);
+                canvasGroup.DOFade(0f, explodeDuration).SetEase(Ease.OutQuad);
+            });
+
+            return sequence;
+        }
     }
 }
