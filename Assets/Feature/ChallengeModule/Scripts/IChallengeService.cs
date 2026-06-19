@@ -10,7 +10,7 @@ namespace Feature.ChallengeModule.Scripts {
         bool IsDailyChallengeAvailable();
         LevelData GetCurrentLevel();
         void ActivateDailyChallenge(LevelConfig levelConfig);
-        void OnChallengeCompleted(int maxMoves, int movesUsed);
+        void OnChallengeCompleted(int shortestPath, int averageMoves, int movesUsed);
         int GetTodayStars();
         bool CanPlayToday();
         bool CanClaimReward();

@@ -48,7 +48,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public SegmentStatus[,] Statuses;
             public List<SlideAreaConfig> Areas;
             public int Difficulty;
-            public int PathLength;
+            public int AverageMoves;
+            public List<Move> SolutionPath;
             public float AvgConfusion;
             public float AvgPlanningDepth;
             public int Seed;
@@ -151,8 +152,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     }
 
                     progress?.Report($"Attempt {attempt}: Calculating difficulty...");
+                    int maxMovesForLevel = Mathf.RoundToInt(targetDifficulty * 2.5f);
                     var calculator = new DifficultyCalculator(solver, areas, rings);
-                    int difficulty = calculator.Calculate(currentLevel, out int pathLength, out float confusion, out float planningDepth);
+                    int difficulty = calculator.Calculate(currentLevel, maxMovesForLevel,
+                        out int pathLength, out int averageMoves, out float confusion, out float planningDepth);
 
                     solver.Solve(currentLevel, out var solution);
                     var pruned = PruneLevel(currentLevel, areas, solution);
@@ -168,7 +171,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                         Statuses = pruned.Statuses,
                         Areas = pruned.Areas,
                         Difficulty = difficulty,
-                        PathLength = pathLength,
+                        AverageMoves = averageMoves,
+                        SolutionPath = solution,
                         AvgConfusion = confusion,
                         AvgPlanningDepth = planningDepth,
                         Seed = activeSeed

@@ -15,16 +15,25 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _rings = rings;
         }
 
-        public int Calculate(LevelState state, out int pathLength, out float avgConfusion, out float avgPlanningDepth) {
-            pathLength = _solver.Solve(state, out var solution);
-            avgConfusion = 0f;
+        public int Calculate(LevelState state, int maxMoves,
+            out int pathLength, out int averageMoves, out float avgConfusion, out float avgPlanningDepth) {
+
             avgPlanningDepth = CalculatePlanningDepth();
 
-            if (pathLength <= 0 || solution == null) {
+            pathLength = _solver.Solve(state, out var solution);
+
+            if (pathLength <= 0) {
+                avgConfusion = 0f;
+                averageMoves = 0;
                 return pathLength;
             }
 
             avgConfusion = CalculateAvgConfusion(state, solution);
+
+            float gapFactor = 0.3f + avgConfusion * 0.4f;
+            float gap = (maxMoves - pathLength) * gapFactor;
+            averageMoves = Mathf.RoundToInt(pathLength + gap);
+            averageMoves = Mathf.Clamp(averageMoves, pathLength + 1, maxMoves - 1);
 
             float multiplier = 1f + avgConfusion + avgPlanningDepth;
             return Math.Max(1, Mathf.RoundToInt(pathLength * multiplier));

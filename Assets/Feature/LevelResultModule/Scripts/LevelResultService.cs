@@ -46,7 +46,7 @@ namespace Feature.LevelResultModule.Scripts {
 
             if (_challengeService.IsActive) {
                 int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                _challengeService.OnChallengeCompleted(_moveTrackModel.MaxMovesForCurrentLevel, movesUsed);
+                _challengeService.OnChallengeCompleted(_moveTrackModel.ShortestSolution, _moveTrackModel.AverageMoves, movesUsed);
                 _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
             }
             else {
@@ -65,7 +65,7 @@ namespace Feature.LevelResultModule.Scripts {
 
             if (_challengeService.IsActive) {
                 int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                _challengeService.OnChallengeCompleted(_moveTrackModel.MaxMovesForCurrentLevel, movesUsed);
+                _challengeService.OnChallengeCompleted(_moveTrackModel.ShortestSolution, _moveTrackModel.AverageMoves, movesUsed);
                 _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
             }
             else {

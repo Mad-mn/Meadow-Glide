@@ -67,11 +67,11 @@ namespace Feature.ChallengeModule.Scripts {
             _session.IsCompleted = false;
         }
 
-        public void OnChallengeCompleted(int maxMoves, int movesUsed) {
+        public void OnChallengeCompleted(int shortestPath, int averageMoves, int movesUsed) {
             if (!_session.IsActive)
                 return;
 
-            _session.StarsEarned = (int)_starCalculator.Calculate(maxMoves, movesUsed);
+            _session.StarsEarned = (int)_starCalculator.Calculate(shortestPath, averageMoves, movesUsed);
             _session.IsCompleted = true;
 
             DailyChallengeData data = GetOrCreateDailyData();

@@ -133,5 +133,61 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             var area = _areas[areaIndex];
             return state.Slide(area.sectorIndex, area.startCircleIndex, area.endCircleIndex, offset);
         }
+
+        public int SolveAll(LevelState initialState, int maxDepth, out List<int> solutionLengths) {
+            solutionLengths = new List<int>();
+            if (initialState.IsSolved()) {
+                solutionLengths.Add(0);
+                return 0;
+            }
+
+            var openSet = new SortedList<float, List<(LevelState state, List<Move> path)>>();
+            var closedSet = new HashSet<LevelState>();
+
+            float initialH = GetHeuristic(initialState);
+            openSet.Add(initialH, new List<(LevelState, List<Move>)> { (initialState, new List<Move>()) });
+
+            int iterations = 0;
+            int shortest = -1;
+            while (openSet.Count > 0 && iterations < _maxIterations) {
+                iterations++;
+
+                var list = openSet.Values[0];
+                var (current, path) = list[0];
+
+                list.RemoveAt(0);
+                if (list.Count == 0) openSet.RemoveAt(0);
+
+                if (current.IsSolved()) {
+                    if (shortest < 0) shortest = path.Count;
+                    solutionLengths.Add(path.Count);
+                    continue;
+                }
+
+                if (path.Count >= maxDepth) continue;
+
+                if (closedSet.Contains(current)) continue;
+                closedSet.Add(current);
+
+                foreach (var move in GetAllPossibleMoves(current)) {
+                    var nextState = ApplyMove(current, move);
+                    if (closedSet.Contains(nextState)) continue;
+
+                    var nextPath = new List<Move>(path) { move };
+                    if (nextPath.Count > maxDepth) continue;
+
+                    float f = nextPath.Count + GetHeuristic(nextState);
+
+                    if (!openSet.TryGetValue(f, out var targetList)) {
+                        targetList = new List<(LevelState, List<Move>)>();
+                        openSet.Add(f, targetList);
+                    }
+                    targetList.Add((nextState, nextPath));
+                }
+            }
+
+            solutionLengths.Sort();
+            return shortest;
+        }
     }
 }

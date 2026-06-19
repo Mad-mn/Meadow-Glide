@@ -80,7 +80,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 if (i >= _existingLevels.Count) return;
                 var level = _existingLevels[i];
                 element.Q<Label>("name").text = level.name;
-                element.Q<Label>("difficulty").text = $"Diff: {level.Difficulty}";
+                element.Q<Label>("difficulty").text = $"D:{level.Difficulty} S:{level.ShortestSolution} A:{level.AverageMoves}";
             };
 
             _levelList.onSelectionChange += obj => {
@@ -89,7 +89,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     _currentLevel = new LevelData {
                         LevelConfig = selected
                     };
-                    _statsLabel.text = $"Loaded: {selected.name} | Difficulty: {selected.Difficulty}";
+                    _statsLabel.text = $"Loaded: {selected.name} | Difficulty: {selected.Difficulty} | Shortest: {selected.ShortestSolution} | Avg: {selected.AverageMoves}";
                     _previewArea.MarkDirtyRepaint();
                 }
             };
@@ -171,7 +171,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     _currentLevel = ConvertToUnityLevelData(rawData);
                     _seedField.SetValueWithoutNotify(rawData.Seed);
                     _activeSeedLabel.text = $"Active seed: {rawData.Seed}";
-                    _statsLabel.text = $"Difficulty: {rawData.Difficulty} (path:{rawData.PathLength} confusion:{rawData.AvgConfusion:F2} plan:{rawData.AvgPlanningDepth:F2}) | Rings: {rawData.Rings} | Areas: {rawData.Areas.Count} | Seed: {rawData.Seed}";
+                    _statsLabel.text = $"Difficulty: {rawData.Difficulty} | Shortest: {rawData.SolutionPath.Count} | Avg: {rawData.AverageMoves} | Rings: {rawData.Rings} | Areas: {rawData.Areas.Count} | Seed: {rawData.Seed}";
                     _previewArea.MarkDirtyRepaint();
                 } else {
                     _statsLabel.text = "Generation failed — no valid level produced.";
@@ -207,7 +207,14 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 circles.Add(circle);
             }
 
-            levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty);
+            var solutionPath = new List<LevelMoveData>();
+            if (raw.SolutionPath != null) {
+                foreach (var move in raw.SolutionPath) {
+                    solutionPath.Add(new LevelMoveData(move.Type.ToString(), move.Index, move.Offset));
+                }
+            }
+
+            levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty, raw.AverageMoves, solutionPath);
 
             return new LevelData {
                 LevelConfig = levelConfig
