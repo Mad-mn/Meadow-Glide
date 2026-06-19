@@ -1,4 +1,6 @@
 using Feature.InputModule.Scripts;
+using Feature.LocalizationModule.Scripts;
+using Feature.LocalizationModule.Scripts.Data;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.TransactionModule.Scripts;
 using Feature.TransactionModule.Scripts.Configs;
@@ -14,12 +16,13 @@ namespace Feature.ConfirmBuyViewModule.Scripts {
         private readonly ConfirmBuyViewModel _viewModel;
         private readonly IPlayerInventoryService _playerInventoryService;
         private readonly IInteractionStateService _interactionStateService;
+        private readonly ILocalizationService _localizationService;
         private TransactionId _transactionId;
 
         public ConfirmBuyPresenter(ConfirmBuyView view, ITransactionService transactionService, IPriceDataProvider priceDataProvider,
             ITransactionConfigsProvider configsProvider, IViewService viewService, ConfirmBuyViewModel viewModel,
             IPlayerInventoryService playerInventoryService,
-            IInteractionStateService interactionStateService) : base(view) {
+            IInteractionStateService interactionStateService, ILocalizationService localizationService) : base(view) {
             _transactionService = transactionService;
             _priceDataProvider = priceDataProvider;
             _configsProvider = configsProvider;
@@ -27,6 +30,7 @@ namespace Feature.ConfirmBuyViewModule.Scripts {
             _viewModel = viewModel;
             _playerInventoryService = playerInventoryService;
             _interactionStateService = interactionStateService;
+            _localizationService = localizationService;
         }
 
         public override void Initialize() {
@@ -76,7 +80,9 @@ namespace Feature.ConfirmBuyViewModule.Scripts {
                 return string.Empty;
             }
 
-            string title = $"Want buy {config.Rewards[0].Amount.ToString()} {config.Rewards[0].Type.ToString()}?";
+            string title = $"{_localizationService.Get(LocalizationKey.Global_ConfirmBuy)} " +
+                           $"{config.Rewards[0].Amount.ToString()}" +
+                           $" {_localizationService.Get(config.Rewards[0].NameKey)}?";
             return title;
         }
     }

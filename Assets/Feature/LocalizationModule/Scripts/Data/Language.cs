@@ -10,11 +10,8 @@ namespace Feature.LocalizationModule.Scripts.Data
         Spanish = 5,
         Italian = 6,
         Portuguese = 7,
-        Japanese = 8,
-        Korean = 9,
-        Chinese = 10,
-        Turkish = 11,
-        Arabic = 12,
-        Hindi = 13
+        Turkish = 8,
+        Arabic = 9,
+        Hindi = 10
     }
 }

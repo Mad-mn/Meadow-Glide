@@ -20,3 +20,4 @@ MonoBehaviour:
   Rewards:
   - Type: 2
     Amount: 3
+    NameKey: 15

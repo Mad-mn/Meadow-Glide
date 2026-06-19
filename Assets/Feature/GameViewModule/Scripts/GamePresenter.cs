@@ -2,6 +2,8 @@ using Cysharp.Threading.Tasks;
 using Feature.ChallengeModule.Scripts;
 using Feature.ConfirmExitToMainMenuViewModule.Scripts;
 using Feature.LevelInitializeModule;
+using Feature.LocalizationModule.Scripts;
+using Feature.LocalizationModule.Scripts.Data;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SoundModule.Scripts;
@@ -18,16 +20,18 @@ namespace Feature.GameViewModule.Scripts {
         private readonly IAudioService _audioService;
         private readonly ILevelInitializeService _levelInitializeService;
         private readonly IChallengeService _challengeService;
+        private readonly ILocalizationService _localizationService;
 
         public GamePresenter(GameView view, IViewService viewService, SaveDataModel saveDataModel,
             MoveTrackModel moveTrackModel, IAudioService audioService, ILevelInitializeService levelInitializeService,
-            IChallengeService challengeService) : base(view) {
+            IChallengeService challengeService, ILocalizationService localizationService) : base(view) {
             _viewService = viewService;
             _saveDataModel = saveDataModel;
             _moveTrackModel = moveTrackModel;
             _audioService = audioService;
             _levelInitializeService = levelInitializeService;
             _challengeService = challengeService;
+            _localizationService = localizationService;
         }
 
         public override void Initialize() {
@@ -58,7 +62,9 @@ namespace Feature.GameViewModule.Scripts {
         }
 
         private void SetupText() {
-            string lvlText = _challengeService.IsActive? "Daily Challenge" : $"Level {_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level}";
+            string lvlText = _challengeService.IsActive ?
+                _localizationService.Get(LocalizationKey.DailyChallenge_Title) :
+                $"{_localizationService.Get(LocalizationKey.Global_Level)} {_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level}";
             View.SetLevelText(lvlText);
             UpdateMovesChangedsText();
         }

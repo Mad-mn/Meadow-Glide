@@ -26,7 +26,7 @@ namespace Feature.LocalizationModule.Scripts.UI {
             LocalizationEvents.OnLanguageChanged -= OnLanguageChanged;
         }
 
-        private void OnLanguageChanged(Language newLanguage) {
+        private void OnLanguageChanged() {
             UpdateText();
         }
 

@@ -5,8 +5,11 @@ using Feature.GameStateModule.Scripts.States;
 using Feature.InputModule.Scripts;
 using Feature.LevelInitializeModule;
 using Feature.LevelModule.Scripts;
+using Feature.LocalizationModule.Scripts;
+using Feature.LocalizationModule.Scripts.Data;
 using Feature.TrackMoveModule.Scripts;
 using Feature.TransactionModule.Scripts;
+using Feature.TransactionModule.Scripts.Configs;
 using Feature.UIServiceModule.Scripts;
 using Feature.WinLevelModule.Scripts;
 
@@ -19,10 +22,11 @@ namespace Feature.LoseViewModule.Scripts {
         private readonly IInteractionStateService _interactionStateService;
         private readonly ConfirmBuyViewModel _confirmBuyViewModel;
         private readonly ITransactionConfigsProvider _transactionConfigsProvider;
+        private readonly ILocalizationService _localizationService;
 
         public LosePresenter(LoseView view, IGameStateMachine gameStateMachine, ILevelInitializeService levelInitializeService,
             IViewService viewService, IMoveTrackService moveTrackService, IInteractionStateService interactionStateService,
-            ConfirmBuyViewModel confirmBuyViewModel, ITransactionConfigsProvider transactionConfigsProvider) : base(view) {
+            ConfirmBuyViewModel confirmBuyViewModel, ITransactionConfigsProvider transactionConfigsProvider, ILocalizationService localizationService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _levelInitializeService = levelInitializeService;
             _viewService = viewService;
@@ -30,6 +34,7 @@ namespace Feature.LoseViewModule.Scripts {
             _interactionStateService = interactionStateService;
             _confirmBuyViewModel = confirmBuyViewModel;
             _transactionConfigsProvider = transactionConfigsProvider;
+            _localizationService = localizationService;
         }
 
         public override void Initialize() {
@@ -41,6 +46,12 @@ namespace Feature.LoseViewModule.Scripts {
         public override void Show() {
             base.Show();
             _interactionStateService.BlockInput();
+            SetupAddMovesButtonText();
+        }
+
+        private void SetupAddMovesButtonText() {
+            TransactionConfig config = _transactionConfigsProvider.GetConfig(TransactionId.BuyExtraMoves);
+            View.AddMovesButtonText.text = $"+ {config.Rewards[0].Amount}\n{_localizationService.Get(LocalizationKey.Global_Moves)}";
         }
 
         public override void Hide() {

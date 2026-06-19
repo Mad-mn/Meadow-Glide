@@ -11,5 +11,14 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Global_Moves = 8,
         Lose_Title = 9,
         DailyChallenge_Locked = 10,
+        Global_Yes = 11,
+        Global_No = 12,
+        Global_ConfirmBuy = 13,
+        Global_ConfirmExit = 14,
+        Reward_Tools_UndoMove = 15,
+        Reward_Tools_ExtraMoves = 16,
+        Reward_Resource_Coins = 17,
+        Reward_Title = 18,
+        Win_Title = 19,
 }
 }

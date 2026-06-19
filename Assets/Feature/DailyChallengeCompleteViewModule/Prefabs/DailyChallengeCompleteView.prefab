@@ -280,6 +280,7 @@ GameObject:
   - component: {fileID: 6110984184919315553}
   - component: {fileID: 2978394983861009282}
   - component: {fileID: 406476246280228215}
+  - component: {fileID: 6996586798120016832}
   m_Layer: 0
   m_Name: MovesText
   m_TagString: Untagged
@@ -406,6 +407,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6996586798120016832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689836233760352783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6465a226641f2b44d84635e8e8fe5ffd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
+  _key: 8
+  _updateOnLanguageChange: 1
 --- !u!1 &2782755794170527798
 GameObject:
   m_ObjectHideFlags: 0
@@ -417,6 +432,7 @@ GameObject:
   - component: {fileID: 1459734060161280017}
   - component: {fileID: 2203640775438935048}
   - component: {fileID: 2666101685371007733}
+  - component: {fileID: 3512856575602580309}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -440,7 +456,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.20602408, y: 0.65918046}
   m_AnchorMax: {x: 0.7939759, y: 0.74186116}
-  m_AnchoredPosition: {x: 0.00097656, y: 0}
+  m_AnchoredPosition: {x: 0.0009765625, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2203640775438935048
@@ -543,6 +559,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &3512856575602580309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2782755794170527798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6465a226641f2b44d84635e8e8fe5ffd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
+  _key: 3
+  _updateOnLanguageChange: 1
 --- !u!1 &4779143111477805324
 GameObject:
   m_ObjectHideFlags: 0

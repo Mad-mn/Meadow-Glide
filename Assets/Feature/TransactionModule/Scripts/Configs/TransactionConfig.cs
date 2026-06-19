@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Feature.LocalizationModule.Scripts.Data;
 using Feature.PlayerInventoryModule.Scripts;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ namespace Feature.TransactionModule.Scripts.Configs
     {
         public ResourceType Type;
         public int Amount;
+        public LocalizationKey NameKey;
     }
 
     [CreateAssetMenu(fileName = "TransactionConfig", menuName = "Configs/Transaction/TransactionConfig")]

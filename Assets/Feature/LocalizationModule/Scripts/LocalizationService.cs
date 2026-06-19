@@ -45,7 +45,7 @@ namespace Feature.LocalizationModule.Scripts
             _currentLanguage = language;
             UpdateCache();
             SaveLanguage();
-            LocalizationEvents.RaiseLanguageChanged(language);
+            LocalizationEvents.RaiseLanguageChanged();
         }
 
         public string Get(LocalizationKey key)

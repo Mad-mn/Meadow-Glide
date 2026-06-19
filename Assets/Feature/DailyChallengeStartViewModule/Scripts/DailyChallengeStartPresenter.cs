@@ -107,7 +107,7 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
         private IEnumerator TimerRoutine() {
             while (true) {
                 TimeSpan remaining = _challengeService.GetTimeUntilNextDay();
-                View.TimerText.text = $"Time to end: {remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+                View.TimerText.text = $"{remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
                 yield return new WaitForSeconds(1f);
             }
         }

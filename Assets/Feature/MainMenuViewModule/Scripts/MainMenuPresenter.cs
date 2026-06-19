@@ -12,6 +12,7 @@ using Feature.SoundModule.Scripts;
 using Feature.TransactionModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using JetBrains.Annotations;
+using UnityEngine;
 using AudioType = Feature.SoundModule.Scripts.AudioType;
 
 namespace Feature.MainMenuViewModule.Scripts {
@@ -38,6 +39,7 @@ namespace Feature.MainMenuViewModule.Scripts {
             View.DebugButton.onClick.AddListener(ShowDebugWindow);
             View.SettingsButton.onClick.AddListener(OnSettingsClick);
             View.DailyChallengeButton.onClick.AddListener(OnDailyChallengeClick);
+            LocalizationEvents.OnLanguageChanged += SetupText;
         }
 
         public override void Show() {
