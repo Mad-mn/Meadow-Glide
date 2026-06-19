@@ -80,13 +80,16 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
 
         private void SetupMilestones() {
             ChallengeConfig config = _configProvider.GetConfig(ChallengeType.Daily);
+            int previousStars = _challengeService.GetTodayStars();
+
             if (config == null || config.StarRewards == null)
                 return;
 
             for (int i = 0; i < View.Milestones.Length; i++) {
                 if (i < config.StarRewards.Length) {
                     View.Milestones[i].gameObject.SetActive(true);
-                    View.Milestones[i].Setup(config.StarRewards[i], _resourceInfoProvider, false);
+                    bool alreadyCompleted = i < previousStars;
+                    View.Milestones[i].Setup(config.StarRewards[i], _resourceInfoProvider, alreadyCompleted);
                 }
                 else {
                     View.Milestones[i].gameObject.SetActive(false);
@@ -113,12 +116,16 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
 
             yield return AnimateMovesCounter(movesUsed);
 
-            int stars = _challengeService.GetTodayStars();
-            yield return AnimateProgressBar(stars);
+            int previousStars = _challengeService.GetTodayStars();
+            int newStars = _challengeService.GetTodayStars();
 
-            yield return AnimateRewardIcons(stars);
+            yield return AnimateProgressBar(previousStars, newStars);
 
-            if (stars >= (int)StarRating.Three) {
+            if (newStars > previousStars) {
+                yield return AnimateNewRewardIcons(previousStars, newStars);
+            }
+
+            if (newStars >= (int)StarRating.Three) {
                 View.RestartButton.gameObject.SetActive(false);
             }
             else {
@@ -128,20 +135,28 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             _interactionStateService.UnblockInput();
         }
 
-        private IEnumerator AnimateProgressBar(int stars) {
-            float totalFill = (float)stars / (int)StarRating.Three;
+        private IEnumerator AnimateProgressBar(int previousStars, int newStars) {
+            float startFill = (float)previousStars / (int)StarRating.Three;
+            float endFill = (float)newStars / (int)StarRating.Three;
             float duration = 0.6f;
             float elapsed = 0f;
-            int nextMilestoneIndex = 0;
+            int nextMilestoneIndex = previousStars;
+
+            View.ProgressBar.SetFill(startFill);
+
+            if (newStars <= previousStars) {
+                View.ProgressBar.SetFill(endFill);
+                yield break;
+            }
 
             while (elapsed < duration) {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
-                float currentFill = Mathf.Lerp(0f, totalFill, t);
+                float currentFill = Mathf.Lerp(startFill, endFill, t);
                 View.ProgressBar.SetFill(currentFill);
 
                 float milestoneThreshold = (float)(nextMilestoneIndex + 1) / (int)StarRating.Three;
-                if (currentFill >= milestoneThreshold && nextMilestoneIndex < stars) {
+                if (currentFill >= milestoneThreshold && nextMilestoneIndex < newStars) {
                     ShowMilestoneWithAnimation(nextMilestoneIndex);
                     nextMilestoneIndex++;
                 }
@@ -149,9 +164,9 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
                 yield return null;
             }
 
-            View.ProgressBar.SetFill(totalFill);
+            View.ProgressBar.SetFill(endFill);
 
-            while (nextMilestoneIndex < stars) {
+            while (nextMilestoneIndex < newStars) {
                 ShowMilestoneWithAnimation(nextMilestoneIndex);
                 nextMilestoneIndex++;
             }
@@ -181,11 +196,8 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             View.MovesCountText.text = target.ToString();
         }
 
-        private IEnumerator AnimateRewardIcons(int stars) {
-            if (stars <= 0)
-                yield break;
-
-            for (int i = 0; i < stars && i < View.Milestones.Length; i++) {
+        private IEnumerator AnimateNewRewardIcons(int previousStars, int newStars) {
+            for (int i = previousStars; i < newStars && i < View.Milestones.Length; i++) {
                 ChallengeMilestone milestone = View.Milestones[i];
                 if (!milestone.gameObject.activeSelf)
                     continue;
