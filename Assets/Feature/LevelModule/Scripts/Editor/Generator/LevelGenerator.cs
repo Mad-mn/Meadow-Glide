@@ -147,16 +147,19 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     var calculator = new DifficultyCalculator(solver, areas, rings, sectors, statuses);
                     int difficulty = calculator.Calculate(currentLevel, out int pathLength, out float confusion, out float planningDepth);
 
+                    solver.Solve(currentLevel, out var solution);
+                    var pruned = PruneLevel(currentLevel, statuses, areas, solution);
+
                     if (p.AllowEmptySegments) {
-                        ApplyEmptySegments(statuses, currentLevel.Colors, rings, sectors, areas, rnd, p);
+                        ApplyEmptySegments(pruned.Statuses, pruned.Colors, pruned.Rings, pruned.Sectors, pruned.Areas, rnd, p);
                     }
 
                     var candidate = new RawLevelData {
-                        Rings = rings,
-                        Sectors = sectors,
-                        Colors = (byte[,])currentLevel.Colors.Clone(),
-                        Statuses = statuses,
-                        Areas = areas,
+                        Rings = pruned.Rings,
+                        Sectors = pruned.Sectors,
+                        Colors = pruned.Colors,
+                        Statuses = pruned.Statuses,
+                        Areas = pruned.Areas,
                         Difficulty = difficulty,
                         PathLength = pathLength,
                         AvgConfusion = confusion,
@@ -435,6 +438,105 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             else if (sameColorCount == 0) score -= 1f;
 
             return Mathf.Clamp(score, 0f, 10f);
+        }
+
+        public struct PrunedLevelData {
+            public int Rings;
+            public int Sectors;
+            public byte[,] Colors;
+            public SegmentStatus[,] Statuses;
+            public List<SlideAreaConfig> Areas;
+        }
+
+        public static PrunedLevelData PruneLevel(LevelState state, SegmentStatus[,] statuses, List<SlideAreaConfig> areas, List<Move> solution) {
+            int rings = state.RingCount;
+            int sectors = state.SectorCount;
+
+            if (solution == null || solution.Count == 0) {
+                return new PrunedLevelData {
+                    Rings = rings,
+                    Sectors = sectors,
+                    Colors = (byte[,])state.Colors.Clone(),
+                    Statuses = (SegmentStatus[,])statuses.Clone(),
+                    Areas = new List<SlideAreaConfig>(areas)
+                };
+            }
+
+            var usedRings = new HashSet<int>();
+            var usedAreaIndices = new HashSet<int>();
+
+            foreach (var move in solution) {
+                if (move.Type == MoveType.Rotate) {
+                    usedRings.Add(move.Index);
+                } else {
+                    usedAreaIndices.Add(move.Index);
+                    var area = areas[move.Index];
+                    for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
+                        usedRings.Add(r);
+                    }
+                }
+            }
+
+            var removedRings = new List<int>();
+            var keptRings = new List<int>();
+            for (int r = 0; r < rings; r++) {
+                if (usedRings.Contains(r)) {
+                    keptRings.Add(r);
+                } else {
+                    removedRings.Add(r);
+                }
+            }
+
+            if (keptRings.Count == rings && usedAreaIndices.Count == areas.Count) {
+                return new PrunedLevelData {
+                    Rings = rings,
+                    Sectors = sectors,
+                    Colors = (byte[,])state.Colors.Clone(),
+                    Statuses = (SegmentStatus[,])statuses.Clone(),
+                    Areas = new List<SlideAreaConfig>(areas)
+                };
+            }
+
+            var ringRemap = new int[rings];
+            for (int i = 0; i < rings; i++) ringRemap[i] = -1;
+            for (int newIdx = 0; newIdx < keptRings.Count; newIdx++) {
+                ringRemap[keptRings[newIdx]] = newIdx;
+            }
+
+            int newRingCount = keptRings.Count;
+            var newColors = new byte[newRingCount, sectors];
+            var newStatuses = new SegmentStatus[newRingCount, sectors];
+
+            for (int newR = 0; newR < newRingCount; newR++) {
+                int oldR = keptRings[newR];
+                for (int s = 0; s < sectors; s++) {
+                    newColors[newR, s] = state.Colors[oldR, s];
+                    newStatuses[newR, s] = statuses[oldR, s];
+                }
+            }
+
+            var newAreas = new List<SlideAreaConfig>();
+            for (int i = 0; i < areas.Count; i++) {
+                if (!usedAreaIndices.Contains(i)) continue;
+
+                var old = areas[i];
+                newAreas.Add(new SlideAreaConfig {
+                    sectorIndex = old.sectorIndex,
+                    startCircleIndex = ringRemap[old.startCircleIndex],
+                    endCircleIndex = ringRemap[old.endCircleIndex],
+                    totalSegments = old.totalSegments,
+                    SlideAreaStatus = old.SlideAreaStatus,
+                    Colors = old.Colors != null ? new List<CircleColorType>(old.Colors) : new List<CircleColorType>()
+                });
+            }
+
+            return new PrunedLevelData {
+                Rings = newRingCount,
+                Sectors = sectors,
+                Colors = newColors,
+                Statuses = newStatuses,
+                Areas = newAreas
+            };
         }
     }
 }
