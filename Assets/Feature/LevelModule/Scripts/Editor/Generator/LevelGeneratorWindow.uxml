@@ -111,6 +111,11 @@
                 <ui:Label text="Level Name:" class="field-label" style="width: 80px;" />
                 <ui:TextField name="levelName" value="LevelConfig_New" class="field-input" />
             </ui:VisualElement>
+            <ui:VisualElement class="field-row" style="width: 100%; margin-top: 5px;">
+                <ui:Label text="Save Path:" class="field-label" style="width: 80px;" />
+                <ui:TextField name="savePath" value="Assets/ScriptableObjects/Levels" class="field-input" style="flex-grow: 1;" />
+                <ui:Button name="browseButton" text="..." class="secondary-button" style="width: 30px; min-width: 30px;" />
+            </ui:VisualElement>
             <ui:Button name="saveButton" text="Save as LevelConfig" class="secondary-button" style="width: 100%;" />
         </ui:VisualElement>
 

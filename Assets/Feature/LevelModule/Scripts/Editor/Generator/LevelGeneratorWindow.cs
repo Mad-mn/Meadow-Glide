@@ -21,6 +21,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private Button _generateButton;
         private Button _cancelButton;
         private TextField _nameField;
+        private TextField _savePathField;
         private ListView _levelList;
         private List<LevelConfig> _existingLevels = new List<LevelConfig>();
         
@@ -45,6 +46,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _generateButton = rootVisualElement.Q<Button>("generateButton");
             _cancelButton = rootVisualElement.Q<Button>("cancelButton");
             _nameField = rootVisualElement.Q<TextField>("levelName");
+            _savePathField = rootVisualElement.Q<TextField>("savePath");
             _levelList = rootVisualElement.Q<ListView>("levelList");
 
             _previewArea.generateVisualContent += DrawPreview;
@@ -52,6 +54,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _generateButton.clicked += OnGenerateClicked;
             _cancelButton.clicked += OnCancelClicked;
             rootVisualElement.Q<Button>("saveButton").clicked += OnSaveClicked;
+            rootVisualElement.Q<Button>("browseButton").clicked += OnBrowseClicked;
             rootVisualElement.Q<Button>("refreshButton").clicked += RefreshLevelList;
 
             SetupListView();
@@ -217,8 +220,28 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             string fileName = _nameField.value;
             if (string.IsNullOrEmpty(fileName)) fileName = "LevelConfig_New";
 
-            string path = EditorUtility.SaveFilePanelInProject("Save Level Config", fileName, "asset", "Save Level Config");
-            if (string.IsNullOrEmpty(path)) return;
+            string folderPath = _savePathField.value;
+            if (string.IsNullOrEmpty(folderPath)) folderPath = "Assets/ScriptableObjects/Levels";
+
+            if (!folderPath.StartsWith("Assets/")) folderPath = "Assets/" + folderPath;
+            folderPath = folderPath.TrimEnd('/');
+
+            string path = $"{folderPath}/{fileName}.asset";
+
+            if (AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path) != null) {
+                if (!EditorUtility.DisplayDialog("Overwrite?", $"File already exists:\n{path}\nOverwrite?", "Yes", "No"))
+                    return;
+            }
+
+            if (!AssetDatabase.IsValidFolder(folderPath)) {
+                string parent = System.IO.Path.GetDirectoryName(folderPath);
+                string folderName = System.IO.Path.GetFileName(folderPath);
+                if (!AssetDatabase.IsValidFolder(parent)) {
+                    EditorUtility.DisplayDialog("Error", $"Parent folder does not exist:\n{parent}", "OK");
+                    return;
+                }
+                AssetDatabase.CreateFolder(parent, folderName);
+            }
 
             AssetDatabase.CreateAsset(_currentLevel.LevelConfig, path);
             foreach (var circle in _currentLevel.LevelConfig.CircleConfigs) {
@@ -229,6 +252,20 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             AssetDatabase.Refresh();
             RefreshLevelList();
             EditorUtility.DisplayDialog("Success", "Level saved to " + path, "OK");
+        }
+
+        private void OnBrowseClicked() {
+            string currentPath = _savePathField.value;
+            if (string.IsNullOrEmpty(currentPath)) currentPath = "Assets/ScriptableObjects/Levels";
+
+            string selectedPath = EditorUtility.OpenFolderPanel("Select Save Folder", currentPath, "");
+            if (string.IsNullOrEmpty(selectedPath)) return;
+
+            if (selectedPath.StartsWith(Application.dataPath)) {
+                selectedPath = "Assets" + selectedPath.Substring(Application.dataPath.Length);
+            }
+
+            _savePathField.SetValueWithoutNotify(selectedPath);
         }
 
         private void DrawPreview(MeshGenerationContext mgc) {
