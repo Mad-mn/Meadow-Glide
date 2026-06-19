@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Feature.StatusModule.Scripts.Segments;
 using UnityEngine;
 
 namespace Feature.LevelModule.Scripts.Editor.Generator {
@@ -9,15 +8,11 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private readonly LevelSolver _solver;
         private readonly List<SlideAreaConfig> _areas;
         private readonly int _rings;
-        private readonly int _sectors;
-        private readonly SegmentStatus[,] _statuses;
 
-        public DifficultyCalculator(LevelSolver solver, List<SlideAreaConfig> areas, int rings, int sectors, SegmentStatus[,] statuses) {
+        public DifficultyCalculator(LevelSolver solver, List<SlideAreaConfig> areas, int rings) {
             _solver = solver;
             _areas = areas;
             _rings = rings;
-            _sectors = sectors;
-            _statuses = statuses;
         }
 
         public int Calculate(LevelState state, out int pathLength, out float avgConfusion, out float avgPlanningDepth) {

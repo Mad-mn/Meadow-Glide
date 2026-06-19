@@ -80,11 +80,14 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
                     var statuses = new SegmentStatus[rings, sectors];
                     var initialColors = new byte[rings, sectors];
+                    var blockedColors = new HashSet<byte>();
                     for (int r = 0; r < rings; r++) {
                         for (int s = 0; s < sectors; s++) {
-                            bool blocked = p.AllowBlocked && rnd.NextDouble() < p.BlockedChance;
-                            statuses[r, s] = blocked ? SegmentStatus.Blocked : SegmentStatus.Default;
                             initialColors[r, s] = (byte)colorPool[r];
+                            bool blocked = p.AllowBlocked && rnd.NextDouble() < p.BlockedChance
+                                && !blockedColors.Contains(initialColors[r, s]);
+                            statuses[r, s] = blocked ? SegmentStatus.Blocked : SegmentStatus.Default;
+                            if (blocked) blockedColors.Add(initialColors[r, s]);
                         }
                     }
 
@@ -117,16 +120,20 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                         continue;
                     }
 
-                    var state = new LevelState(rings, sectors);
+                    bool hasBlocked = false;
+                    for (int r = 0; r < rings && !hasBlocked; r++)
+                        for (int s = 0; s < sectors && !hasBlocked; s++)
+                            if (statuses[r, s] == SegmentStatus.Blocked) hasBlocked = true;
+
+                    var state = new LevelState(rings, sectors, hasBlocked);
                     for (int r = 0; r < rings; r++)
-                        for (int s = 0; s < sectors; s++)
+                        for (int s = 0; s < sectors; s++) {
                             state.Colors[r, s] = initialColors[r, s];
+                            if (state.Blocked != null && statuses[r, s] == SegmentStatus.Blocked)
+                                state.Blocked[r, s] = initialColors[r, s];
+                        }
 
                     var solver = new LevelSolver(areas, rings, sectors, Math.Max(1, p.MaxIterations));
-                    for (int r = 0; r < rings; r++)
-                        for (int s = 0; s < sectors; s++)
-                            if (statuses[r, s] == SegmentStatus.Blocked)
-                                solver.SetLockedSegment(r, s, initialColors[r, s]);
 
                     progress?.Report($"Attempt {attempt}: Scrambling...");
                     var currentLevel = Scramble(state, targetDifficulty, areas, solver, rnd, ct);
@@ -144,11 +151,11 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     }
 
                     progress?.Report($"Attempt {attempt}: Calculating difficulty...");
-                    var calculator = new DifficultyCalculator(solver, areas, rings, sectors, statuses);
+                    var calculator = new DifficultyCalculator(solver, areas, rings);
                     int difficulty = calculator.Calculate(currentLevel, out int pathLength, out float confusion, out float planningDepth);
 
                     solver.Solve(currentLevel, out var solution);
-                    var pruned = PruneLevel(currentLevel, statuses, areas, solution);
+                    var pruned = PruneLevel(currentLevel, areas, solution);
 
                     if (p.AllowEmptySegments) {
                         ApplyEmptySegments(pruned.Statuses, pruned.Colors, pruned.Rings, pruned.Sectors, pruned.Areas, rnd, p);
@@ -409,16 +416,20 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             var testStatuses = (SegmentStatus[,])statuses.Clone();
             testStatuses[testRing, testSector] = SegmentStatus.Empty;
 
-            var state = new LevelState(rings, sectors);
+            bool hasBlocked = false;
+            for (int r = 0; r < rings && !hasBlocked; r++)
+                for (int s = 0; s < sectors && !hasBlocked; s++)
+                    if (testStatuses[r, s] == SegmentStatus.Blocked) hasBlocked = true;
+
+            var state = new LevelState(rings, sectors, hasBlocked);
             for (int r = 0; r < rings; r++)
-                for (int s = 0; s < sectors; s++)
+                for (int s = 0; s < sectors; s++) {
                     state.Colors[r, s] = colors[r, s];
+                    if (state.Blocked != null && testStatuses[r, s] == SegmentStatus.Blocked)
+                        state.Blocked[r, s] = colors[r, s];
+                }
 
             var solver = new LevelSolver(areas, rings, sectors, 5000);
-            for (int r = 0; r < rings; r++)
-                for (int s = 0; s < sectors; s++)
-                    if (testStatuses[r, s] == SegmentStatus.Blocked)
-                        solver.SetLockedSegment(r, s, colors[r, s]);
 
             int movesToSolve = solver.Solve(state, out _);
 
@@ -448,16 +459,22 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public List<SlideAreaConfig> Areas;
         }
 
-        public static PrunedLevelData PruneLevel(LevelState state, SegmentStatus[,] statuses, List<SlideAreaConfig> areas, List<Move> solution) {
+        public static PrunedLevelData PruneLevel(LevelState state, List<SlideAreaConfig> areas, List<Move> solution) {
             int rings = state.RingCount;
             int sectors = state.SectorCount;
 
             if (solution == null || solution.Count == 0) {
+                var defaultStatuses = new SegmentStatus[rings, sectors];
+                if (state.Blocked != null) {
+                    for (int r = 0; r < rings; r++)
+                        for (int s = 0; s < sectors; s++)
+                            defaultStatuses[r, s] = state.Blocked[r, s] != 0 ? SegmentStatus.Blocked : SegmentStatus.Default;
+                }
                 return new PrunedLevelData {
                     Rings = rings,
                     Sectors = sectors,
                     Colors = (byte[,])state.Colors.Clone(),
-                    Statuses = (SegmentStatus[,])statuses.Clone(),
+                    Statuses = defaultStatuses,
                     Areas = new List<SlideAreaConfig>(areas)
                 };
             }
@@ -488,11 +505,17 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             }
 
             if (keptRings.Count == rings && usedAreaIndices.Count == areas.Count) {
+                var noChangeStatuses = new SegmentStatus[rings, sectors];
+                if (state.Blocked != null) {
+                    for (int r = 0; r < rings; r++)
+                        for (int s = 0; s < sectors; s++)
+                            noChangeStatuses[r, s] = state.Blocked[r, s] != 0 ? SegmentStatus.Blocked : SegmentStatus.Default;
+                }
                 return new PrunedLevelData {
                     Rings = rings,
                     Sectors = sectors,
                     Colors = (byte[,])state.Colors.Clone(),
-                    Statuses = (SegmentStatus[,])statuses.Clone(),
+                    Statuses = noChangeStatuses,
                     Areas = new List<SlideAreaConfig>(areas)
                 };
             }
@@ -511,7 +534,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 int oldR = keptRings[newR];
                 for (int s = 0; s < sectors; s++) {
                     newColors[newR, s] = state.Colors[oldR, s];
-                    newStatuses[newR, s] = statuses[oldR, s];
+                    newStatuses[newR, s] = (state.Blocked != null && state.Blocked[oldR, s] != 0)
+                        ? SegmentStatus.Blocked
+                        : SegmentStatus.Default;
                 }
             }
 

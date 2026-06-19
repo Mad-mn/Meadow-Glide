@@ -7,29 +7,21 @@ using Feature.StatusModule.Scripts.SlideAreas;
 namespace Feature.LevelModule.Scripts.Editor.Generator {
     public class LevelSolver {
         private readonly List<SlideAreaConfig> _areas;
-        private readonly byte[,] _lockedSegments; 
         private readonly int _maxIterations;
 
         public LevelSolver(IReadOnlyList<SlideAreaConfig> areas, int rings, int sectors, int maxIterations = 50000) {
             _areas = new List<SlideAreaConfig>(areas);
-            _lockedSegments = new byte[rings, sectors];
             _maxIterations = maxIterations;
         }
 
-        public void SetLockedSegment(int ring, int sector, byte color) {
-            _lockedSegments[ring, sector] = color;
-        }
-
-        /// <summary>
-        /// Mirrors runtime SlideSegmentService.PrepareSegments: slide is blocked when any segment
-        /// in the area path is Blocked, or (for FilterColors) any segment color is not in the allowed list.
-        /// </summary>
         public bool IsSlideAreaBlocked(LevelState state, int areaIndex) {
+            if (state.Blocked == null) return false;
+
             var area = _areas[areaIndex];
             bool isFilterColors = area.SlideAreaStatus == SlideAreaStatus.FilterColors;
 
             for (int r = area.startCircleIndex; r <= area.endCircleIndex; r++) {
-                if (_lockedSegments[r, area.sectorIndex] != 0)
+                if (state.Blocked[r, area.sectorIndex] != 0)
                     return true;
 
                 if (isFilterColors) {
@@ -46,7 +38,6 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             solution = null;
             if (initialState.IsSolved()) return 0;
 
-            // A* with Priority Queue simulation
             var openSet = new SortedList<float, List<(LevelState state, List<Move> path)>>();
             var closedSet = new HashSet<LevelState>();
 
@@ -56,11 +47,11 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             int iterations = 0;
             while (openSet.Count > 0 && iterations < _maxIterations) {
                 iterations++;
-                
+
                 float firstKey = openSet.Keys[0];
                 var list = openSet.Values[0];
                 var (current, path) = list[0];
-                
+
                 list.RemoveAt(0);
                 if (list.Count == 0) openSet.RemoveAt(0);
 
@@ -97,10 +88,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             for (int r = 0; r < state.RingCount; r++) {
                 int[] counts = new int[256];
                 for (int s = 0; s < state.SectorCount; s++) counts[state.Colors[r, s]]++;
-                
+
                 int max = 0;
                 for (int i = 0; i < 256; i++) if (counts[i] > max) max = counts[i];
-                
+
                 score += (state.SectorCount - max);
             }
             return score;
