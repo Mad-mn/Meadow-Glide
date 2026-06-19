@@ -48,6 +48,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public SegmentStatus[,] Statuses;
             public List<SlideAreaConfig> Areas;
             public int Difficulty;
+            public int PathLength;
+            public float AvgConfusion;
+            public float AvgPlanningDepth;
             public int Seed;
         }
 
@@ -128,6 +131,12 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     progress?.Report($"Attempt {attempt}: Scrambling...");
                     var currentLevel = Scramble(state, targetDifficulty, areas, solver, rnd, ct);
 
+                    int postScrambleCheck = solver.Solve(currentLevel, out _);
+                    if (postScrambleCheck < 0) {
+                        LogValidationFailure(attempt, "Level unsolvable after scramble (blocked segments in wrong positions).");
+                        continue;
+                    }
+
                     var validation = ValidateGeneratedLevel(currentLevel, rings, areas);
                     if (!validation.IsValid) {
                         LogValidationFailure(attempt, validation.Reason);
@@ -135,7 +144,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     }
 
                     progress?.Report($"Attempt {attempt}: Calculating difficulty...");
-                    int difficulty = solver.Solve(currentLevel, out _);
+                    var calculator = new DifficultyCalculator(solver, areas, rings, sectors, statuses);
+                    int difficulty = calculator.Calculate(currentLevel, out int pathLength, out float confusion, out float planningDepth);
 
                     if (p.AllowEmptySegments) {
                         ApplyEmptySegments(statuses, currentLevel.Colors, rings, sectors, areas, rnd, p);
@@ -148,6 +158,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                         Statuses = statuses,
                         Areas = areas,
                         Difficulty = difficulty,
+                        PathLength = pathLength,
+                        AvgConfusion = confusion,
+                        AvgPlanningDepth = planningDepth,
                         Seed = activeSeed
                     };
 

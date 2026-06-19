@@ -92,7 +92,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             return -1;
         }
 
-        private float GetHeuristic(LevelState state) {
+        public float GetHeuristic(LevelState state) {
             float score = 0;
             for (int r = 0; r < state.RingCount; r++) {
                 int[] counts = new int[256];
@@ -106,7 +106,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             return score;
         }
 
-        private IEnumerable<Move> GetAllPossibleMoves(LevelState state) {
+        public IEnumerable<Move> GetAllPossibleMoves(LevelState state) {
             for (int r = 0; r < state.RingCount; r++) {
                 for (int offset = 1; offset < state.SectorCount; offset++) {
                     var next = state.Rotate(r, offset);

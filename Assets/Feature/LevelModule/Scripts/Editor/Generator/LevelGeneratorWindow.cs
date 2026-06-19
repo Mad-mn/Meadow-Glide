@@ -168,7 +168,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     _currentLevel = ConvertToUnityLevelData(rawData);
                     _seedField.SetValueWithoutNotify(rawData.Seed);
                     _activeSeedLabel.text = $"Active seed: {rawData.Seed}";
-                    _statsLabel.text = $"Difficulty: {_currentLevel.LevelConfig.Difficulty} | Rings: {_currentLevel.LevelConfig.CircleConfigs.Count} | Seed: {rawData.Seed}";
+                    _statsLabel.text = $"Difficulty: {rawData.Difficulty} (path:{rawData.PathLength} confusion:{rawData.AvgConfusion:F2} plan:{rawData.AvgPlanningDepth:F2}) | Rings: {rawData.Rings} | Seed: {rawData.Seed}";
                     _previewArea.MarkDirtyRepaint();
                 } else {
                     _statsLabel.text = "Generation failed — no valid level produced.";
