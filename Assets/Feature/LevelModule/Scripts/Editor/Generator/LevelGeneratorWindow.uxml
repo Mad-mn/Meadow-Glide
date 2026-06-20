@@ -122,7 +122,10 @@
         <ui:VisualElement name="browser-panel" class="panel">
             <ui:Label text="Level Browser" class="header" />
             <ui:ListView name="levelList" class="level-list" item-height="40" />
-            <ui:Button name="refreshButton" text="Refresh List" class="secondary-button" />
+            <ui:VisualElement class="field-row" style="width: 100%; margin-top: 5px;">
+                <ui:Button name="refreshButton" text="Refresh List" class="secondary-button" style="flex-grow: 1;" />
+                <ui:Button name="recalculateButton" text="Recalculate Selected" class="secondary-button" style="flex-grow: 1;" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

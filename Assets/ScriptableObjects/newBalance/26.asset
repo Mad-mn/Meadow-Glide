@@ -29,8 +29,11 @@ MonoBehaviour:
     totalSegments: 5
     SlideAreaStatus: 0
     Colors: 
-  _difficulty: 7
-  _difficultyMultiplier: 2
+  _difficulty: -1
+  _difficultyMultiplier: 1
+  _averageMoves: 0
+  _seed: 0
+  _solutionPath: []
   <TutorialLevelConfig>k__BackingField: {fileID: 0}
 --- !u!114 &1226868369712837018
 MonoBehaviour:

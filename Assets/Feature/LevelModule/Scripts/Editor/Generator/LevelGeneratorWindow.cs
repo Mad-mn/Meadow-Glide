@@ -56,6 +56,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             rootVisualElement.Q<Button>("saveButton").clicked += OnSaveClicked;
             rootVisualElement.Q<Button>("browseButton").clicked += OnBrowseClicked;
             rootVisualElement.Q<Button>("refreshButton").clicked += RefreshLevelList;
+            rootVisualElement.Q<Button>("recalculateButton").clicked += OnRecalculateClicked;
 
             SetupListView();
             RefreshLevelList();
@@ -80,7 +81,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 if (i >= _existingLevels.Count) return;
                 var level = _existingLevels[i];
                 element.Q<Label>("name").text = level.name;
-                element.Q<Label>("difficulty").text = $"D:{level.Difficulty} S:{level.ShortestSolution} A:{level.AverageMoves}";
+                element.Q<Label>("difficulty").text = $"D:{level.Difficulty} S:{level.ShortestSolution} A:{level.AverageMoves} Seed:{level.Seed}";
             };
 
             _levelList.onSelectionChange += obj => {
@@ -89,7 +90,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     _currentLevel = new LevelData {
                         LevelConfig = selected
                     };
-                    _statsLabel.text = $"Loaded: {selected.name} | Difficulty: {selected.Difficulty} | Shortest: {selected.ShortestSolution} | Avg: {selected.AverageMoves}";
+                    _statsLabel.text = $"Loaded: {selected.name} | D:{selected.Difficulty} S:{selected.ShortestSolution} A:{selected.AverageMoves} Seed:{selected.Seed}";
                     _previewArea.MarkDirtyRepaint();
                 }
             };
@@ -273,6 +274,82 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             }
 
             _savePathField.SetValueWithoutNotify(selectedPath);
+        }
+
+        private void OnRecalculateClicked() {
+            int selectedIndex = _levelList.selectedIndex;
+            if (selectedIndex < 0 || selectedIndex >= _existingLevels.Count) {
+                EditorUtility.DisplayDialog("Error", "Select a level in the browser first.", "OK");
+                return;
+            }
+
+            var levelConfig = _existingLevels[selectedIndex];
+            RecalculateLevel(levelConfig);
+        }
+
+        private void RecalculateLevel(LevelConfig levelConfig) {
+            int rings = levelConfig.CircleConfigs.Count;
+            if (rings == 0) {
+                EditorUtility.DisplayDialog("Error", "Level has no circles.", "OK");
+                return;
+            }
+
+            int sectors = levelConfig.CircleConfigs[0].SegmentCount;
+            var state = new LevelState(rings, sectors);
+            bool hasBlocked = false;
+
+            for (int r = 0; r < rings; r++) {
+                for (int s = 0; s < sectors; s++) {
+                    var seg = levelConfig.CircleConfigs[r].Segments[s];
+                    state.Colors[r, s] = (byte)seg.ColorType;
+                    if (seg.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked)
+                        hasBlocked = true;
+                }
+            }
+
+            if (hasBlocked) {
+                state = new LevelState(rings, sectors, true);
+                for (int r = 0; r < rings; r++) {
+                    for (int s = 0; s < sectors; s++) {
+                        var seg = levelConfig.CircleConfigs[r].Segments[s];
+                        state.Colors[r, s] = (byte)seg.ColorType;
+                        if (seg.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked)
+                            state.Blocked[r, s] = (byte)seg.ColorType;
+                    }
+                }
+            }
+
+            var areas = new List<SlideAreaConfig>(levelConfig.SlideAreaConfigs);
+            int maxMoves = levelConfig.MovesForLevel;
+
+            var solver = new LevelSolver(areas, rings, sectors);
+            solver.Solve(state, out var solution);
+
+            var calculator = new DifficultyCalculator(solver, areas, rings);
+            int difficulty = calculator.Calculate(state, maxMoves,
+                out int pathLength, out int averageMoves, out _, out _);
+
+            var solutionPath = new List<LevelMoveData>();
+            if (solution != null) {
+                foreach (var move in solution)
+                    solutionPath.Add(new LevelMoveData(move.Type.ToString(), move.Index, move.Offset));
+            }
+
+            Undo.RecordObject(levelConfig, "Recalculate Level");
+            levelConfig.SetConfigs(
+                new List<CircleConfig>(levelConfig.CircleConfigs),
+                areas,
+                difficulty,
+                averageMoves,
+                levelConfig.Seed,
+                solutionPath
+            );
+            EditorUtility.SetDirty(levelConfig);
+            AssetDatabase.SaveAssets();
+
+            _statsLabel.text = $"Recalculated: {levelConfig.name} | D:{difficulty} S:{pathLength} A:{averageMoves}";
+            _previewArea.MarkDirtyRepaint();
+            _levelList.Rebuild();
         }
 
         private void DrawPreview(MeshGenerationContext mgc) {

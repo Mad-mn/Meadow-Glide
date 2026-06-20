@@ -139,7 +139,41 @@ MonoBehaviour:
     totalSegments: 5
     SlideAreaStatus: 1
     Colors: 060000000400000002000000
-  _difficulty: 10
+  _difficulty: 26
+  _difficultyMultiplier: 1
+  _averageMoves: 17
+  _seed: 0
+  _solutionPath:
+  - MoveType: Rotate
+    Index: 2
+    Offset: 3
+  - MoveType: Rotate
+    Index: 3
+    Offset: 2
+  - MoveType: Slide
+    Index: 1
+    Offset: 1
+  - MoveType: Rotate
+    Index: 0
+    Offset: 4
+  - MoveType: Rotate
+    Index: 3
+    Offset: 4
+  - MoveType: Slide
+    Index: 1
+    Offset: 3
+  - MoveType: Rotate
+    Index: 2
+    Offset: 3
+  - MoveType: Slide
+    Index: 1
+    Offset: 3
+  - MoveType: Rotate
+    Index: 0
+    Offset: 3
+  - MoveType: Slide
+    Index: 2
+    Offset: 1
   <TutorialLevelConfig>k__BackingField: {fileID: 0}
 --- !u!114 &2030069979277343873
 MonoBehaviour:

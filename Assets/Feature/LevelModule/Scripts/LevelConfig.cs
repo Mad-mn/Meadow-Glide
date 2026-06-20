@@ -12,7 +12,7 @@ namespace Feature.LevelModule.Scripts {
         [SerializeField] private List<CircleConfig> _circleConfigs = new List<CircleConfig>();
         [SerializeField] private List<SlideAreaConfig> _slideAreaConfigs = new List<SlideAreaConfig>();
         [SerializeField] private int _difficulty;
-        [SerializeField] private float _difficultyMultiplier = 2;
+        [SerializeField] private float _difficultyMultiplier = 1;
         [SerializeField] private int _averageMoves;
         [SerializeField] private int _seed;
         [SerializeField] private List<LevelMoveData> _solutionPath = new List<LevelMoveData>();

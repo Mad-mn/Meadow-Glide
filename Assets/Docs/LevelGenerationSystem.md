@@ -104,7 +104,28 @@ public class LevelMoveData {
 3. Арени які не використовуються в розв'язку — видаляються
 4. Індекси кілець ремаппляться (0,1,2,...)
 
-## 7. Pre-Game Placement (Розміщення сегментів)
+## 7. Recalculate Level (Перерахунок існуючих рівнів)
+
+### Призначення
+Можливість оновити поля LevelConfig (difficulty, shortest, average, solutionPath) для рівнів які були створені до додавання цих полів.
+
+### Використання
+1. Відкрий `Tools/ColorRings/Level Generator`
+2. Вибери рівень в Level Browser
+3. Натисни "Recalculate Selected"
+4. Рівень буде прогнаний через солвер та DifficultyCalculator
+5. Поля `Difficulty`, `ShortestSolution`, `AverageMoves`, `SolutionPath` оновляться
+
+### Що оновлюється
+*   `_difficulty` — перерахована складність
+*   `_averageMoves` — поріг для 2 зірок
+*   `_solutionPath` — список ходів найкоротшого розв'язку
+*   `_seed` — **не змінюється** (зберігається оригінальний)
+
+### Примітка
+Операція підтримує Undo (Ctrl+Z).
+
+## 8. Pre-Game Placement (Розміщення сегментів)
 
 ### Сегменти зі статусом Empty
 *   `SegmentStatus.Empty = 4` — порожні слоти для попереднього розміщення
@@ -163,5 +184,7 @@ public class LevelMoveData {
 *   [x] PruneLevel — видалення зайвих кілець та арен
 *   [x] Система зірок з ShortestSolution та AverageMoves
 *   [x] LevelMoveData — збереження розв'язку як списку ходів
+*   [x] Seed — збереження сіду для перегенерації
+*   [x] Recalculate — перерахунок існуючих рівнів через солвер
 *   [x] Pre-Game Placement з інтелектуальним вибором
 *   [x] Level Browser та збереження по шляху
