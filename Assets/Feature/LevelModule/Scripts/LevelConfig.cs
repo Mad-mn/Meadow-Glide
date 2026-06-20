@@ -14,6 +14,7 @@ namespace Feature.LevelModule.Scripts {
         [SerializeField] private int _difficulty;
         [SerializeField] private float _difficultyMultiplier = 2;
         [SerializeField] private int _averageMoves;
+        [SerializeField] private int _seed;
         [SerializeField] private List<LevelMoveData> _solutionPath = new List<LevelMoveData>();
         [field: SerializeField] public TutorialLevelConfig TutorialLevelConfig { get; private set; }
 
@@ -21,6 +22,7 @@ namespace Feature.LevelModule.Scripts {
         public IReadOnlyList<SlideAreaConfig> SlideAreaConfigs => _slideAreaConfigs;
         public int Difficulty => _difficulty;
         public int AverageMoves => _averageMoves;
+        public int Seed => _seed;
         public IReadOnlyList<LevelMoveData> SolutionPath => _solutionPath;
         public int ShortestSolution => _solutionPath.Count;
 
@@ -28,11 +30,12 @@ namespace Feature.LevelModule.Scripts {
             Mathf.RoundToInt(_difficulty * _difficultyMultiplier);
 
         public void SetConfigs(List<CircleConfig> circles, List<SlideAreaConfig> areas, int difficulty,
-            int averageMoves, List<LevelMoveData> solutionPath) {
+            int averageMoves, int seed, List<LevelMoveData> solutionPath) {
             _circleConfigs = circles;
             _slideAreaConfigs = areas;
             _difficulty = difficulty;
             _averageMoves = averageMoves;
+            _seed = seed;
             _solutionPath = solutionPath ?? new List<LevelMoveData>();
         }
     }

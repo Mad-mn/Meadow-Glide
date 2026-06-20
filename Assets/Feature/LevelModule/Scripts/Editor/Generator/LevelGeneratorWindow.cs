@@ -214,7 +214,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 }
             }
 
-            levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty, raw.AverageMoves, solutionPath);
+            levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty, raw.AverageMoves, raw.Seed, solutionPath);
 
             return new LevelData {
                 LevelConfig = levelConfig
