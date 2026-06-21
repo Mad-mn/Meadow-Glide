@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Feature.LevelModule.Scripts;
+using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
-using Feature.StarModule.Scripts;
 using Feature.TransactionModule.Scripts;
-using UnityEngine;
 
 namespace Feature.ChallengeModule.Scripts {
     public class ChallengeService : IChallengeService {
@@ -14,7 +13,6 @@ namespace Feature.ChallengeModule.Scripts {
         private readonly ISaveDataModel _saveDataModel;
         private readonly ISaveDataService _saveDataService;
         private readonly IPlayerInventoryService _inventoryService;
-        private readonly IStarCalculator _starCalculator;
 
         private readonly ChallengeSessionData _session = new ChallengeSessionData();
 
@@ -24,13 +22,11 @@ namespace Feature.ChallengeModule.Scripts {
             IChallengeConfigProvider configProvider,
             ISaveDataModel saveDataModel,
             ISaveDataService saveDataService,
-            IPlayerInventoryService inventoryService,
-            IStarCalculator starCalculator) {
+            IPlayerInventoryService inventoryService) {
             _configProvider = configProvider;
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _inventoryService = inventoryService;
-            _starCalculator = starCalculator;
         }
 
         public bool IsDailyChallengeAvailable() {
@@ -43,60 +39,73 @@ namespace Feature.ChallengeModule.Scripts {
         }
 
         public LevelData GetCurrentLevel() {
-            if (!_session.IsActive)
-                return default;
+            LevelData levelData = ResolveDailyLevel();
+            if (levelData.LevelConfig != null)
+                _session.CurrentLevelConfig = levelData.LevelConfig;
 
-            ChallengeConfig config = _configProvider.GetConfig(_session.ActiveChallengeType);
-            if (config == null)
-                return default;
+            return levelData;
+        }
 
-            ChallengeLevelSelector selector = new ChallengeLevelSelector(config);
-            LevelData levelData = selector.GetLevelForDate(DateTime.Today);
+        public int GetMinMoves() {
+            if (_session.CurrentLevelConfig != null)
+                return _session.CurrentLevelConfig.ShortestSolution;
 
-            return new LevelData {
-                LevelID = levelData.LevelID,
-                LevelConfig = levelData.LevelConfig
-            };
+            LevelData levelData = ResolveDailyLevel();
+            return levelData.LevelConfig != null ? levelData.LevelConfig.ShortestSolution : 0;
         }
 
         public void ActivateDailyChallenge(LevelConfig levelConfig) {
             _session.IsActive = true;
             _session.ActiveChallengeType = ChallengeType.Daily;
-            _session.CurrentLevelConfig = levelConfig;
-            _session.StarsEarned = 0;
+            _session.CurrentLevelConfig = levelConfig ?? ResolveDailyLevel().LevelConfig;
+            _session.CurrentResult = MoveEfficiencyResult.None;
             _session.IsCompleted = false;
         }
 
-        public void OnChallengeCompleted(int shortestPath, int averageMoves, int movesUsed) {
+        private LevelData ResolveDailyLevel() {
+            ChallengeConfig config = _configProvider.GetConfig(ChallengeType.Daily);
+            if (config == null)
+                return default;
+
+            ChallengeLevelSelector selector = new ChallengeLevelSelector(config);
+            return selector.GetLevelForDate(DateTime.Today);
+        }
+
+        public void OnChallengeCompleted(MoveEfficiencyResult result) {
             if (!_session.IsActive)
                 return;
 
-            _session.StarsEarned = (int)_starCalculator.Calculate(shortestPath, averageMoves, movesUsed);
+            _session.CurrentResult = result;
             _session.IsCompleted = true;
 
             DailyChallengeData data = GetOrCreateDailyData();
+            _session.PreviousClaimedResult = (MoveEfficiencyResult)data.ClaimedResultThreshold;
 
-            if (_session.StarsEarned > data.TodayStarsEarned) {
-                data.TodayStarsEarned = _session.StarsEarned;
+            if ((int)result > data.TodayBestResult) {
+                data.TodayBestResult = (int)result;
             }
 
             ClaimNewRewards(data);
             SaveDailyData(data);
         }
 
-        public int GetTodayStars() {
+        public MoveEfficiencyResult GetTodayBestResult() {
             DailyChallengeData data = GetOrCreateDailyData();
-            return data.TodayStarsEarned;
+            return (MoveEfficiencyResult)data.TodayBestResult;
+        }
+
+        public MoveEfficiencyResult GetPreviousClaimedResult() {
+            return _session.PreviousClaimedResult;
         }
 
         public bool CanPlayToday() {
             DailyChallengeData data = GetOrCreateDailyData();
-            return data.TodayStarsEarned < (int)StarRating.Three;
+            return data.TodayBestResult < (int)MoveEfficiencyResult.PerfectClear;
         }
 
         public bool CanClaimReward() {
             DailyChallengeData data = GetOrCreateDailyData();
-            return data.TodayStarsEarned > data.ClaimedStarsThreshold;
+            return data.TodayBestResult > data.ClaimedResultThreshold;
         }
 
         public List<ResourceAmount> ClaimReward() {
@@ -113,8 +122,8 @@ namespace Feature.ChallengeModule.Scripts {
             if (config == null)
                 return claimed;
 
-            for (int stars = data.ClaimedStarsThreshold + 1; stars <= data.TodayStarsEarned; stars++) {
-                StarRewardEntry reward = FindRewardEntry(config, (StarRating)stars);
+            for (int result = data.ClaimedResultThreshold + 1; result <= data.TodayBestResult; result++) {
+                ChallengeRewardEntry reward = FindRewardEntry(config, (MoveEfficiencyResult)result);
                 if (reward == null)
                     continue;
 
@@ -124,7 +133,7 @@ namespace Feature.ChallengeModule.Scripts {
                 }
             }
 
-            data.ClaimedStarsThreshold = data.TodayStarsEarned;
+            data.ClaimedResultThreshold = data.TodayBestResult;
             return claimed;
         }
 
@@ -132,7 +141,8 @@ namespace Feature.ChallengeModule.Scripts {
             _session.IsActive = false;
             _session.ActiveChallengeType = ChallengeType.Daily;
             _session.CurrentLevelConfig = null;
-            _session.StarsEarned = 0;
+            _session.CurrentResult = MoveEfficiencyResult.None;
+            _session.PreviousClaimedResult = MoveEfficiencyResult.None;
             _session.IsCompleted = false;
         }
 
@@ -151,8 +161,8 @@ namespace Feature.ChallengeModule.Scripts {
             string today = DateTime.Today.ToString("yyyy-MM-dd");
             if (data.LastCompletedDate != today) {
                 data.LastCompletedDate = today;
-                data.TodayStarsEarned = 0;
-                data.ClaimedStarsThreshold = 0;
+                data.TodayBestResult = 0;
+                data.ClaimedResultThreshold = 0;
             }
 
             return data;
@@ -163,12 +173,12 @@ namespace Feature.ChallengeModule.Scripts {
             _saveDataService.Save(SaveDataType.DailyChallenge);
         }
 
-        private static StarRewardEntry FindRewardEntry(ChallengeConfig config, StarRating stars) {
-            if (config.StarRewards == null)
+        private static ChallengeRewardEntry FindRewardEntry(ChallengeConfig config, MoveEfficiencyResult result) {
+            if (config.Rewards == null)
                 return null;
 
-            foreach (StarRewardEntry entry in config.StarRewards) {
-                if (entry.RequiredStars == stars)
+            foreach (ChallengeRewardEntry entry in config.Rewards) {
+                if (entry.RequiredResult == result)
                     return entry;
             }
 

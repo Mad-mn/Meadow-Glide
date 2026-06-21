@@ -1,6 +1,7 @@
 using Feature.ChallengeModule.Scripts;
 using Feature.DailyChallengeCompleteViewModule.Scripts;
 using Feature.LoseViewModule.Scripts;
+using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
@@ -11,6 +12,7 @@ using Feature.WinLevelModule.Scripts;
 namespace Feature.LevelResultModule.Scripts {
     public class LevelResultService : ILevelResultService {
         private readonly IChallengeService _challengeService;
+        private readonly IMoveEfficiencyService _moveEfficiencyService;
         private readonly ISaveDataModel _saveDataModel;
         private readonly ISaveDataService _saveDataService;
         private readonly IPlayerInventoryService _inventoryService;
@@ -23,6 +25,7 @@ namespace Feature.LevelResultModule.Scripts {
 
         public LevelResultService(
             IChallengeService challengeService,
+            IMoveEfficiencyService moveEfficiencyService,
             ISaveDataModel saveDataModel,
             ISaveDataService saveDataService,
             IPlayerInventoryService inventoryService,
@@ -30,6 +33,7 @@ namespace Feature.LevelResultModule.Scripts {
             MoveTrackModel moveTrackModel,
             IViewService viewService) {
             _challengeService = challengeService;
+            _moveEfficiencyService = moveEfficiencyService;
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _inventoryService = inventoryService;
@@ -46,7 +50,8 @@ namespace Feature.LevelResultModule.Scripts {
 
             if (_challengeService.IsActive) {
                 int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                _challengeService.OnChallengeCompleted(_moveTrackModel.ShortestSolution, _moveTrackModel.AverageMoves, movesUsed);
+                MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
+                _challengeService.OnChallengeCompleted(result);
                 _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
             }
             else {
@@ -65,7 +70,8 @@ namespace Feature.LevelResultModule.Scripts {
 
             if (_challengeService.IsActive) {
                 int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                _challengeService.OnChallengeCompleted(_moveTrackModel.ShortestSolution, _moveTrackModel.AverageMoves, movesUsed);
+                MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
+                _challengeService.OnChallengeCompleted(result);
                 _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
             }
             else {

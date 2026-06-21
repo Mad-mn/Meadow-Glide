@@ -9,8 +9,10 @@ using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.InputModule.Scripts;
 using Feature.LevelInitializeModule;
+using Feature.LocalizationModule.Scripts;
+using Feature.LocalizationModule.Scripts.Data;
+using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
-using Feature.StarModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
@@ -27,6 +29,7 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
         private readonly MoveTrackModel _moveTrackModel;
         private readonly ILevelInitializeService _levelInitializeService;
         private readonly IViewService _viewService;
+        private readonly ILocalizationService _localizationService;
 
         private IEnumerator _showRoutine;
 
@@ -41,7 +44,8 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             IAnimationService animationService,
             MoveTrackModel moveTrackModel,
             ILevelInitializeService levelInitializeService,
-            IViewService viewService) : base(view) {
+            IViewService viewService,
+            ILocalizationService localizationService) : base(view) {
             _challengeService = challengeService;
             _configProvider = configProvider;
             _resourceInfoProvider = resourceInfoProvider;
@@ -52,6 +56,7 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             _moveTrackModel = moveTrackModel;
             _levelInitializeService = levelInitializeService;
             _viewService = viewService;
+            _localizationService = localizationService;
         }
 
         public override void Initialize() {
@@ -63,8 +68,14 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             base.Show();
             _interactionStateService.BlockInput();
             View.RestartButton.gameObject.SetActive(false);
+            SetupMaxText();
             SetupMilestones();
             StartShowRoutine();
+        }
+
+        private void SetupMaxText() {
+            int moves = _challengeService.GetMinMoves();
+            View.MaxMOvesText.text = $"{_localizationService.Get(LocalizationKey.Global_Max)} {moves} {_localizationService.Get(LocalizationKey.Global_Moves)}";
         }
 
         public override void Hide() {
@@ -80,16 +91,16 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
 
         private void SetupMilestones() {
             ChallengeConfig config = _configProvider.GetConfig(ChallengeType.Daily);
-            int previousStars = _challengeService.GetTodayStars();
+            MoveEfficiencyResult previousResult = _challengeService.GetPreviousClaimedResult();
 
-            if (config == null || config.StarRewards == null)
+            if (config == null || config.Rewards == null)
                 return;
 
             for (int i = 0; i < View.Milestones.Length; i++) {
-                if (i < config.StarRewards.Length) {
+                if (i < config.Rewards.Length) {
                     View.Milestones[i].gameObject.SetActive(true);
-                    bool alreadyCompleted = i < previousStars;
-                    View.Milestones[i].Setup(config.StarRewards[i], _resourceInfoProvider, alreadyCompleted);
+                    bool alreadyCompleted = i < (int)previousResult;
+                    View.Milestones[i].Setup(config.Rewards[i], _resourceInfoProvider, alreadyCompleted);
                 }
                 else {
                     View.Milestones[i].gameObject.SetActive(false);
@@ -116,16 +127,17 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
 
             yield return AnimateMovesCounter(movesUsed);
 
-            int previousStars = _challengeService.GetTodayStars();
-            int newStars = _challengeService.GetTodayStars();
+            MoveEfficiencyResult previousResult = _challengeService.GetPreviousClaimedResult();
+            MoveEfficiencyResult newResult = _challengeService.GetTodayBestResult();
 
-            yield return AnimateProgressBar(previousStars, newStars);
+            int fromIndex = (int)previousResult;
+            int toIndex = (int)newResult;
 
-            if (newStars > previousStars) {
-                yield return AnimateNewRewardIcons(previousStars, newStars);
+            for (int i = fromIndex; i < toIndex; i++) {
+                yield return AnimateMilestone(i);
             }
 
-            if (newStars >= (int)StarRating.Three) {
+            if (newResult == MoveEfficiencyResult.PerfectClear) {
                 View.RestartButton.gameObject.SetActive(false);
             }
             else {
@@ -135,50 +147,17 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             _interactionStateService.UnblockInput();
         }
 
-        private IEnumerator AnimateProgressBar(int previousStars, int newStars) {
-            float startFill = (float)previousStars / (int)StarRating.Three;
-            float endFill = (float)newStars / (int)StarRating.Three;
-            float duration = 0.6f;
-            float elapsed = 0f;
-            int nextMilestoneIndex = previousStars;
-
-            View.ProgressBar.SetFill(startFill);
-
-            if (newStars <= previousStars) {
-                View.ProgressBar.SetFill(endFill);
-                yield break;
-            }
-
-            while (elapsed < duration) {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                float currentFill = Mathf.Lerp(startFill, endFill, t);
-                View.ProgressBar.SetFill(currentFill);
-
-                float milestoneThreshold = (float)(nextMilestoneIndex + 1) / (int)StarRating.Three;
-                if (currentFill >= milestoneThreshold && nextMilestoneIndex < newStars) {
-                    ShowMilestoneWithAnimation(nextMilestoneIndex);
-                    nextMilestoneIndex++;
-                }
-
-                yield return null;
-            }
-
-            View.ProgressBar.SetFill(endFill);
-
-            while (nextMilestoneIndex < newStars) {
-                ShowMilestoneWithAnimation(nextMilestoneIndex);
-                nextMilestoneIndex++;
-            }
-        }
-
-        private void ShowMilestoneWithAnimation(int index) {
+        private IEnumerator AnimateMilestone(int index) {
             if (index >= View.Milestones.Length)
-                return;
+                yield break;
 
             ChallengeMilestone milestone = View.Milestones[index];
+            if (!milestone.gameObject.activeSelf)
+                yield break;
+
             milestone.ShowCheckmark();
             _animationService.PlayPunchScale(milestone.transform, Vector3.one * 0.15f, 0.25f, 2, 0.5f);
+            yield return new WaitForSeconds(0.3f);
         }
 
         private IEnumerator AnimateMovesCounter(int target) {
@@ -194,17 +173,6 @@ namespace Feature.DailyChallengeCompleteViewModule.Scripts {
             }
 
             View.MovesCountText.text = target.ToString();
-        }
-
-        private IEnumerator AnimateNewRewardIcons(int previousStars, int newStars) {
-            for (int i = previousStars; i < newStars && i < View.Milestones.Length; i++) {
-                ChallengeMilestone milestone = View.Milestones[i];
-                if (!milestone.gameObject.activeSelf)
-                    continue;
-
-                _animationService.PlayPunchScale(milestone.transform, Vector3.one * 0.2f, 0.3f, 2, 0.5f);
-                yield return new WaitForSeconds(0.2f);
-            }
         }
 
         private void OnMainMenuButtonClick() {

@@ -4,9 +4,10 @@ using Feature.ChallengeModule.Scripts;
 using Feature.CoroutineRunnerModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
-using Feature.InputModule.Scripts;
+using Feature.LocalizationModule.Scripts;
+using Feature.LocalizationModule.Scripts.Data;
+using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
-using Feature.StarModule.Scripts;
 using Feature.UIServiceModule.Scripts;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
         private readonly IGameStateMachine _gameStateMachine;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IViewService _viewService;
+        private readonly ILocalizationService _localizationService;
 
         private IEnumerator _timerRoutine;
 
@@ -28,13 +30,15 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
             IResourceInfoProvider resourceInfoProvider,
             IGameStateMachine gameStateMachine,
             ICoroutineRunner coroutineRunner,
-            IViewService viewService) : base(view) {
+            IViewService viewService,
+            ILocalizationService localizationService) : base(view) {
             _challengeService = challengeService;
             _configProvider = configProvider;
             _resourceInfoProvider = resourceInfoProvider;
             _gameStateMachine = gameStateMachine;
             _coroutineRunner = coroutineRunner;
             _viewService = viewService;
+            _localizationService = localizationService;
         }
 
         public override void Initialize() {
@@ -46,8 +50,13 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
             base.Show();
             SetupLock();
             SetupMilestones();
-            SetupProgressBar();
             StartTimer();
+            SetupMaxMovesText();
+        }
+
+        private void SetupMaxMovesText() {
+            int moves = _challengeService.GetMinMoves();
+            View.MaxMovesText.text = $"{_localizationService.Get(LocalizationKey.Global_Max)} {moves} {_localizationService.Get(LocalizationKey.Global_Moves)}";
         }
 
         private void SetupLock() {
@@ -68,27 +77,20 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
 
         private void SetupMilestones() {
             ChallengeConfig config = _configProvider.GetConfig(ChallengeType.Daily);
-            int stars = _challengeService.GetTodayStars();
+            MoveEfficiencyResult currentResult = _challengeService.GetTodayBestResult();
 
-            if (config == null || config.StarRewards == null)
+            if (config == null || config.Rewards == null)
                 return;
 
             for (int i = 0; i < View.Milestones.Length; i++) {
-                if (i < config.StarRewards.Length) {
+                if (i < config.Rewards.Length) {
                     View.Milestones[i].gameObject.SetActive(true);
-                    View.Milestones[i].Setup(config.StarRewards[i], _resourceInfoProvider, stars >= i + 1);
+                    View.Milestones[i].Setup(config.Rewards[i], _resourceInfoProvider, i < (int)currentResult);
                 }
                 else {
                     View.Milestones[i].gameObject.SetActive(false);
                 }
             }
-        }
-
-        private void SetupProgressBar() {
-            int stars = _challengeService.GetTodayStars();
-            int maxStars = (int)StarRating.Three;
-            float fill = maxStars > 0 ? (float)stars / maxStars : 0f;
-            View.ProgressBar.SetFill(fill);
         }
 
         private void StartTimer() {

@@ -21,5 +21,6 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Reward_Title = 18,
         Win_Title = 19,
         Tutorial_UndoMove = 20,
-    }
+            Global_Max = 21,
+}
 }

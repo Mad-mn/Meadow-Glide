@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Feature.LevelModule.Scripts;
-using Feature.StarModule.Scripts;
+using Feature.MoveEfficiencyModule.Scripts;
 using Feature.TransactionModule.Scripts;
 
 namespace Feature.ChallengeModule.Scripts {
@@ -9,9 +9,11 @@ namespace Feature.ChallengeModule.Scripts {
         bool IsActive { get; }
         bool IsDailyChallengeAvailable();
         LevelData GetCurrentLevel();
+        int GetMinMoves();
         void ActivateDailyChallenge(LevelConfig levelConfig);
-        void OnChallengeCompleted(int shortestPath, int averageMoves, int movesUsed);
-        int GetTodayStars();
+        void OnChallengeCompleted(MoveEfficiencyResult result);
+        MoveEfficiencyResult GetTodayBestResult();
+        MoveEfficiencyResult GetPreviousClaimedResult();
         bool CanPlayToday();
         bool CanClaimReward();
         List<ResourceAmount> ClaimReward();

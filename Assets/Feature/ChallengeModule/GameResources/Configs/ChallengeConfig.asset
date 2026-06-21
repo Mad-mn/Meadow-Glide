@@ -18,20 +18,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0bbd0988ec56e964390267d00967f6d8, type: 2}
   - {fileID: 11400000, guid: bc7d6e77a914e0a43be7475c416323f7, type: 2}
   - {fileID: 11400000, guid: d098965c7aad93c479b256ebf375c1f7, type: 2}
-  _starRewards:
-  - RequiredStars: 1
-    Rewards:
-    - Type: 1
-      Amount: 50
-  - RequiredStars: 2
+  _rewards:
+  - RequiredResult: 1
     Rewards:
     - Type: 1
       Amount: 100
-    - Type: 2
-      Amount: 1
-  - RequiredStars: 3
+  - RequiredResult: 2
     Rewards:
     - Type: 1
       Amount: 150
     - Type: 2
-      Amount: 2
+      Amount: 3

@@ -12,7 +12,7 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
 
         private readonly List<ChallengeRewardView> _spawnedRewards = new List<ChallengeRewardView>();
 
-        public void Setup(StarRewardEntry rewardEntry, IResourceInfoProvider resourceInfoProvider, bool isCompleted) {
+        public void Setup(ChallengeRewardEntry rewardEntry, IResourceInfoProvider resourceInfoProvider, bool isCompleted) {
             Clear();
 
             if (rewardEntry == null || rewardEntry.Rewards == null)

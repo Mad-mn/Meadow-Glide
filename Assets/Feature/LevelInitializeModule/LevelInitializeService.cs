@@ -4,6 +4,7 @@ using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PreGamePlacementModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
 using Feature.StripRotationModule.Scripts;
@@ -30,6 +31,7 @@ namespace Feature.LevelInitializeModule {
         private readonly IPreGamePlacementService _preGamePlacementService;
         private readonly IInteractionStateService _interactionStateService;
         private readonly IUndoService _undoService;
+        private readonly IMoveEfficiencyService _moveEfficiencyService;
 
         private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
@@ -46,7 +48,8 @@ namespace Feature.LevelInitializeModule {
             IStripSpawnService stripSpawnService,
             IPreGamePlacementService preGamePlacementService,
             IInteractionStateService interactionStateService,
-            IUndoService undoService) {
+            IUndoService undoService,
+            IMoveEfficiencyService moveEfficiencyService) {
             _slideAreaService = slideAreaService;
             _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
@@ -60,6 +63,7 @@ namespace Feature.LevelInitializeModule {
             _preGamePlacementService = preGamePlacementService;
             _interactionStateService = interactionStateService;
             _undoService = undoService;
+            _moveEfficiencyService = moveEfficiencyService;
         }
 
         public async UniTask Initialize() {
@@ -68,6 +72,7 @@ namespace Feature.LevelInitializeModule {
 
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);
+            _moveEfficiencyService.SetMinMoves(levelData.LevelConfig.ShortestSolution);
             _viewService.ShowView<GameView>(ViewType.GameView);
 
             await _slideAreaService.Initialize();
@@ -107,6 +112,7 @@ namespace Feature.LevelInitializeModule {
         public async UniTask ReloadScene() {
             _viewService.HideView(ViewType.WinLevel);
             _viewService.HideView(ViewType.LoseView);
+            _viewService.HideView(ViewType.DailyChallengeCompleteView);
             await Dispose();
             await Initialize();
         }
