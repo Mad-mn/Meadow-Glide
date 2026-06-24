@@ -8,7 +8,11 @@ namespace Feature.ColorServiceModule.Scripts {
         Green = 4,
         Yellow = 5,
         Cyan = 6,
-        Magenta = 7
+        Magenta = 7,
+        Orange = 8,
+        Lime = 9,
+        Teal = 10,
+        Purple = 11
     }
 
     public interface ICircleColorService {

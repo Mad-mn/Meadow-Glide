@@ -76,7 +76,6 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                         .Cast<CircleColorType>()
                         .Where(c => c != CircleColorType.None)
                         .OrderBy(_ => rnd.Next())
-                        .Take(rings)
                         .ToList();
 
                     var statuses = new SegmentStatus[rings, sectors];
@@ -84,7 +83,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     var blockedColors = new HashSet<byte>();
                     for (int r = 0; r < rings; r++) {
                         for (int s = 0; s < sectors; s++) {
-                            initialColors[r, s] = (byte)colorPool[r];
+                            initialColors[r, s] = (byte)colorPool[r % colorPool.Count];
                             bool blocked = p.AllowBlocked && rnd.NextDouble() < p.BlockedChance
                                 && !blockedColors.Contains(initialColors[r, s]);
                             statuses[r, s] = blocked ? SegmentStatus.Blocked : SegmentStatus.Default;

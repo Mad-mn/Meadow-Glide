@@ -495,6 +495,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         }
 
         private static CircleParamsConfig _cachedCircleParamsConfig;
+        private static Feature.ColorServiceModule.Scripts.CircleColorProvider _cachedColorProvider;
 
         private static CircleParamsConfig LoadCircleParamsConfig() {
             if (_cachedCircleParamsConfig != null) return _cachedCircleParamsConfig;
@@ -507,16 +508,25 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             return _cachedCircleParamsConfig;
         }
 
-        private Color GetColor(Feature.ColorServiceModule.Scripts.CircleColorType type) {
-            switch (type) {
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Red: return Color.red;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Blue: return Color.blue;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Green: return Color.green;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Yellow: return Color.yellow;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Cyan: return Color.cyan;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Magenta: return Color.magenta;
-                default: return Color.white;
+        private static Feature.ColorServiceModule.Scripts.CircleColorProvider LoadCircleColorProvider() {
+            if (_cachedColorProvider != null) return _cachedColorProvider;
+
+            var guids = AssetDatabase.FindAssets("t:CircleColorProvider");
+            if (guids.Length > 0) {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                _cachedColorProvider = AssetDatabase.LoadAssetAtPath<Feature.ColorServiceModule.Scripts.CircleColorProvider>(path);
             }
+            return _cachedColorProvider;
+        }
+
+        private Color GetColor(Feature.ColorServiceModule.Scripts.CircleColorType type) {
+            var provider = LoadCircleColorProvider();
+            if (provider != null) {
+                foreach (var mapping in provider.Mappings) {
+                    if (mapping.Type == type) return mapping.Color;
+                }
+            }
+            return Color.white;
         }
     }
 }
