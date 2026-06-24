@@ -15,15 +15,49 @@ MonoBehaviour:
   _challengeType: 0
   _unlockLevel: 12
   _levelPool:
-  - {fileID: 11400000, guid: d1c6b64ad422fe94fba1c86f3c9fe9fc, type: 2}
+  - {fileID: 11400000, guid: f24e212e57ab83747990b473b20a3f56, type: 2}
+  - {fileID: 11400000, guid: 8a0cc1a4e43f2ef469a690d5cc96ea6f, type: 2}
+  - {fileID: 11400000, guid: 8dc906782fb81f741bd0f135063b6875, type: 2}
+  - {fileID: 11400000, guid: d1d7f9da62b3d9d47ae7a696a5f004d9, type: 2}
+  - {fileID: 11400000, guid: 4ae72a44649ba6742814a2b1754e04f8, type: 2}
+  - {fileID: 11400000, guid: b5c4502f7cc29f54dadfb55d1650d22e, type: 2}
+  - {fileID: 11400000, guid: 81a4ae2898fe9084491f5e2e7c75b10b, type: 2}
+  - {fileID: 11400000, guid: c3079e7044441a74892e3f401695b8cd, type: 2}
+  - {fileID: 11400000, guid: 9abe134be8ee4d44491c3ba0e4af8d60, type: 2}
+  - {fileID: 11400000, guid: 25c9964e9330b684c8d0b87eb2a7168b, type: 2}
+  - {fileID: 11400000, guid: 9307a5f5b58bf5949a6dc9dfee6ed3ae, type: 2}
+  - {fileID: 11400000, guid: 9f20bf89cb5af4c4cadb2d34c6a31b73, type: 2}
+  - {fileID: 11400000, guid: db4bad72ccb81b441be4551a34945c1c, type: 2}
+  - {fileID: 11400000, guid: 355ee1efc82969843a1d2cdbb90b070a, type: 2}
+  - {fileID: 11400000, guid: 560653388266d5b449056b98dd1bb001, type: 2}
+  - {fileID: 11400000, guid: 023f823819500cb47a5f2328ef86ff21, type: 2}
+  - {fileID: 11400000, guid: a1c1b3d34d732d0438b4994caaace0b9, type: 2}
+  - {fileID: 11400000, guid: efa6b2dedc67c7644b4dac0170937496, type: 2}
+  - {fileID: 11400000, guid: 7cfb5511a98b9674194c9c9129f03f90, type: 2}
+  - {fileID: 11400000, guid: ba2139221be09a445b4591dc2aa08007, type: 2}
+  - {fileID: 11400000, guid: 5fbdcb1e37e7c964e96f1f1b4350f704, type: 2}
+  - {fileID: 11400000, guid: 13bf52eb6f01aa44db5674e86a73dac6, type: 2}
+  - {fileID: 11400000, guid: bb0524547449831429285777a486fbf0, type: 2}
+  - {fileID: 11400000, guid: bce048a7ae51d5040b8af6852ae078e5, type: 2}
+  - {fileID: 11400000, guid: 1062b5b01df51c64f9cd0897f9c2f7a7, type: 2}
+  - {fileID: 11400000, guid: e75e223c06bb1ca489ed7e3dda57212f, type: 2}
+  - {fileID: 11400000, guid: fce51582a7f10ee468f7108180b1dfa5, type: 2}
+  - {fileID: 11400000, guid: a3aacada231572b48ab1516ba45049a7, type: 2}
+  - {fileID: 11400000, guid: 2e42ff325d0d0004691b0e315ff1b4ad, type: 2}
+  - {fileID: 11400000, guid: 17cbe6937a31bef4fa7cf3673c7f9c7d, type: 2}
+  - {fileID: 11400000, guid: 2d050cfc7a3ee4a4980f860c56500a0d, type: 2}
+  - {fileID: 11400000, guid: 8c21655812a833d48bb01402a028b299, type: 2}
+  - {fileID: 11400000, guid: f9dc1d89ab6657c4e9d2daf92e8d75e3, type: 2}
+  - {fileID: 11400000, guid: fc998f7f445d19b4ebb7670f8138f2c9, type: 2}
+  - {fileID: 11400000, guid: b068f663a8a2b3a44aef9d60877a6934, type: 2}
   _rewards:
   - RequiredResult: 1
     Rewards:
     - Type: 1
-      Amount: 100
+      Amount: 250
   - RequiredResult: 2
     Rewards:
     - Type: 1
-      Amount: 150
+      Amount: 350
     - Type: 2
-      Amount: 3
+      Amount: 6
