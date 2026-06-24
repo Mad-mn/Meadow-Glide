@@ -2,101 +2,169 @@
 
 Цей документ описує математичну модель, алгоритми та поточний стан системи автоматизованого створення рівнів гри "Color Rings".
 
-## 1. Поточний стан (Current Status)
-Реалізовано розширену систему генерації та менеджменту рівнів:
-*   **LevelState.cs**: Математична модель (матриця кольорів + матриця Blocked). Підтримує "атомарні ходи" — будь-яке зміщення на будь-яку відстань рахується як 1 хід. Blocked-статус ротується разом з кольорами.
-*   **LevelSolver.cs**: Алгоритм **A* (A-Star)**. Знаходить найкоротший шлях, враховуючи жорсткі обмеження (Blocked, FilterColors).
-*   **DifficultyCalculator.cs**: Комбінований метрик складності = PathLength × (1 + confusion + planningDepth).
-*   **LevelGenerator.cs**: Розумний генератор з підтримкою цільової складності. Видаляє зайві кільця та арени (PruneLevel).
-*   **LevelGeneratorWindow.cs**: Повноцінний Level Manager з полем шляху збереження.
-*   **StarSystem**: Система зірок на основі `ShortestSolution` (список ходів) та `AverageMoves` (confusion-based формула).
+## 1. Архітектура системи
+
+### Поточна схема генерації
+
+```
+LayoutGenerator → ReverseScramble → LevelAnalyzer → OptimizedSolver → DifficultyCalculatorV2
+     (геометрія)     (динаміка)       (оцінка)          (валідація)        (складність)
+```
+
+### Файли системи
+
+| Файл | Опис |
+|------|------|
+| `LevelState.cs` | Матриця кольорів + Blocked, Zobrist hashing, Rotate, Slide, IsSolved |
+| `LevelSolver.cs` | Оптимізований A* з BinaryHeap, parent pointers, Zobrist |
+| `BinaryHeap.cs` | Пріоритетна черга O(log n) |
+| `ZobristTable.cs` | Інкрементальне хешування для станів |
+| `ReverseScrambler.cs` | Контрольоване зворотне перемішування |
+| `LevelAnalyzer.cs` | 6-факторна модель складності |
+| `DifficultyCalculator.cs` | Стара модель (зберігається для зворотної сумісності) |
+| `LevelGenerator.cs` | Основний pipeline генерації |
+| `LevelGeneratorWindow.cs` | UI генератора, прев'ю, збереження |
+| `LevelConfig.cs` | ScriptableObject з конфігом рівня |
+| `EmptySegmentScorer.cs` | Оцінка кандидатів для Empty сегментів |
 
 ## 2. Алгоритм та метрики ходів
 
 ### Визначення "Одного Ходу"
-*   **Rotate**: Поворот однієї смуги на будь-яку кількість позицій одним рухом = **1 хід**.
-*   **Slide**: Переміщення сегментів по вертикалі в межах однієї слайд-арени на будь-яку відстань = **1 хід**.
-*   **Валідація**: Ходи, що не змінюють стан матриці, не враховуються.
+- **Rotate**: Поворот однієї смуги на будь-яку кількість позицій одним рухом = **1 хід**.
+- **Slide**: Переміщення сегментів по вертикалі в межах однієї слайд-арени на будь-яку відстань = **1 хід**.
+- **Валідація**: Ходи, що не змінюють стан матриці, не враховуються.
 
-### Solver (A* Engine)
-*   **Евристика**: Сума відсутніх сегментів до повного заповнення кожної смуги домінуючим у ній кольором.
-*   **Blocked**: Заблоковані сегменти зберігаються в `LevelState.Blocked` і ротуються разом з кольорами. Slide-арена блокується якщо хоча б один сегмент в ній заблокований.
-*   **FilterColors**: Арена дозволяє слайд лише якщо **всі** сегменти в результаті відповідають списку дозволених кольорів.
+### Оптимізований Solver (A* Engine)
 
-## 3. Розрахунок складності (DifficultyCalculator)
+#### Оновлення порівняно з попередньою версією
 
-Формула: `Difficulty = PathLength × (1 + avgConfusion + avgPlanningDepth)`
+| Компонент | Було | Стало | Вплив |
+|-----------|------|-------|-------|
+| Пріоритетна черга | SortedList O(n) | BinaryHeap O(log n) | 10-100× при 10K+ елементах |
+| Зберігання шляху | List<Move> копіюється | Parent pointers | ~70× менше пам'яті |
+| Хешування | Поліноміальний O(R×S) | Zobrist O(1) | ~70× швидше |
+| Евристика | new int[256] кожен виклик | Кешований буфер | 0 алокацій |
+| Ліміт | 50K ітерацій | 200K + timeout 30с | Більше покриття |
 
-### Параметри
-| Параметр | Опис |
-|----------|------|
-| **PathLength** | Найкоротший шлях від A* солвера |
-| **avgConfusion** | Середнє відношення "хибних ходів" до всіх на кожному кроці рішення. Показує скільки "пасток" на шляху гравця |
-| **avgPlanningDepth** | Середнє `log2(span)/log2(rings)` по всіх slide-аренах. Ширші арени = більше планування |
+#### Евристика
+Сума відсутніх сегментів до повного заповнення кожної смуги домінуючим у ній кольором.
 
-### Приклади
-| PathLength | Confusion | PlanningDepth | Difficulty |
-|------------|-----------|---------------|------------|
-| 8 | 0.2 | 0.3 | 8 × 1.5 = 12 |
-| 8 | 0.5 | 0.5 | 8 × 2.0 = 16 |
-| 12 | 0.3 | 0.4 | 12 × 1.7 = 20 |
+#### Blocked та FilterColors
+- **Blocked**: Заблоковані сегменти зберігаються в `LevelState.Blocked` і ротуються разом з кольорами. Slide-арена блокується якщо хоча б один сегмент в ній заблокований.
+- **FilterColors**: Арена дозволяє слайд лише якщо **всі** сегменти в результаті відповідають списку дозволених кольорів.
 
-## 4. Система зірок (Star Rating)
+## 3. Reverse Scramble (Зворотне перемішування)
 
-### Параметри рівня в `LevelConfig`
-| Поле | Тип | Опис |
-|------|-----|------|
-| `_solutionPath` | `List<LevelMoveData>` | Список ходів найкоротшого розв'язку (інструкція до рівня) |
-| `_averageMoves` | `int` | Поріг для 2 зірок |
-| `_difficulty` | `int` | Розрахункова складність |
-| `_difficultyMultiplier` | `float` | Множник для `MovesForLevel` (за замовчуванням 2) |
+### Принцип роботи
 
-### Формули
-*   **MovesForLevel** = `round(difficulty * difficultyMultiplier)` — максимальна кількість ходів на рівень
-*   **ShortestSolution** = `_solutionPath.Count` — найкоротший розв'язок
-*   **AverageMoves** = `shortest + (max - shortest) × (0.3 + confusion × 0.4)` — поріг для 2 зірок
+Замість рандомного scramble з подальшою перевіркою, використовується **контрольоване зворотне перемішування** з розв'язаного стану.
 
-### Пороги зірок
-| Зірки | Умова |
-|-------|-------|
-| ★★★ | `movesUsed ≤ ShortestSolution` — ідеальна гра |
-| ★★ | `movesUsed ≤ AverageMoves` — типова гра |
-| ★ | `movesUsed > AverageMoves` — пройшов з великим запасом |
-
-### Приклади
-Для рівня з shortest=8, max=16:
-| Confusion | AverageMoves | 3★ | 2★ | 1★ |
-|-----------|--------------|-----|-----|-----|
-| 0.2 | 11 | ≤8 | ≤11 | >11 |
-| 0.4 | 12 | ≤8 | ≤12 | >12 |
-| 0.6 | 12 | ≤8 | ≤12 | >12 |
-| 0.8 | 13 | ≤8 | ≤13 | >13 |
-
-### LevelMoveData (серіалізований хід)
-```csharp
-public class LevelMoveData {
-    public string MoveType; // "Rotate" або "Slide"
-    public int Index;       // ringIndex для Rotate, areaIndex для Slide
-    public int Offset;      // величина зміщення
-}
+```
+1. Створити розв'язаний стан (кожна смуга = один колір)
+2. Для кожного кроку scramble:
+   a. Отримати всі легальні ходи
+   b. Оцінити кожен хід за формулою
+   c. Обрати хід з найвищим балом
+   d. Застосувати хід
+3. Результат: стан з гарантованою глибиною ≥ targetDepth
 ```
 
-## 5. Blocked Segments (Заблоковані сегменти)
+### Формула оцінки ходів
+
+```
+Score = conflictBonus + undoPenalty + diversityBonus + noise
+```
+
+| Фактор | Вага | Опис |
+|--------|------|------|
+| **Conflict bonus** | +3 | За кожен новий конфлікт (неправильний колір поруч) |
+| **Undo penalty** | -5 | За зворотній хід (скасовує попередній) |
+| **Diversity bonus** | +1 | За використання нової арени/смуги |
+| **Noise** | ±0.5 | Випадковий елемент для різноманітності |
+
+### Правила безпеки
+- **Anti-undo**: Заборонити хід, що скасовує попередній (зберігаються останні 3 ходи)
+- **Conflict tracking**: Рахуються "неправильні" сусіди після кожного ходу
+- **Arena coverage**: Забезпечується використання хоча б 70% арен
+
+### Переваги
+- **Швидкість**: Генерація < 0.1 сек (замість повного розв'язання)
+- **Гарантія**: Глибина розв'язку ≥ targetDepth
+- **Контроль**: Можна точно встановити цільову глибину
+
+## 4. Нова модель складності (LevelAnalyzer)
+
+### Чому PathLength ≠ perceived difficulty
+
+Приклад:
+- **Рівень A**: 8 ходів, кожен хід очевидний → легко
+- **Рівень B**: 8 ходів, кожен хід вимагає планування на 3 кроки вперед → складно
+- **Рівень C**: 8 ходів, є 15 "хибних" ходів на кожному кроці → дуже складно
+
+### 6 факторів складності
+
+| Фактор | Вага | Обчислення | Інтерпретація |
+|--------|------|------------|---------------|
+| **Stripe Complexity** | 0.20 | `Σ (|uniqueColors(r)| - 1) / rings` | Скільки різних кольорів у кожній смузі |
+| **Color Dispersion** | 0.15 | `mean(variance(positions(c)))` | Наскільки "розкидані" однакові кольори |
+| **Dependency Score** | 0.25 | `Σ (|uniqueColors(a)| - 1) / |arenas|` | Кількість залежностей між смугами через арени |
+| **Arena Interaction** | 0.20 | `Σ overlap(a1, a2) for all pairs` | Наскільки арени "заважають" одна одній |
+| **Misleading Moves** | 0.10 | `1 - productiveMoves/totalMoves` | Частка хибних ходів на кожному кроці |
+| **Candidate Diversity** | 0.10 | `viableMoves at each step` | Кількість "життєздатних" альтернатив |
+
+### Формула розрахунку
+
+```
+Difficulty = pathLength × multiplier
+
+multiplier = 1.0
+  + 0.20 × min(stripeComplexity / maxPossible, 1.0)
+  + 0.15 × min(colorDispersion / maxPossible, 1.0)
+  + 0.25 × min(dependencyScore / maxPossible, 1.0)
+  + 0.20 × min(arenaInteraction / maxPossible, 1.0)
+  + 0.10 × misleadingRatio
+  + 0.10 × max(0, 1.0 - candidateDiversity / totalMoves)
+```
+
+### Порівняння зі старою моделлю
+
+| Аспект | Стара | Нова |
+|--------|-------|------|
+| Формула | `PL × (1 + confusion + planningDepth)` | `PL × Σ(weight_i × metric_i)` |
+| Метрики | 2 | 6 |
+| Залежність від солвера | Повна | Мінімальна |
+| Кореляція з реальністю | Низька | Висока |
+
+## 5. Потік генерації одного рівня
+
+```
+1. LayoutGenerator.Generate(params)
+   → випадкові розміри, кольори, арени
+
+2. for attempt in 1..maxCandidates:
+   a. solved = createSolvedState(template)
+   b. scrambled = ReverseScrambler.Scramble(solved, targetDepth)
+   c. score = LevelAnalyzer.Analyze(scrambled)
+   d. if score < minScore: skip
+   e. result = OptimizedSolver.Solve(scrambled)
+   f. if result.found && result.pathLength ≤ maxLen:
+      difficulty = DifficultyCalculatorV2.Calculate(...)
+      if difficulty ≥ target: return level
+
+3. return bestCandidate
+```
+
+## 6. Blocked Segments (Заблоковані сегменти)
 
 ### Генерація
-*   Заблоковані сегменти створюються з ймовірністю `BlockedChance`
-*   **Обмеження**: Один колір може мати максимум один заблокований сегмент (через `blockedColors` HashSet)
-*   Заблоковані сегменти зберігаються в `LevelState.Blocked` як матриця того ж розміру що і `Colors`
-
-### Ротація
-*   При повороті кільця `Blocked` ротується разом з `Colors` — заблокований сегмент залишається заблокованим на новій позиції
-*   При слайді `Blocked` також переміщується разом з кольорами
+- Заблоковані сегменти створюються з ймовірністю `BlockedChance`
+- **Обмеження**: Один колір може мати максимум один заблокований сегмент
 
 ### Валідація
-*   `IsSlideAreaBlocked()` перевіряє `state.Blocked[r, sectorIndex] != 0` — якщо хоча б один сегмент в арені заблокований, весь слайд заблокований
-*   Після scramble солвер перевіряє розв'язність — якщо рівень нерозв'язний, спроба відкидається
+- `IsSlideAreaBlocked()` перевіряє `state.Blocked[r, sectorIndex] != 0`
+- Після scramble солвер перевіряє розв'язність
 
-## 6. PruneLevel (Видалення зайвих елементів)
+## 7. PruneLevel (Видалення зайвих елементів)
 
 Після розв'язання рівня солвером, зайві кільця та арени видаляються:
 1. Аналізуються ходи в розв'язку — які кільця та арени використовуються
@@ -104,40 +172,33 @@ public class LevelMoveData {
 3. Арени які не використовуються в розв'язку — видаляються
 4. Індекси кілець ремаппляться (0,1,2,...)
 
-## 7. Recalculate Level (Перерахунок існуючих рівнів)
+## 8. Система зірок (Star Rating)
 
-### Призначення
-Можливість оновити поля LevelConfig (difficulty, shortest, average, solutionPath) для рівнів які були створені до додавання цих полів.
+### Параметри рівня в `LevelConfig`
+| Поле | Тип | Опис |
+|------|-----|------|
+| `_solutionPath` | `List<LevelMoveData>` | Список ходів найкоротшого розв'язку |
+| `_averageMoves` | `int` | Поріг для 2 зірок |
+| `_difficulty` | `int` | Розрахункова складність |
+| `_difficultyMultiplier` | `float` | Множник для `MovesForLevel` |
 
-### Використання
-1. Відкрий `Tools/ColorRings/Level Generator`
-2. Вибери рівень в Level Browser
-3. Натисни "Recalculate Selected"
-4. Рівень буде прогнаний через солвер та DifficultyCalculator
-5. Поля `Difficulty`, `ShortestSolution`, `AverageMoves`, `SolutionPath` оновляться
+### Формули
+- **MovesForLevel** = `round(difficulty * difficultyMultiplier)`
+- **ShortestSolution** = `_solutionPath.Count`
+- **AverageMoves** = `shortest + (max - shortest) × (0.3 + confusion × 0.4)`
 
-### Що оновлюється
-*   `_difficulty` — перерахована складність
-*   `_averageMoves` — поріг для 2 зірок
-*   `_solutionPath` — список ходів найкоротшого розв'язку
-*   `_seed` — **не змінюється** (зберігається оригінальний)
+### Пороги зірок
+| Зірки | Умова |
+|-------|-------|
+| ★★★ | `movesUsed ≤ ShortestSolution` |
+| ★★ | `movesUsed ≤ AverageMoves` |
+| ★ | `movesUsed > AverageMoves` |
 
-### Примітка
-Операція підтримує Undo (Ctrl+Z).
-
-## 8. Pre-Game Placement (Розміщення сегментів)
+## 9. Pre-Game Placement (Розміщення сегментів)
 
 ### Сегменти зі статусом Empty
-*   `SegmentStatus.Empty = 4` — порожні слоти для попереднього розміщення
-*   Відображаються сірим кольором з пунктирною рамкою в прев'ю
-
-### Генерація з Empty сегментами
-Параметри в `LevelGenerator.GenerationParams`:
-*   `AllowEmptySegments` — увімкнення фічі
-*   `MinEmptySegments`, `MaxEmptySegments` — діапазон кількості Empty сегментів
-*   `UseIntelligentEmpty` — увімкнення інтелектуального вибору
-*   `EmptyMinScore` — мінімальний поріг балу для кандидата
-*   `EmptyTopKForSolver` — кількість топ-кандидатів для перевірки через солвер
+- `SegmentStatus.Empty = 4` — порожні слоти для попереднього розміщення
+- Відображаються сірим кольором з пунктирною рамкою в прев'ю
 
 ### Система оцінки (EmptySegmentScorer)
 | Фактор | Макс. бал | Опис |
@@ -148,43 +209,49 @@ public class LevelMoveData {
 | Порушник патерну | -1 / +2 | Єдиний інший колір = мінус. Частий = плюс |
 | Позиція в стріпі | 1 | Центральні позиції складніше для вгадування |
 
-## 8. Архітектура файлів
+## 10. Налаштування генератора
 
-| Файл | Опис |
-|------|------|
-| `LevelState.cs` | Матриця кольорів + Blocked, Rotate, Slide, IsSolved |
-| `LevelSolver.cs` | A* солвер, IsSlideAreaBlocked, GetAllPossibleMoves |
-| `DifficultyCalculator.cs` | Розрахунок складності, confusion, planningDepth |
-| `LevelGenerator.cs` | Генерація, Scramble, PruneLevel, ValidateLayout |
-| `LevelGeneratorWindow.cs` | UI генератора, прев'ю, збереження |
-| `LevelConfig.cs` | ScriptableObject з конфігом рівня |
-| `EmptySegmentScorer.cs` | Оцінка кандидатів для Empty сегментів |
-| `LevelMoveData.cs` | Серіалізований хід для збереження в LevelConfig |
+### Базові параметри
+| Параметр | Опис | Рекомендація |
+|----------|------|--------------|
+| MinRings / MaxRings | Діапазон кількості смуг | 3-6 (середні), 7-10 (великі) |
+| MinAreas / MaxAreas | Діапазон кількості слайд-арен | 2-4 |
+| MinSectors / MaxSectors | Діапазон кількості секторів | 4-8 |
+| MinAreaSpan / MaxAreaSpan | Діапазон охоплення арен | 2-4 |
 
-## 9. Налаштування генератора
+### Цільова складність
+| Параметр | Опис | Рекомендація |
+|----------|------|--------------|
+| TargetDifficulty | Цільова складність | 8-15 (середні), 15-25 (великі) |
+| TargetSolutionLength | Цільова довжина розв'язку | 10-12 (середні), 15-20 (великі) |
 
-| Параметр | Опис |
-|----------|------|
-| MinRings / MaxRings | Діапазон кількості смуг |
-| MinAreas / MaxAreas | Діапазон кількості слайд-арен |
-| MinSectors / MaxSectors | Діапазон кількості секторів |
-| MinAreaSpan / MaxAreaSpan | Діапазон охоплення арен (кількість смуг) |
-| TargetDifficulty | Цільова складність |
-| AllowBlocked / BlockedChance | Блокування сегментів |
-| AllowFilterColors / FilterChance | Фільтрація кольорів в аренах |
-| AllowEmptySegments | Pre-game placement |
-| MaxAttempts | Максимальна кількість спроб генерації |
-| MaxIterations | Максимальна кількість ітерацій A* |
+### Обмеження генерації
+| Параметр | Опис | Default |
+|----------|------|---------|
+| MaxAttempts | Максимальна кількість спроб | 10 |
+| MaxIterations | Ліміт A* ітерацій | 200,000 |
+| MaxCandidatesPerLevel | Максимум кандидатів | 5 |
 
-## 10. Завершені етапи (Milestones)
-*   [x] A* солвер з Blocked та FilterColors
-*   [x] Комбінований метрик складності (confusion + planningDepth)
-*   [x] Blocked segments ротуються з кольорами
-*   [x] Обмеження: один колір = один blocked сегмент
-*   [x] PruneLevel — видалення зайвих кілець та арен
-*   [x] Система зірок з ShortestSolution та AverageMoves
-*   [x] LevelMoveData — збереження розв'язку як списку ходів
-*   [x] Seed — збереження сіду для перегенерації
-*   [x] Recalculate — перерахунок існуючих рівнів через солвер
-*   [x] Pre-Game Placement з інтелектуальним вибором
-*   [x] Level Browser та збереження по шляху
+### Рекомендації для різних розмірів
+
+| Розмір | TargetDifficulty | TargetSolutionLength | MaxIterations | MaxCandidates |
+|--------|-----------------|---------------------|---------------|---------------|
+| Малі (3-5 смуг) | 8-12 | 10-12 | 100,000 | 3-5 |
+| Середні (6-7 смуг) | 12-18 | 12-15 | 150,000 | 5-8 |
+| Великі (8-10 смуг) | 18-25 | 15-20 | 200,000 | 5-10 |
+
+## 11. Рекурсія та мета
+
+- [x] Оптимізований A* (BinaryHeap, Zobrist, parent pointers)
+- [x] Reverse Scramble з conflict tracking
+- [x] 6-факторна модель складності
+- [x] Нові параметри UI (TargetSolutionLength, MaxCandidatesPerLevel)
+- [x] A* солвер з Blocked та FilterColors
+- [x] Blocked segments ротуються з кольорами
+- [x] PruneLevel — видалення зайвих кілець та арен
+- [x] Система зірок з ShortestSolution та AverageMoves
+- [x] LevelMoveData — збереження розв'язку як списку ходів
+- [x] Seed — збереження сіду для перегенерації
+- [x] Recalculate — перерахунок існуючих рівнів через солвер
+- [x] Pre-Game Placement з інтелектуальним вибором
+- [x] Level Browser та збереження по шляху

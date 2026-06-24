@@ -31,6 +31,8 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             public int MaxIterations;
             public int Seed;
             public bool UseFixedSeed;
+            public int TargetSolutionLength;
+            public int MaxCandidatesPerLevel;
         }
 
         public struct ValidationResult {
@@ -133,31 +135,41 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                                 state.Blocked[r, s] = initialColors[r, s];
                         }
 
-                    var solver = new LevelSolver(areas, rings, sectors, Math.Max(1, p.MaxIterations));
+                    progress?.Report($"Attempt {attempt}: Reverse scrambling...");
 
-                    progress?.Report($"Attempt {attempt}: Scrambling...");
-                    var currentLevel = Scramble(state, targetDifficulty, areas, solver, rnd, ct);
+                    int targetSolutionLength = p.TargetSolutionLength > 0 ? p.TargetSolutionLength : targetDifficulty;
+                    var scrambler = new ReverseScrambler(areas, rings, sectors);
+                    var scrambleResult = scrambler.Scramble(state, targetSolutionLength, rnd);
 
-                    int postScrambleCheck = solver.Solve(currentLevel, out _);
-                    if (postScrambleCheck < 0) {
-                        LogValidationFailure(attempt, "Level unsolvable after scramble (blocked segments in wrong positions).");
-                        continue;
-                    }
-
-                    var validation = ValidateGeneratedLevel(currentLevel, rings, areas);
+                    var validation = ValidateGeneratedLevel(scrambleResult.State, rings, areas);
                     if (!validation.IsValid) {
                         LogValidationFailure(attempt, validation.Reason);
                         continue;
                     }
 
-                    progress?.Report($"Attempt {attempt}: Calculating difficulty...");
+                    progress?.Report($"Attempt {attempt}: Solving...");
+
+                    var solver = new LevelSolver(areas, rings, sectors, Math.Max(1, p.MaxIterations));
+                    int pathLength = solver.Solve(scrambleResult.State, out var solution);
+
+                    if (pathLength < 0) {
+                        LogValidationFailure(attempt, "Level unsolvable after reverse scramble.");
+                        continue;
+                    }
+
+                    progress?.Report($"Attempt {attempt}: Analyzing difficulty...");
+
+                    var analyzer = new LevelAnalyzer(areas, rings, sectors);
+                    var metrics = analyzer.AnalyzeWithSolver(scrambleResult.State, solver, solution);
+                    float calculatedDifficulty = analyzer.CalculateDifficulty(metrics, pathLength);
+                    int difficulty = Mathf.RoundToInt(calculatedDifficulty);
+
                     int maxMovesForLevel = Mathf.RoundToInt(targetDifficulty * 2.5f);
                     var calculator = new DifficultyCalculator(solver, areas, rings);
-                    int difficulty = calculator.Calculate(currentLevel, maxMovesForLevel,
-                        out int pathLength, out int averageMoves, out float confusion, out float planningDepth);
+                    int legacyDifficulty = calculator.Calculate(scrambleResult.State, maxMovesForLevel,
+                        out _, out int averageMoves, out float confusion, out float planningDepth);
 
-                    solver.Solve(currentLevel, out var solution);
-                    var pruned = PruneLevel(currentLevel, areas, solution);
+                    var pruned = PruneLevel(scrambleResult.State, areas, solution);
 
                     if (p.AllowEmptySegments) {
                         ApplyEmptySegments(pruned.Statuses, pruned.Colors, pruned.Rings, pruned.Sectors, pruned.Areas, rnd, p);
@@ -261,28 +273,6 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             Debug.LogWarning($"[LevelGenerator] Attempt {attempt}: Validation failed — {reason}");
         }
 
-        private LevelState Scramble(LevelState solvedState, int targetDifficulty, List<SlideAreaConfig> areas, LevelSolver solver, Random rnd, System.Threading.CancellationToken ct) {
-            var currentLevel = solvedState;
-            int targetSteps = Math.Max(targetDifficulty, rnd.Next(targetDifficulty, targetDifficulty + 5));
-            int appliedSteps = 0;
-
-            while (appliedSteps < targetSteps) {
-                if (appliedSteps % 5 == 0) ct.ThrowIfCancellationRequested();
-
-                var moves = GetAllValidMoves(currentLevel, areas, solver).ToList();
-                if (moves.Count == 0) break;
-
-                var move = moves[rnd.Next(moves.Count)];
-                var nextLevel = ApplyMove(currentLevel, move, solver);
-                if (nextLevel.Equals(currentLevel)) continue;
-
-                currentLevel = nextLevel;
-                appliedSteps++;
-            }
-
-            return currentLevel;
-        }
-
         private List<SlideAreaConfig> GenerateValidAreas(int rings, int sectors, int count, Random rnd, int minSpan, int maxSpan) {
             var areas = new List<SlideAreaConfig>();
             minSpan = Math.Max(2, Math.Min(minSpan, rings));
@@ -353,33 +343,6 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 }
             }
             return false;
-        }
-
-        private IEnumerable<Move> GetAllValidMoves(LevelState state, List<SlideAreaConfig> areas, LevelSolver solver) {
-            for (int r = 0; r < state.RingCount; r++) {
-                for (int offset = 1; offset < state.SectorCount; offset++) {
-                    var next = state.Rotate(r, offset);
-                    if (!next.Equals(state))
-                        yield return new Move { Type = MoveType.Rotate, Index = r, Offset = offset };
-                }
-            }
-
-            for (int a = 0; a < areas.Count; a++) {
-                if (solver.IsSlideAreaBlocked(state, a)) continue;
-
-                var area = areas[a];
-                int span = area.endCircleIndex - area.startCircleIndex + 1;
-                for (int offset = 1; offset < span; offset++) {
-                    var next = solver.ApplyMove(state, new Move { Type = MoveType.Slide, Index = a, Offset = offset });
-                    if (!next.Equals(state))
-                        yield return new Move { Type = MoveType.Slide, Index = a, Offset = offset };
-                }
-            }
-        }
-
-        private LevelState ApplyMove(LevelState state, Move move, LevelSolver solver) {
-            if (move.Type == MoveType.Rotate) return state.Rotate(move.Index, move.Offset);
-            return solver.ApplyMove(state, move);
         }
 
         private void ApplyEmptySegments(SegmentStatus[,] statuses, byte[,] colors, int rings, int sectors,

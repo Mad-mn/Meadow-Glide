@@ -6,7 +6,8 @@ using Feature.ColorServiceModule.Scripts;
 namespace Feature.LevelModule.Scripts.Editor.Generator {
     public struct LevelState : IEquatable<LevelState> {
         public byte[,] Colors;
-        public byte[,] Blocked; // 0 = not blocked, non-zero = blocked (stores color for reference)
+        public byte[,] Blocked;
+        public ulong ZobristHash;
 
         public int RingCount => Colors != null ? Colors.GetLength(0) : 0;
         public int SectorCount => Colors != null ? Colors.GetLength(1) : 0;
@@ -14,16 +15,23 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         public LevelState(int rings, int sectors) {
             Colors = new byte[rings, sectors];
             Blocked = null;
+            ZobristHash = 0;
         }
 
         public LevelState(int rings, int sectors, bool includeBlocked) {
             Colors = new byte[rings, sectors];
             Blocked = includeBlocked ? new byte[rings, sectors] : null;
+            ZobristHash = 0;
         }
 
         public LevelState(LevelState other) {
             Colors = (byte[,])other.Colors.Clone();
             Blocked = other.Blocked != null ? (byte[,])other.Blocked.Clone() : null;
+            ZobristHash = other.ZobristHash;
+        }
+
+        public void ComputeZobristHash(ZobristTable table) {
+            ZobristHash = table.ComputeHash(Colors);
         }
 
         public bool IsSolved() {
@@ -68,28 +76,30 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         }
 
         public bool Equals(LevelState other) {
+            if (ZobristHash != 0 && other.ZobristHash != 0 && ZobristHash != other.ZobristHash)
+                return false;
+
             if (Colors == null || other.Colors == null) return false;
             if (RingCount != other.RingCount || SectorCount != other.SectorCount) return false;
 
-            for (int r = 0; r < RingCount; r++) {
-                for (int s = 0; s < SectorCount; s++) {
+            for (int r = 0; r < RingCount; r++)
+                for (int s = 0; s < SectorCount; s++)
                     if (Colors[r, s] != other.Colors[r, s]) return false;
-                }
-            }
+
             return true;
         }
 
         public override bool Equals(object obj) => obj is LevelState other && Equals(other);
 
         public override int GetHashCode() {
+            if (ZobristHash != 0) return (int)(ZobristHash ^ (ZobristHash >> 32));
+
             unchecked {
                 if (Colors == null) return 0;
                 int hash = 17;
-                for (int r = 0; r < RingCount; r++) {
-                    for (int s = 0; s < SectorCount; s++) {
+                for (int r = 0; r < RingCount; r++)
+                    for (int s = 0; s < SectorCount; s++)
                         hash = hash * 31 + Colors[r, s];
-                    }
-                }
                 return hash;
             }
         }

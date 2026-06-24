@@ -160,7 +160,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 MaxAttempts = rootVisualElement.Q<IntegerField>("maxAttempts").value,
                 MaxIterations = rootVisualElement.Q<IntegerField>("maxIterations").value,
                 Seed = _seedField.value,
-                UseFixedSeed = rootVisualElement.Q<Toggle>("useFixedSeed").value
+                UseFixedSeed = rootVisualElement.Q<Toggle>("useFixedSeed").value,
+                TargetSolutionLength = rootVisualElement.Q<IntegerField>("targetSolutionLength").value,
+                MaxCandidatesPerLevel = rootVisualElement.Q<IntegerField>("maxCandidatesPerLevel").value
             };
 
             int targetDepth = rootVisualElement.Q<IntegerField>("targetDifficulty").value;

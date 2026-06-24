@@ -28,6 +28,10 @@
                     <ui:Label text="Target Difficulty:" class="field-label" />
                     <uie:IntegerField name="targetDifficulty" value="8" class="field-input" />
                 </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Target Solution Length:" class="field-label" />
+                    <uie:IntegerField name="targetSolutionLength" value="15" class="field-input" />
+                </ui:VisualElement>
 
                 <ui:Label text="Generation Limits" class="subheader" />
                 <ui:VisualElement class="field-row">
@@ -36,7 +40,11 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="field-row">
                     <ui:Label text="Max Iterations:" class="field-label" />
-                    <uie:IntegerField name="maxIterations" value="50000" class="field-input" />
+                    <uie:IntegerField name="maxIterations" value="200000" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Max Candidates Per Level:" class="field-label" />
+                    <uie:IntegerField name="maxCandidatesPerLevel" value="5" class="field-input" />
                 </ui:VisualElement>
 
                 <ui:Label text="Reproducibility" class="subheader" />

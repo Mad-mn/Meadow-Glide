@@ -15,9 +15,7 @@ MonoBehaviour:
   _challengeType: 0
   _unlockLevel: 12
   _levelPool:
-  - {fileID: 11400000, guid: 0bbd0988ec56e964390267d00967f6d8, type: 2}
-  - {fileID: 11400000, guid: bc7d6e77a914e0a43be7475c416323f7, type: 2}
-  - {fileID: 11400000, guid: d098965c7aad93c479b256ebf375c1f7, type: 2}
+  - {fileID: 11400000, guid: d1c6b64ad422fe94fba1c86f3c9fe9fc, type: 2}
   _rewards:
   - RequiredResult: 1
     Rewards:
