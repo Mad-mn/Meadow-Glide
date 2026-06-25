@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Feature.ChallengeModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PreGamePlacementModule.Scripts;
+using Feature.SaveDataModule.Scripts;
+using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SlideAreaModule.Scripts;
 using Feature.StripRotationModule.Scripts;
 using Feature.StripsModule.Scripts;
@@ -32,6 +35,9 @@ namespace Feature.LevelInitializeModule {
         private readonly IInteractionStateService _interactionStateService;
         private readonly IUndoService _undoService;
         private readonly IMoveEfficiencyService _moveEfficiencyService;
+        private readonly ISaveDataModel _saveDataModel;
+        private readonly ISaveDataService _saveDataService;
+        private readonly IChallengeService _challengeService;
 
         private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
@@ -49,7 +55,10 @@ namespace Feature.LevelInitializeModule {
             IPreGamePlacementService preGamePlacementService,
             IInteractionStateService interactionStateService,
             IUndoService undoService,
-            IMoveEfficiencyService moveEfficiencyService) {
+            IMoveEfficiencyService moveEfficiencyService,
+            ISaveDataModel saveDataModel,
+            ISaveDataService saveDataService,
+            IChallengeService challengeService) {
             _slideAreaService = slideAreaService;
             _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
@@ -64,11 +73,15 @@ namespace Feature.LevelInitializeModule {
             _interactionStateService = interactionStateService;
             _undoService = undoService;
             _moveEfficiencyService = moveEfficiencyService;
+            _saveDataModel = saveDataModel;
+            _saveDataService = saveDataService;
+            _challengeService = challengeService;
         }
 
         public async UniTask Initialize() {
             _interactionStateService.ResetInputBlock();
             _undoService.Clear();
+            IncrementAttempt();
 
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);
@@ -81,7 +94,7 @@ namespace Feature.LevelInitializeModule {
             SpawnStrips(levelData);
             _slideAreaService.SpawnSlideAreas(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count);
 
-            await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
+            await _tutorialService.Initialize(levelData);
             _preGamePlacementService.StartPlacement(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count).Forget();
 
             await UniTask.Delay(1);
@@ -115,6 +128,25 @@ namespace Feature.LevelInitializeModule {
             _viewService.HideView(ViewType.DailyChallengeCompleteView);
             await Dispose();
             await Initialize();
+        }
+
+        private void IncrementAttempt() {
+            if (_challengeService.IsActive) {
+                return;
+            }
+            PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+            int currentLevel = progress.Level;
+
+            if (progress.CompletedLevels == null)
+                progress.CompletedLevels = new Dictionary<int, LevelCompletionData>();
+
+            if (!progress.CompletedLevels.TryGetValue(currentLevel, out LevelCompletionData data)) {
+                data = new LevelCompletionData();
+                progress.CompletedLevels[currentLevel] = data;
+            }
+
+            data.Attempts++;
+            _saveDataService.Save(SaveDataType.PlayerProgress);
         }
 
         private void SpawnStrips(LevelData levelData) {

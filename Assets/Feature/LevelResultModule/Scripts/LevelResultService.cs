@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Feature.ChallengeModule.Scripts;
 using Feature.DailyChallengeCompleteViewModule.Scripts;
 using Feature.LoseViewModule.Scripts;
@@ -55,7 +56,14 @@ namespace Feature.LevelResultModule.Scripts {
                 _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
             }
             else {
-                _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level++;
+                PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+                int completedLevel = progress.Level;
+
+                int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
+                MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
+                SaveLevelCompletion(progress, completedLevel, result);
+
+                progress.Level++;
                 _saveDataService.Save(SaveDataType.PlayerProgress);
                 _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
                 _viewService.ShowView<WinLevel>(ViewType.WinLevel);
@@ -79,6 +87,20 @@ namespace Feature.LevelResultModule.Scripts {
         public void Reset() {
             _isWin = false;
             _isLose = false;
+        }
+
+        private void SaveLevelCompletion(PlayerProgressData progress, int level, MoveEfficiencyResult result) {
+            if (progress.CompletedLevels == null)
+                progress.CompletedLevels = new Dictionary<int, LevelCompletionData>();
+
+            if (!progress.CompletedLevels.TryGetValue(level, out LevelCompletionData existing)) {
+                progress.CompletedLevels[level] = new LevelCompletionData { Status = result };
+                return;
+            }
+
+            if ((int)result > (int)existing.Status) {
+                existing.Status = result;
+            }
         }
     }
 }

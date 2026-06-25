@@ -71,10 +71,8 @@ namespace Feature.MainMenuViewModule.Scripts {
         }
 
         private void StartSimpleGame() {
-            
             _audioService.PlaySound(AudioType.ButtonClick);
             _gameStateMachine.EnterState(typeof(GameSimpleState));
-            throw new System.Exception("test exception please ignore");
         }
     }
 }
