@@ -28,6 +28,35 @@
                     <ui:Label text="Target Difficulty:" class="field-label" />
                     <uie:IntegerField name="targetDifficulty" value="8" class="field-input" />
                 </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Target Solution Length:" class="field-label" />
+                    <uie:IntegerField name="targetSolutionLength" value="15" class="field-input" />
+                </ui:VisualElement>
+
+                <ui:Label text="Generation Limits" class="subheader" />
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Max Attempts:" class="field-label" />
+                    <uie:IntegerField name="maxAttempts" value="10" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Max Iterations:" class="field-label" />
+                    <uie:IntegerField name="maxIterations" value="200000" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Max Candidates Per Level:" class="field-label" />
+                    <uie:IntegerField name="maxCandidatesPerLevel" value="5" class="field-input" />
+                </ui:VisualElement>
+
+                <ui:Label text="Reproducibility" class="subheader" />
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Use Fixed Seed:" class="field-label" />
+                    <ui:Toggle name="useFixedSeed" value="false" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Seed:" class="field-label" />
+                    <uie:IntegerField name="seed" value="42" class="field-input" />
+                </ui:VisualElement>
+                <ui:Label name="activeSeedLabel" text="Active seed: —" class="progress-label" />
 
                 <ui:Label text="Segment Constraints" class="subheader" />
                 <ui:VisualElement class="field-row">
@@ -53,6 +82,29 @@
                     <uie:IntegerField name="minFilterColors" value="2" class="field-input" />
                     <uie:IntegerField name="maxFilterColors" value="3" class="field-input" />
                 </ui:VisualElement>
+
+                <ui:Label text="Pre-Game Placement" class="subheader" />
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Allow Empty Segments:" class="field-label" />
+                    <ui:Toggle name="allowEmptySegments" value="false" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Empty Segments (Min/Max):" class="field-label" />
+                    <uie:IntegerField name="minEmptySegments" value="2" class="field-input" />
+                    <uie:IntegerField name="maxEmptySegments" value="5" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Intelligent Selection:" class="field-label" />
+                    <ui:Toggle name="useIntelligentEmpty" value="true" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Min Score Threshold:" class="field-label" />
+                    <ui:Slider name="emptyMinScore" low-value="0" high-value="10" value="3" class="field-input" />
+                </ui:VisualElement>
+                <ui:VisualElement class="field-row">
+                    <ui:Label text="Top K for Solver Check:" class="field-label" />
+                    <uie:IntegerField name="emptyTopKForSolver" value="5" class="field-input" />
+                </ui:VisualElement>
             </ui:ScrollView>
             <ui:Button name="generateButton" text="Generate Level" class="primary-button" />
             <ui:Button name="cancelButton" text="Cancel Generation" class="cancel-button hidden" />
@@ -67,13 +119,21 @@
                 <ui:Label text="Level Name:" class="field-label" style="width: 80px;" />
                 <ui:TextField name="levelName" value="LevelConfig_New" class="field-input" />
             </ui:VisualElement>
+            <ui:VisualElement class="field-row" style="width: 100%; margin-top: 5px;">
+                <ui:Label text="Save Path:" class="field-label" style="width: 80px;" />
+                <ui:TextField name="savePath" value="Assets/ScriptableObjects/Levels" class="field-input" style="flex-grow: 1;" />
+                <ui:Button name="browseButton" text="..." class="secondary-button" style="width: 30px; min-width: 30px;" />
+            </ui:VisualElement>
             <ui:Button name="saveButton" text="Save as LevelConfig" class="secondary-button" style="width: 100%;" />
         </ui:VisualElement>
 
         <ui:VisualElement name="browser-panel" class="panel">
             <ui:Label text="Level Browser" class="header" />
             <ui:ListView name="levelList" class="level-list" item-height="40" />
-            <ui:Button name="refreshButton" text="Refresh List" class="secondary-button" />
+            <ui:VisualElement class="field-row" style="width: 100%; margin-top: 5px;">
+                <ui:Button name="refreshButton" text="Refresh List" class="secondary-button" style="flex-grow: 1;" />
+                <ui:Button name="recalculateButton" text="Recalculate Selected" class="secondary-button" style="flex-grow: 1;" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Feature.ConfirmBuyViewModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
 using Feature.LoseViewModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
@@ -23,6 +24,7 @@ namespace Feature.GameStateModule.Scripts.States {
             LoadMainMenuScene().Forget();
             _viewService.ReleasePrewarmedView(ViewType.WinLevel);
             _viewService.ReleasePrewarmedView(ViewType.LoseView);
+            _viewService.ReleasePrewarmedView(ViewType.ConfirmBuyView);
         }
 
         public void Exit() {
@@ -30,6 +32,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _viewService.HideView(ViewType.MainMenu);
             _viewService.PrewarmView<WinLevel>(ViewType.WinLevel);
             _viewService.PrewarmView<LoseView>(ViewType.LoseView);
+            _viewService.PrewarmView<ConfirmBuyView>(ViewType.ConfirmBuyView);
         }
 
         private async UniTaskVoid LoadMainMenuScene() {

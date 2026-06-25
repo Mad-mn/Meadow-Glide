@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
 using Feature.CircleModule.Scripts;
-using UnityEngine;
 
 namespace Feature.SlideAreaModule.Scripts {
     public class SlideAreaModel {
-        private readonly List<CircleSegment> _activeSegments = new List<CircleSegment>();
-        private readonly HashSet<CircleSegment> _segmentsInAreas = new HashSet<CircleSegment>();
+        private readonly List<IGameSegment> _activeSegments = new List<IGameSegment>();
+        private readonly HashSet<IGameSegment> _segmentsInAreas = new HashSet<IGameSegment>();
         private List<SlideArea> _spawnedAreas = new List<SlideArea>();
 
         public IReadOnlyList<SlideArea> SpawnedAreas => _spawnedAreas;
-        public IReadOnlyList<CircleSegment> ActiveSegments => _activeSegments;
-        public IReadOnlyCollection<CircleSegment> SegmentsInAreas => _segmentsInAreas;
+        public IReadOnlyList<IGameSegment> ActiveSegments => _activeSegments;
+        public IReadOnlyCollection<IGameSegment> SegmentsInAreas => _segmentsInAreas;
 
         public event Action<bool> OnChangeSlideState;
-        
+
         public bool IsSliding { get; private set; }
 
         public void ChangeSlideState(bool state) {
@@ -22,16 +21,16 @@ namespace Feature.SlideAreaModule.Scripts {
             OnChangeSlideState?.Invoke(state);
         }
 
-        public void SetupActiveSegments(List<CircleSegment> segments) {
+        public void SetupActiveSegments<T>(List<T> segments) where T : IGameSegment {
             _activeSegments.Clear();
-            _activeSegments.AddRange(segments);
+            foreach (T segment in segments)
+                _activeSegments.Add(segment);
         }
 
-        public void UpdateSegmentsInAreas(IEnumerable<CircleSegment> segments) {
+        public void UpdateSegmentsInAreas(IEnumerable<IGameSegment> segments) {
             _segmentsInAreas.Clear();
-            foreach (var segment in segments) {
+            foreach (IGameSegment segment in segments)
                 _segmentsInAreas.Add(segment);
-            }
         }
 
         public void SetupAreas(List<SlideArea> spawnedAreas) {

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea46b3201ee721448bf3f4a38ff3d7fc, type: 3}
+  m_Name: BuyAdditionalMoves
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.TransactionModule.Scripts.Configs.TransactionConfig
+  TransactionId: 2
+  FailureMessage: 
+  Costs:
+  - Type: 1
+    Amount: 200
+  Rewards:
+  - Type: 3
+    Amount: 5
+    NameKey: 16

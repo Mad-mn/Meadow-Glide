@@ -171,6 +171,7 @@ GameObject:
   - component: {fileID: 3054488843259033014}
   - component: {fileID: 6116368405609523104}
   - component: {fileID: 6959634358699003826}
+  - component: {fileID: 2815074744178228894}
   m_Layer: 0
   m_Name: CircleSegmentPrefab
   m_TagString: Untagged
@@ -329,7 +330,7 @@ MonoBehaviour:
   _trigger: {fileID: 6586106479114405459}
   _lineRenderer: {fileID: 3054488843259033014}
   _statusIcon: {fileID: 5679628872982880035}
-  _statusAnimator: {fileID: 6959634358699003826}
+  _animationController: {fileID: 0}
   _weightCoefficient: 0.5
   _zoomScaleMultiplier: 1.3
 --- !u!114 &6959634358699003826
@@ -347,3 +348,22 @@ MonoBehaviour:
   _target: {fileID: 8913364528657223711}
   _shakeDuration: 0.3
   _shakeAmount: 0.1
+--- !u!114 &2815074744178228894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7360643612368400864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47842d385023f844ebfe72eca804873a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.StripsModule.Scripts.SegmentAnimationController
+  _lineRenderer: {fileID: 3054488843259033014}
+  _zoomMultiplier: 2
+  _zoomInDuration: 0.2
+  _zoomOutDuration: 0.2
+  _zoomInEase: 27
+  _zoomOutEase: 7
+  _statusAnimator: {fileID: 6959634358699003826}

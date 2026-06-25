@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Feature.TutorialModule.Scripts.Tutorials;
 using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialStates;
+using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.UndoMoveTutorialStates;
 using Zenject;
 
 namespace Feature.TutorialModule.Scripts.Factory {
@@ -14,6 +15,8 @@ namespace Feature.TutorialModule.Scripts.Factory {
             switch (tutorialType) {
                 case TutorialType.First:
                     return new Tutorial(GetStatesForFirstTutorial());
+                case TutorialType.UndoMove:
+                    return new Tutorial(GetStatesForUndoMoveTutorial());
             }
 
             return null;
@@ -23,6 +26,12 @@ namespace Feature.TutorialModule.Scripts.Factory {
             List<ITutorialState> states = new List<ITutorialState>();
             states.Add(_container.Instantiate<ShowPointerOnCircleState>());
             states.Add(_container.Instantiate<ShowPointerOnSlideAreaState>());
+            return states;
+        }
+
+        private List<ITutorialState> GetStatesForUndoMoveTutorial() {
+            List<ITutorialState> states = new List<ITutorialState>();
+            states.Add(_container.Instantiate<ShowUndoMoveTutorialState>());
             return states;
         }
 

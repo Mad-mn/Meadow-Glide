@@ -16,9 +16,12 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
         private VisualElement _previewArea;
         private Label _statsLabel;
         private Label _progressLabel;
+        private Label _activeSeedLabel;
+        private IntegerField _seedField;
         private Button _generateButton;
         private Button _cancelButton;
         private TextField _nameField;
+        private TextField _savePathField;
         private ListView _levelList;
         private List<LevelConfig> _existingLevels = new List<LevelConfig>();
         
@@ -38,9 +41,12 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _previewArea = rootVisualElement.Q<VisualElement>("previewArea");
             _statsLabel = rootVisualElement.Q<Label>("statsLabel");
             _progressLabel = rootVisualElement.Q<Label>("progressLabel");
+            _activeSeedLabel = rootVisualElement.Q<Label>("activeSeedLabel");
+            _seedField = rootVisualElement.Q<IntegerField>("seed");
             _generateButton = rootVisualElement.Q<Button>("generateButton");
             _cancelButton = rootVisualElement.Q<Button>("cancelButton");
             _nameField = rootVisualElement.Q<TextField>("levelName");
+            _savePathField = rootVisualElement.Q<TextField>("savePath");
             _levelList = rootVisualElement.Q<ListView>("levelList");
 
             _previewArea.generateVisualContent += DrawPreview;
@@ -48,7 +54,9 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _generateButton.clicked += OnGenerateClicked;
             _cancelButton.clicked += OnCancelClicked;
             rootVisualElement.Q<Button>("saveButton").clicked += OnSaveClicked;
+            rootVisualElement.Q<Button>("browseButton").clicked += OnBrowseClicked;
             rootVisualElement.Q<Button>("refreshButton").clicked += RefreshLevelList;
+            rootVisualElement.Q<Button>("recalculateButton").clicked += OnRecalculateClicked;
 
             SetupListView();
             RefreshLevelList();
@@ -73,7 +81,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 if (i >= _existingLevels.Count) return;
                 var level = _existingLevels[i];
                 element.Q<Label>("name").text = level.name;
-                element.Q<Label>("difficulty").text = $"Diff: {level.Difficulty}";
+                element.Q<Label>("difficulty").text = $"D:{level.Difficulty} S:{level.ShortestSolution} A:{level.AverageMoves} Seed:{level.Seed}";
             };
 
             _levelList.onSelectionChange += obj => {
@@ -82,7 +90,7 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                     _currentLevel = new LevelData {
                         LevelConfig = selected
                     };
-                    _statsLabel.text = $"Loaded: {selected.name} | Difficulty: {selected.Difficulty}";
+                    _statsLabel.text = $"Loaded: {selected.name} | D:{selected.Difficulty} S:{selected.ShortestSolution} A:{selected.AverageMoves} Seed:{selected.Seed}";
                     _previewArea.MarkDirtyRepaint();
                 }
             };
@@ -121,7 +129,12 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             _progressLabel.text = "Starting...";
             
             _cts = new CancellationTokenSource();
-            var progress = new Progress<string>(msg => _progressLabel.text = msg);
+            var progress = new Progress<string>(msg => {
+                _progressLabel.text = msg;
+                if (msg.StartsWith("Seed: ")) {
+                    _activeSeedLabel.text = $"Active seed: {msg.Substring(6)}";
+                }
+            });
 
             var p = new LevelGenerator.GenerationParams {
                 MinRings = rootVisualElement.Q<IntegerField>("minRings").value,
@@ -137,7 +150,19 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 MinFilterColors = rootVisualElement.Q<IntegerField>("minFilterColors").value,
                 MaxFilterColors = rootVisualElement.Q<IntegerField>("maxFilterColors").value,
                 MinAreaSpan = rootVisualElement.Q<IntegerField>("minAreaSpan").value,
-                MaxAreaSpan = rootVisualElement.Q<IntegerField>("maxAreaSpan").value
+                MaxAreaSpan = rootVisualElement.Q<IntegerField>("maxAreaSpan").value,
+                AllowEmptySegments = rootVisualElement.Q<Toggle>("allowEmptySegments").value,
+                MinEmptySegments = rootVisualElement.Q<IntegerField>("minEmptySegments").value,
+                MaxEmptySegments = rootVisualElement.Q<IntegerField>("maxEmptySegments").value,
+                UseIntelligentEmpty = rootVisualElement.Q<Toggle>("useIntelligentEmpty").value,
+                EmptyMinScore = rootVisualElement.Q<Slider>("emptyMinScore").value,
+                EmptyTopKForSolver = rootVisualElement.Q<IntegerField>("emptyTopKForSolver").value,
+                MaxAttempts = rootVisualElement.Q<IntegerField>("maxAttempts").value,
+                MaxIterations = rootVisualElement.Q<IntegerField>("maxIterations").value,
+                Seed = _seedField.value,
+                UseFixedSeed = rootVisualElement.Q<Toggle>("useFixedSeed").value,
+                TargetSolutionLength = rootVisualElement.Q<IntegerField>("targetSolutionLength").value,
+                MaxCandidatesPerLevel = rootVisualElement.Q<IntegerField>("maxCandidatesPerLevel").value
             };
 
             int targetDepth = rootVisualElement.Q<IntegerField>("targetDifficulty").value;
@@ -147,10 +172,12 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
 
                 if (rawData != null) {
                     _currentLevel = ConvertToUnityLevelData(rawData);
-                    _statsLabel.text = $"Difficulty: {_currentLevel.LevelConfig.Difficulty} | Rings: {_currentLevel.LevelConfig.CircleConfigs.Count}";
+                    _seedField.SetValueWithoutNotify(rawData.Seed);
+                    _activeSeedLabel.text = $"Active seed: {rawData.Seed}";
+                    _statsLabel.text = $"Difficulty: {rawData.Difficulty} | Shortest: {rawData.SolutionPath.Count} | Avg: {rawData.AverageMoves} | Rings: {rawData.Rings} | Areas: {rawData.Areas.Count} | Seed: {rawData.Seed}";
                     _previewArea.MarkDirtyRepaint();
                 } else {
-                    _statsLabel.text = "Timeout or Limit reached.";
+                    _statsLabel.text = "Generation failed — no valid level produced.";
                 }
             } catch (OperationCanceledException) {
                 _statsLabel.text = "Generation cancelled.";
@@ -183,7 +210,14 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 circles.Add(circle);
             }
 
-            levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty);
+            var solutionPath = new List<LevelMoveData>();
+            if (raw.SolutionPath != null) {
+                foreach (var move in raw.SolutionPath) {
+                    solutionPath.Add(new LevelMoveData(move.Type.ToString(), move.Index, move.Offset));
+                }
+            }
+
+            levelConfig.SetConfigs(circles, raw.Areas, raw.Difficulty, raw.AverageMoves, raw.Seed, solutionPath);
 
             return new LevelData {
                 LevelConfig = levelConfig
@@ -196,8 +230,28 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             string fileName = _nameField.value;
             if (string.IsNullOrEmpty(fileName)) fileName = "LevelConfig_New";
 
-            string path = EditorUtility.SaveFilePanelInProject("Save Level Config", fileName, "asset", "Save Level Config");
-            if (string.IsNullOrEmpty(path)) return;
+            string folderPath = _savePathField.value;
+            if (string.IsNullOrEmpty(folderPath)) folderPath = "Assets/ScriptableObjects/Levels";
+
+            if (!folderPath.StartsWith("Assets/")) folderPath = "Assets/" + folderPath;
+            folderPath = folderPath.TrimEnd('/');
+
+            string path = $"{folderPath}/{fileName}.asset";
+
+            if (AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path) != null) {
+                if (!EditorUtility.DisplayDialog("Overwrite?", $"File already exists:\n{path}\nOverwrite?", "Yes", "No"))
+                    return;
+            }
+
+            if (!AssetDatabase.IsValidFolder(folderPath)) {
+                string parent = System.IO.Path.GetDirectoryName(folderPath);
+                string folderName = System.IO.Path.GetFileName(folderPath);
+                if (!AssetDatabase.IsValidFolder(parent)) {
+                    EditorUtility.DisplayDialog("Error", $"Parent folder does not exist:\n{parent}", "OK");
+                    return;
+                }
+                AssetDatabase.CreateFolder(parent, folderName);
+            }
 
             AssetDatabase.CreateAsset(_currentLevel.LevelConfig, path);
             foreach (var circle in _currentLevel.LevelConfig.CircleConfigs) {
@@ -210,57 +264,181 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             EditorUtility.DisplayDialog("Success", "Level saved to " + path, "OK");
         }
 
+        private void OnBrowseClicked() {
+            string currentPath = _savePathField.value;
+            if (string.IsNullOrEmpty(currentPath)) currentPath = "Assets/ScriptableObjects/Levels";
+
+            string selectedPath = EditorUtility.OpenFolderPanel("Select Save Folder", currentPath, "");
+            if (string.IsNullOrEmpty(selectedPath)) return;
+
+            if (selectedPath.StartsWith(Application.dataPath)) {
+                selectedPath = "Assets" + selectedPath.Substring(Application.dataPath.Length);
+            }
+
+            _savePathField.SetValueWithoutNotify(selectedPath);
+        }
+
+        private void OnRecalculateClicked() {
+            int selectedIndex = _levelList.selectedIndex;
+            if (selectedIndex < 0 || selectedIndex >= _existingLevels.Count) {
+                EditorUtility.DisplayDialog("Error", "Select a level in the browser first.", "OK");
+                return;
+            }
+
+            var levelConfig = _existingLevels[selectedIndex];
+            RecalculateLevel(levelConfig);
+        }
+
+        private void RecalculateLevel(LevelConfig levelConfig) {
+            int rings = levelConfig.CircleConfigs.Count;
+            if (rings == 0) {
+                EditorUtility.DisplayDialog("Error", "Level has no circles.", "OK");
+                return;
+            }
+
+            int sectors = levelConfig.CircleConfigs[0].SegmentCount;
+            var state = new LevelState(rings, sectors);
+            bool hasBlocked = false;
+
+            for (int r = 0; r < rings; r++) {
+                for (int s = 0; s < sectors; s++) {
+                    var seg = levelConfig.CircleConfigs[r].Segments[s];
+                    state.Colors[r, s] = (byte)seg.ColorType;
+                    if (seg.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked)
+                        hasBlocked = true;
+                }
+            }
+
+            if (hasBlocked) {
+                state = new LevelState(rings, sectors, true);
+                for (int r = 0; r < rings; r++) {
+                    for (int s = 0; s < sectors; s++) {
+                        var seg = levelConfig.CircleConfigs[r].Segments[s];
+                        state.Colors[r, s] = (byte)seg.ColorType;
+                        if (seg.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked)
+                            state.Blocked[r, s] = (byte)seg.ColorType;
+                    }
+                }
+            }
+
+            var areas = new List<SlideAreaConfig>(levelConfig.SlideAreaConfigs);
+            int maxMoves = levelConfig.MovesForLevel;
+
+            var solver = new LevelSolver(areas, rings, sectors);
+            solver.Solve(state, out var solution);
+
+            var calculator = new DifficultyCalculator(solver, areas, rings);
+            int difficulty = calculator.Calculate(state, maxMoves,
+                out int pathLength, out int averageMoves, out _, out _);
+
+            var solutionPath = new List<LevelMoveData>();
+            if (solution != null) {
+                foreach (var move in solution)
+                    solutionPath.Add(new LevelMoveData(move.Type.ToString(), move.Index, move.Offset));
+            }
+
+            Undo.RecordObject(levelConfig, "Recalculate Level");
+            levelConfig.SetConfigs(
+                new List<CircleConfig>(levelConfig.CircleConfigs),
+                areas,
+                difficulty,
+                averageMoves,
+                levelConfig.Seed,
+                solutionPath
+            );
+            EditorUtility.SetDirty(levelConfig);
+            AssetDatabase.SaveAssets();
+
+            _statsLabel.text = $"Recalculated: {levelConfig.name} | D:{difficulty} S:{pathLength} A:{averageMoves}";
+            _previewArea.MarkDirtyRepaint();
+            _levelList.Rebuild();
+        }
+
         private void DrawPreview(MeshGenerationContext mgc) {
             if (_currentLevel == null) return;
 
             var painter = mgc.painter2D;
-            var center = _previewArea.contentRect.center;
-            float maxRadius = Mathf.Min(_previewArea.contentRect.width, _previewArea.contentRect.height) / 2f - 20f;
+            Rect rect = _previewArea.contentRect;
+            Vector2 center = rect.center;
 
             var circles = _currentLevel.LevelConfig.CircleConfigs;
-            int count = circles.Count;
-            float ringThickness = maxRadius / (count + 1);
+            int stripeCount = circles.Count;
+            if (stripeCount == 0) return;
 
-            // Draw Areas background
-            foreach (var area in _currentLevel.LevelConfig.SlideAreaConfigs) {
-                float innerR = (area.startCircleIndex + 1) * ringThickness - ringThickness / 2f;
-                float outerR = (area.endCircleIndex + 1) * ringThickness + ringThickness / 2f;
-                
-                float angleStep = 360f / area.totalSegments;
-                float startA = area.sectorIndex * angleStep - 90f;
-                float endA = (area.sectorIndex + 1) * angleStep - 90f;
+            int totalSectors = circles[0].SegmentCount;
 
-                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
-                    painter.fillColor = new Color(1, 0.6f, 0, 0.25f);
-                    painter.strokeColor = Color.orange;
-                    painter.lineWidth = 2f;
-                } else {
-                    painter.fillColor = new Color(1, 1, 1, 0.1f);
-                }
+            CircleParamsConfig cfg = LoadCircleParamsConfig();
+            float segmentWidth = cfg != null ? cfg.GetUniformSegmentThickness() : 0.3f;
+            float distanceBetween = cfg != null ? cfg.DistanceBetweenCircles : 1f;
+            float spacing = segmentWidth + distanceBetween;
+            float stripLoopLength = cfg != null ? cfg.StripLoopLength : 4f * Mathf.PI;
 
+            float segmentSpan = stripLoopLength / totalSectors;
+            float totalHeight = (stripeCount - 1) * spacing;
+
+            float availableWidth = rect.width - 40f;
+            float availableHeight = rect.height - 40f;
+            float scaleX = availableWidth / stripLoopLength;
+            float scaleY = availableHeight / (totalHeight + segmentWidth);
+            float scale = Mathf.Min(scaleX, scaleY, 45f) * 1.5f;
+
+            float scaledLoopLength = stripLoopLength * scale;
+            float scaledSpacing = spacing * scale;
+            float scaledSegmentWidth = segmentWidth * scale;
+            float scaledSegmentSpan = segmentSpan * scale;
+
+            float originX = center.x - scaledLoopLength * 0.5f;
+            float originY = center.y + totalHeight * scale * 0.5f;
+
+            for (int s = 0; s < totalSectors; s++) {
+                float sectorCenterX = originX + (s + 0.5f) * scaledSegmentSpan;
+                float dotY = originY + scaledSpacing * 0.7f;
+                painter.fillColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
                 painter.BeginPath();
-                painter.Arc(center, outerR, Angle.Degrees(startA), Angle.Degrees(endA), ArcDirection.Clockwise);
-                painter.Arc(center, innerR, Angle.Degrees(endA), Angle.Degrees(startA), ArcDirection.CounterClockwise);
+                painter.Arc(new Vector2(sectorCenterX, dotY), 2f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
                 painter.Fill();
-                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
-                    painter.Stroke();
-                    
-                    // Draw allowed colors as small dots
-                    if (area.Colors != null && area.Colors.Count > 0) {
-                        float midA = (startA + endA) / 2f;
-                        float dotRadius = 4f;
-                        float spacing = 12f;
-                        float startDist = (innerR + outerR) / 2f - (area.Colors.Count - 1) * spacing / 2f;
-                        
-                        for (int cIdx = 0; cIdx < area.Colors.Count; cIdx++) {
-                            float dist = startDist + cIdx * spacing;
-                            Vector2 dotPos = center + new Vector2(Mathf.Cos(midA * Mathf.Deg2Rad), Mathf.Sin(midA * Mathf.Deg2Rad)) * dist;
-                            painter.fillColor = GetColor(area.Colors[cIdx]);
+            }
+
+            for (int i = 0; i < stripeCount; i++) {
+                float stripeY = originY - i * scaledSpacing;
+
+                for (int s = 0; s < totalSectors; s++) {
+                    var segment = circles[i].Segments[s];
+                    float segLeft = originX + s * scaledSegmentSpan;
+                    float segRight = segLeft + scaledSegmentSpan;
+                    float segTop = stripeY + scaledSegmentWidth * 0.5f;
+                    float segBottom = stripeY - scaledSegmentWidth * 0.5f;
+
+                    if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Empty) {
+                        painter.fillColor = new Color(0.4f, 0.4f, 0.4f, 0.5f);
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
+                        painter.Fill();
+
+                        painter.strokeColor = new Color(0.6f, 0.6f, 0.6f, 0.7f);
+                        painter.lineWidth = 2f;
+                            //painter.strokePattern = new DashPattern(new float[] { 4f, 4f });
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
+                        painter.Stroke();
+                        //painter.strokePattern = default;
+                    }
+                    else {
+                        painter.fillColor = GetColor(segment.ColorType);
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
+                        painter.Fill();
+
+                        painter.strokeColor = new Color(0, 0, 0, 0.3f);
+                        painter.lineWidth = 1f;
+                        DrawRect(painter, segLeft, segBottom, segRight, segTop);
+                        painter.Stroke();
+
+                        if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked) {
+                            float dotX = (segLeft + segRight) / 2f;
+                            float dotY = stripeY;
+                            painter.fillColor = Color.black;
                             painter.BeginPath();
-                            painter.Arc(dotPos, dotRadius, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                            painter.Arc(new Vector2(dotX, dotY), 5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
                             painter.Fill();
-                            // Border for dot
-                            painter.strokeColor = Color.black;
+                            painter.strokeColor = Color.white;
                             painter.lineWidth = 1f;
                             painter.Stroke();
                         }
@@ -268,66 +446,89 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
                 }
             }
 
-            // Draw Sector Indices
-            int totalSectors = circles[0].SegmentCount;
-            float sectorAngleStep = 360f / totalSectors;
-            painter.fillColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
-            for (int s = 0; s < totalSectors; s++) {
-                float angle = s * sectorAngleStep + (sectorAngleStep / 2f) - 90f;
-                Vector2 pos = center + new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * (maxRadius + 10f);
-                painter.BeginPath();
-                painter.Arc(pos, 2f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
-                painter.Fill();
-            }
+            float stripeBarWidth = scaledSegmentWidth * 0.4f;
 
-            for (int i = 0; i < count; i++) {
-                float r = (i + 1) * ringThickness;
-                int sectors = circles[i].SegmentCount;
-                float angleStep = 360f / sectors;
-                
-                // Draw Ring Index Marker (small dot at start of ring)
-                Vector2 ringMarkerPos = center + new Vector2(0, -1) * (r + ringThickness * 0.35f);
-                painter.fillColor = new Color(1, 1, 1, 0.2f);
-                painter.BeginPath();
-                painter.Arc(ringMarkerPos, 1.5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+            foreach (var area in _currentLevel.LevelConfig.SlideAreaConfigs) {
+                float startY = originY - area.startCircleIndex * scaledSpacing;
+                float endY = originY - area.endCircleIndex * scaledSpacing;
+                float centerX = originX + (area.sectorIndex + 0.5f) * scaledSegmentSpan;
+                float barLeft = centerX - stripeBarWidth * 0.5f;
+                float barRight = centerX + stripeBarWidth * 0.5f;
+
+                painter.fillColor = new Color(1f, 1f, 1f, 0.7f);
+                DrawRect(painter, barLeft, endY, barRight, startY);
                 painter.Fill();
 
-                for (int s = 0; s < sectors; s++) {
-                    var segment = circles[i].Segments[s];
-                    painter.strokeColor = GetColor(segment.ColorType);
-                    painter.lineWidth = ringThickness * 0.7f;
-                    float startA = s * angleStep - 88f;
-                    float endA = (s + 1) * angleStep - 92f;
+                painter.strokeColor = new Color(0.3f, 0.3f, 0.3f, 0.8f);
+                painter.lineWidth = 1f;
+                DrawRect(painter, barLeft, endY, barRight, startY);
+                painter.Stroke();
 
-                    painter.BeginPath();
-                    painter.Arc(center, r, Angle.Degrees(startA), Angle.Degrees(endA), ArcDirection.Clockwise);
-                    painter.Stroke();
+                if (area.SlideAreaStatus == Feature.StatusModule.Scripts.SlideAreas.SlideAreaStatus.FilterColors) {
+                    if (area.Colors != null && area.Colors.Count > 0) {
+                        float midY = (startY + endY) / 2f;
+                        float dotRadius = 4f;
+                        float dotSpacing = 12f;
+                        float dotsStartY = midY + (area.Colors.Count - 1) * dotSpacing * 0.5f;
 
-                    if (segment.SegmentStatus == Feature.StatusModule.Scripts.Segments.SegmentStatus.Blocked) {
-                        painter.fillColor = Color.black;
-                        painter.strokeColor = Color.white;
-                        painter.lineWidth = 1f;
-                        float mid = (startA + endA) / 2f;
-                        Vector2 pos = center + new Vector2(Mathf.Cos(mid * Mathf.Deg2Rad), Mathf.Sin(mid * Mathf.Deg2Rad)) * r;
-                        painter.BeginPath();
-                        painter.Arc(pos, 5f, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
-                        painter.Fill();
-                        painter.Stroke();
+                        for (int cIdx = 0; cIdx < area.Colors.Count; cIdx++) {
+                            float dotY = dotsStartY - cIdx * dotSpacing;
+                            Vector2 dotPos = new Vector2(centerX, dotY);
+                            painter.fillColor = GetColor(area.Colors[cIdx]);
+                            painter.BeginPath();
+                            painter.Arc(dotPos, dotRadius, Angle.Degrees(0), Angle.Degrees(360), ArcDirection.Clockwise);
+                            painter.Fill();
+                            painter.strokeColor = Color.black;
+                            painter.lineWidth = 1f;
+                            painter.Stroke();
+                        }
                     }
                 }
             }
-}
+        }
+
+        private static void DrawRect(Painter2D painter, float left, float bottom, float right, float top) {
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(left, bottom));
+            painter.LineTo(new Vector2(right, bottom));
+            painter.LineTo(new Vector2(right, top));
+            painter.LineTo(new Vector2(left, top));
+            painter.ClosePath();
+        }
+
+        private static CircleParamsConfig _cachedCircleParamsConfig;
+        private static Feature.ColorServiceModule.Scripts.CircleColorProvider _cachedColorProvider;
+
+        private static CircleParamsConfig LoadCircleParamsConfig() {
+            if (_cachedCircleParamsConfig != null) return _cachedCircleParamsConfig;
+
+            var guids = AssetDatabase.FindAssets("t:CircleParamsConfig");
+            if (guids.Length > 0) {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                _cachedCircleParamsConfig = AssetDatabase.LoadAssetAtPath<CircleParamsConfig>(path);
+            }
+            return _cachedCircleParamsConfig;
+        }
+
+        private static Feature.ColorServiceModule.Scripts.CircleColorProvider LoadCircleColorProvider() {
+            if (_cachedColorProvider != null) return _cachedColorProvider;
+
+            var guids = AssetDatabase.FindAssets("t:CircleColorProvider");
+            if (guids.Length > 0) {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                _cachedColorProvider = AssetDatabase.LoadAssetAtPath<Feature.ColorServiceModule.Scripts.CircleColorProvider>(path);
+            }
+            return _cachedColorProvider;
+        }
 
         private Color GetColor(Feature.ColorServiceModule.Scripts.CircleColorType type) {
-            switch (type) {
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Red: return Color.red;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Blue: return Color.blue;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Green: return Color.green;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Yellow: return Color.yellow;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Cyan: return Color.cyan;
-                case Feature.ColorServiceModule.Scripts.CircleColorType.Magenta: return Color.magenta;
-                default: return Color.white;
+            var provider = LoadCircleColorProvider();
+            if (provider != null) {
+                foreach (var mapping in provider.Mappings) {
+                    if (mapping.Type == type) return mapping.Color;
+                }
             }
+            return Color.white;
         }
     }
 }

@@ -1,0 +1,26 @@
+namespace Feature.LocalizationModule.Scripts.Data {
+    public enum LocalizationKey {
+        None = 0,
+            Global_Play = 1,
+        Global_Settings = 2,
+        DailyChallenge_Title = 3,
+        Global_Level = 4,
+        Settings_Sound = 5,
+        Settings_Vibration = 6,
+        Settings_Language = 7,
+        Global_Moves = 8,
+        Lose_Title = 9,
+        DailyChallenge_Locked = 10,
+        Global_Yes = 11,
+        Global_No = 12,
+        Global_ConfirmBuy = 13,
+        Global_ConfirmExit = 14,
+        Reward_Tools_UndoMove = 15,
+        Reward_Tools_ExtraMoves = 16,
+        Reward_Resource_Coins = 17,
+        Reward_Title = 18,
+        Win_Title = 19,
+        Tutorial_UndoMove = 20,
+            Global_Max = 21,
+}
+}

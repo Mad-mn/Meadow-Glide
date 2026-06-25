@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 41daba43fb4162249a06150a35bf8489
+    m_Address: ResourceInfoConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6b4e9f12cbb6a0b46a4b43409d7ec88e
     m_Address: ViewSettings
     m_ReadOnly: 0
@@ -30,8 +35,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 814f9948fdda12540ab5cf4825460b51
+    m_Address: EconomyConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 874585107a9d166498e380dbcd28d69c
     m_Address: SegmentStatusVisualConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f34809b41b3cda4abf5b5d8c7e92f8a
+    m_Address: DailyChallengeConfigs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a7ed82368af9d6c4d8820663ed8d558c
+    m_Address: ToolConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a85a4b798dbbccc4787488e59c17f616
+    m_Address: TransactionConfigs
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

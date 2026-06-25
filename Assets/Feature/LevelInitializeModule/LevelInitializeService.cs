@@ -2,135 +2,136 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
+using Feature.InputModule.Scripts;
 using Feature.LevelModule.Scripts;
-using Feature.SaveDataModule.Scripts;
-using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.MoveEfficiencyModule.Scripts;
+using Feature.PreGamePlacementModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
+using Feature.StripRotationModule.Scripts;
+using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
 using Feature.TutorialModule.Scripts;
 using Feature.UIServiceModule.Scripts;
-using Feature.WinLevelModule.Scripts;
+using Feature.UndoModule.Scripts;
 using UnityEngine;
 using Zenject;
 
 namespace Feature.LevelInitializeModule {
     public class LevelInitializeService : ILevelInitializeService {
-        private readonly UniTask<CircleController> _circleControllerTask;
-        
-        private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
         private readonly IViewService _viewService;
-        private readonly ISaveDataService _saveDataService;
-        private readonly ISaveDataModel _saveDataModel;
         private readonly ILevelService _levelService;
         private readonly ITutorialService _tutorialService;
         private readonly MoveTrackModel _moveTrackModel;
-        private readonly DiContainer _container;
+        private readonly IStripSpawnService _stripSpawnService;
         private readonly ISlideAreaService _slideAreaService;
-        private readonly ICircleRotationService _circleRotationService;
+        private readonly IStripRotationService _stripRotationService;
         private readonly ISlideSegmentService _slideSegmentService;
         private readonly ICircleControllerService _circleControllerService;
-        private readonly GameCircleModel _circleModel;
-        private CircleParamsConfig _circleParamsConfig;
-        
-        private readonly List<CircleController> _spawnedCircles = new List<CircleController>();
+        private readonly StripModel _stripModel;
+        private readonly IPreGamePlacementService _preGamePlacementService;
+        private readonly IInteractionStateService _interactionStateService;
+        private readonly IUndoService _undoService;
+        private readonly IMoveEfficiencyService _moveEfficiencyService;
+
+        private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
         public LevelInitializeService(
-            UniTask<CircleController> circleControllerTask, 
-            DiContainer container, 
-            ISlideAreaService slideAreaService, 
-            ICircleRotationService circleRotationService,
+            ISlideAreaService slideAreaService,
+            IStripRotationService stripRotationService,
             ISlideSegmentService slideSegmentService,
             ICircleControllerService circleControllerService,
-            GameCircleModel circleModel,
-            UniTask<CircleParamsConfig> circleParamsConfigTask,
+            StripModel stripModel,
             IViewService viewService,
-            ISaveDataService saveDataService,
-            ISaveDataModel saveDataModel,
             ILevelService levelService,
             ITutorialService tutorialService,
-            MoveTrackModel moveTrackModel) {
-            _circleControllerTask = circleControllerTask;
-            _container = container;
+            MoveTrackModel moveTrackModel,
+            IStripSpawnService stripSpawnService,
+            IPreGamePlacementService preGamePlacementService,
+            IInteractionStateService interactionStateService,
+            IUndoService undoService,
+            IMoveEfficiencyService moveEfficiencyService) {
             _slideAreaService = slideAreaService;
-            _circleRotationService = circleRotationService;
+            _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
             _circleControllerService = circleControllerService;
-            _circleModel = circleModel;
-            _circleParamsConfigTask = circleParamsConfigTask;
+            _stripModel = stripModel;
             _viewService = viewService;
-            _saveDataService = saveDataService;
-            _saveDataModel = saveDataModel;
             _levelService = levelService;
             _tutorialService = tutorialService;
             _moveTrackModel = moveTrackModel;
+            _stripSpawnService = stripSpawnService;
+            _preGamePlacementService = preGamePlacementService;
+            _interactionStateService = interactionStateService;
+            _undoService = undoService;
+            _moveEfficiencyService = moveEfficiencyService;
         }
-        
+
         public async UniTask Initialize() {
-            CircleController circleControllerPrefab = await _circleControllerTask;
-            _circleParamsConfig = await _circleParamsConfigTask;
+            _interactionStateService.ResetInputBlock();
+            _undoService.Clear();
 
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);
+            _moveEfficiencyService.SetMinMoves(levelData.LevelConfig.ShortestSolution);
             _viewService.ShowView<GameView>(ViewType.GameView);
-            
-            await _slideAreaService.Initialize();
 
-            SpawnCircles(levelData, circleControllerPrefab);
-            _slideAreaService.SpawnSlideAreas(levelData.LevelConfig);
+            await _slideAreaService.Initialize();
+            await _stripSpawnService.Initialize();
+
+            SpawnStrips(levelData);
+            _slideAreaService.SpawnSlideAreas(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count);
 
             await _tutorialService.Initialize(_levelService.GetLevelDataForCurrentLevel());
+            _preGamePlacementService.StartPlacement(levelData.LevelConfig, levelData.LevelConfig.CircleConfigs.Count).Forget();
 
             await UniTask.Delay(1);
             _levelService.LevelStarted();
         }
 
         public async UniTask Dispose() {
+            _preGamePlacementService.Cancel();
             _tutorialService.Deinitialize();
             _viewService.HideView(ViewType.GameView);
-            _circleRotationService.Clear();
+            _stripRotationService.Clear();
             _slideSegmentService.Clear();
             _slideAreaService.Clear();
             _circleControllerService.Reset();
-            _circleModel.Clear();
-            _tutorialService.Deinitialize();
-            _levelService.LevelEnded();
-            foreach (var circle in _spawnedCircles) {
-                if (circle != null) {
-                    Object.Destroy(circle.gameObject);
-                }
+            _stripModel.Clear();
+
+            foreach (StripController strip in _spawnedStrips) {
+                if (strip != null)
+                    Object.Destroy(strip.gameObject);
             }
-            _spawnedCircles.Clear();
-            
+
+            _spawnedStrips.Clear();
+            _levelService.LevelEnded();
+
             await UniTask.CompletedTask;
         }
 
         public async UniTask ReloadScene() {
             _viewService.HideView(ViewType.WinLevel);
             _viewService.HideView(ViewType.LoseView);
+            _viewService.HideView(ViewType.DailyChallengeCompleteView);
             await Dispose();
             await Initialize();
         }
 
-        private void SpawnCircles(LevelData levelData, CircleController circleControllerPrefab) {
-            _circleRotationService.Clear();
+        private void SpawnStrips(LevelData levelData) {
+            _stripRotationService.Clear();
             _slideSegmentService.Clear();
-            _spawnedCircles.Clear();
-            
+            _spawnedStrips.Clear();
+            _stripModel.Clear();
+
             var circleConfigs = levelData.LevelConfig.CircleConfigs;
+            int totalStripCount = circleConfigs.Count;
+            _slideSegmentService.SetTotalStripCount(totalStripCount);
+
             for (int i = 0; i < circleConfigs.Count; i++) {
                 CircleConfig config = circleConfigs[i];
-                var circleController = _container.InstantiatePrefabForComponent<CircleController>(circleControllerPrefab);
-                circleController.transform.position = Vector3.zero;
-                
-                float radius = _circleParamsConfig.GetRadius(i);
-                float width = _circleParamsConfig.GetWidth(i);
-                circleController.Setup(config, radius, width);
-                
-                _circleRotationService.Register(circleController);
-                _slideSegmentService.RegisterCircle(circleController);
-                _circleModel.RegisterCircle(circleController);
-                _spawnedCircles.Add(circleController);
-}
+                StripController strip = _stripSpawnService.SpawnStrip(config, i, totalStripCount);
+                _spawnedStrips.Add(strip);
+            }
         }
     }
 }

@@ -37,3 +37,18 @@ MonoBehaviour:
   - ViewType: 9
     Address: SettingsView
     PresenterTypeName: Feature.SettingsViewModule.Scripts.SettingsPresenter
+  - ViewType: 10
+    Address: ToolButtonView
+    PresenterTypeName: Feature.ToolButtonViewModule.Scripts.ToolButtonPresenter
+  - ViewType: 11
+    Address: ConfirmBuyView
+    PresenterTypeName: Feature.ConfirmBuyViewModule.Scripts.ConfirmBuyPresenter
+  - ViewType: 12
+    Address: DailyChallengeStartView
+    PresenterTypeName: Feature.DailyChallengeStartViewModule.Scripts.DailyChallengeStartPresenter
+  - ViewType: 13
+    Address: DailyChallengeCompleteView
+    PresenterTypeName: Feature.DailyChallengeCompleteViewModule.Scripts.DailyChallengeCompletePresenter
+  - ViewType: 14
+    Address: TutorialView
+    PresenterTypeName: Feature.TutorialViewModule.Scripts.TutorialPresenter

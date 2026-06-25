@@ -20,6 +20,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1ef4e5b51008f0c4cb92b233d3a469db
+    m_Address: TutorialView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 262b1422a261dd44e9d795c505f71bee
+    m_Address: DailyChallengeStartView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3688563366627f14397b6a4e1dfbe407
     m_Address: CircleSegmentPrefab
     m_ReadOnly: 0
@@ -40,6 +50,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b13159f517cf9b4098391a5f4879326
+    m_Address: DailyChallengeCompleteView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 72921a07c40dda34ea467317082afeba
     m_Address: SettingsView
     m_ReadOnly: 0
@@ -47,6 +62,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 79cff393eca8e364aaad30cf4bc42aac
     m_Address: WinLevel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d46a79f9dc319724f8924f88a00872cb
+    m_Address: ConfirmBuyView
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -62,6 +82,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f2750003463360a418f4acb19126e255
     m_Address: DebugView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fcd2369d4ea628e479d26dc72b22236c
+    m_Address: ToolButtonView
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

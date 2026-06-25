@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4755207638151434890}
   - component: {fileID: 6290815786263488680}
   - component: {fileID: 4400463812629974988}
+  - component: {fileID: 4865104627982758657}
   m_Layer: 0
   m_Name: CircleModule
   m_TagString: Untagged
@@ -46,6 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.CircleController
   _segmentPrefab: {fileID: 6116368405609523104, guid: 3688563366627f14397b6a4e1dfbe407, type: 3}
+  _circleAnimationController: {fileID: 4865104627982758657}
 --- !u!114 &4400463812629974988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,3 +61,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleRegistrator
   _circleController: {fileID: 6290815786263488680}
+--- !u!114 &4865104627982758657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 988664178776098582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c46182caa3dc458bb8e95adc280a194e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleAnimationController
+  _circle: {fileID: 6290815786263488680}
+  _segmentZoomDuration: 0.1

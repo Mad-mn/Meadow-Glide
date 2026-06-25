@@ -1,4 +1,5 @@
 using System;
+using Feature.LocalizationModule.Scripts.Data;
 
 namespace Feature.SaveDataModule.Scripts.SavedData {
     [Serializable]
@@ -10,5 +11,6 @@ namespace Feature.SaveDataModule.Scripts.SavedData {
     public class PlayerSettingsData : ISaveData {
         public bool SoundsEnabled = true;
         public bool VibrationEnabled = true;
+        public Language SelectedLanguage = Language.English;
     }
 }

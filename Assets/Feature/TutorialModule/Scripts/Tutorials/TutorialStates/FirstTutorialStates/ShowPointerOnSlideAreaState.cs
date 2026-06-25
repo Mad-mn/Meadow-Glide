@@ -1,36 +1,36 @@
 using System;
 using System.Collections;
-using Feature.CircleModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
+using Feature.StripsModule.Scripts;
 using Feature.TutorialModule.Scripts.Hints;
 using UnityEngine;
 using Zenject;
 
 namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialStates {
     public class ShowPointerOnSlideAreaState : ITutorialState {
-        private const int CIRCLE_INDEX_FOR_HINT_START = 0;
-        private const int CIRCLE_INDEX_FOR_HINT_FINISH = 1;
+        private const int STRIP_INDEX_FOR_HINT_START = 0;
+        private const int STRIP_INDEX_FOR_HINT_FINISH = 1;
         private const float MOVE_DURATION = 1.5f;
+        private const float DELAY_FOR_LOOP = 0.5f;
 
-        private readonly GameCircleModel _gameCircleModel;
+        private readonly StripModel _stripModel;
         private readonly ITutorialAssetProvider _tutorialAssetProvider;
         private readonly DiContainer _container;
         private readonly IInputService _inputService;
         private readonly SlideAreaModel _slideAreaModel;
-        private readonly ISlideAreaService _slideAreaService;
+
         public event Action OnComplete;
 
         private bool _isTapped;
         private FingerHint _fingerHint;
-        private float _minRadius;
-        private float _maRadius;
-        private float _angle;
-        private Vector3 _center;
+        private float _startY;
+        private float _endY;
+        private float _columnX;
 
-        public ShowPointerOnSlideAreaState(GameCircleModel gameCircleModel, ITutorialAssetProvider tutorialAssetProvider, DiContainer container,
+        public ShowPointerOnSlideAreaState(StripModel stripModel, ITutorialAssetProvider tutorialAssetProvider, DiContainer container,
             IInputService inputService, SlideAreaModel slideAreaModel) {
-            _gameCircleModel = gameCircleModel;
+            _stripModel = stripModel;
             _tutorialAssetProvider = tutorialAssetProvider;
             _container = container;
             _inputService = inputService;
@@ -52,22 +52,20 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         }
 
         private void CachePositions() {
-            if (_gameCircleModel.Circles.Count < 2) {
-                Debug.LogError("[ShowPointerOnCircleState] Not enough circles to cache positions!");
+            if (_stripModel.Strips.Count < 2 || _slideAreaModel.SpawnedAreas.Count == 0) {
+                Debug.LogError("[ShowPointerOnSlideAreaState] Not enough strips or slide areas!");
                 return;
             }
 
-            var circleStart = _gameCircleModel.Circles[CIRCLE_INDEX_FOR_HINT_START];
-            var circleFinish = _gameCircleModel.Circles[CIRCLE_INDEX_FOR_HINT_FINISH];
+            StripController stripStart = _stripModel.Strips[STRIP_INDEX_FOR_HINT_START];
+            StripController stripEnd = _stripModel.Strips[STRIP_INDEX_FOR_HINT_FINISH];
+            SlideArea area = _slideAreaModel.SpawnedAreas[0];
 
-            var segment = _slideAreaModel.SpawnedAreas[0];
-            CircleSegment segStart = circleStart.SpawnedSegments[segment.SectorIndex]; // 3rd segment
-            CircleSegment segEnd = circleFinish.SpawnedSegments[segment.SectorIndex];   // 1st segment
-            
-            _minRadius = segStart.Radius;
-            _maRadius = segEnd.Radius;
-            _angle = segStart.transform.localEulerAngles.z;
-            _center = circleStart.transform.position;
+            _startY = stripStart.CenterY;
+            _endY = stripEnd.CenterY;
+
+            float segmentSpan = stripStart.GetSegmentSpan();
+            _columnX = (area.SectorIndex + 0.5f) * segmentSpan - stripStart.StripLoopLength * 0.5f;
         }
 
         private void InstantiateHint() {
@@ -77,37 +75,31 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         }
 
         private void StartHintAnimation() {
-            if (_fingerHint != null) {
+            if (_fingerHint != null)
                 _fingerHint.StartCoroutine(HintRoutine());
-            }
         }
 
         private IEnumerator HintRoutine() {
             while (!_isTapped) {
-                float elapsed = 0;
+                float elapsed = 0f;
 
                 while (elapsed < MOVE_DURATION && !_isTapped) {
                     elapsed += Time.deltaTime;
                     float t = elapsed / MOVE_DURATION;
-                    // Ease in out
-                    float smoothedT = Mathf.SmoothStep(0, 1, t);
-                    float currentRadius = Mathf.LerpAngle(_minRadius, _maRadius, smoothedT);
-                    UpdateHintPosition(currentRadius);
+                    float smoothedT = Mathf.SmoothStep(0f, 1f, t);
+                    float currentY = Mathf.Lerp(_startY, _endY, smoothedT);
+                    UpdateHintPosition(currentY);
                     yield return null;
                 }
 
-                if (!_isTapped) {
+                if (!_isTapped)
                     yield return new WaitForSeconds(DELAY_FOR_LOOP);
-                }
             }
         }
 
-        private const float DELAY_FOR_LOOP = 0.5f;
-
-        private void UpdateHintPosition(float radius) {
+        private void UpdateHintPosition(float y) {
             if (_fingerHint == null) return;
-            Vector3 offset = Quaternion.Euler(0, 0, _angle) * Vector3.right * radius;
-            _fingerHint.transform.position = _center + offset;
+            _fingerHint.transform.position = new Vector3(_columnX, y, 0f);
         }
 
         public void Exit() {

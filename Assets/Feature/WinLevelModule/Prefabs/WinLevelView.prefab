@@ -299,6 +299,7 @@ GameObject:
   - component: {fileID: 6803098961636172349}
   - component: {fileID: 5498046355424873026}
   - component: {fileID: 5797274314100172988}
+  - component: {fileID: 9006422888171990967}
   m_Layer: 0
   m_Name: NextLevelButton
   m_TagString: Untagged
@@ -407,6 +408,26 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &9006422888171990967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5699278161151964125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e280e96d49c0ec43992687537fb7094, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ButtonPressEffect
+  _pressScale: 0.9
+  _scaleDuration: 0.1
+  _scaleEase: 6
+  _usePunch: 1
+  _punchScale: 0.1
+  _punchDuration: 0.2
+  _punchVibrato: 10
+  _punchElasticity: 1
 --- !u!1 &5718781583024499049
 GameObject:
   m_ObjectHideFlags: 0
@@ -458,6 +479,7 @@ GameObject:
   - component: {fileID: 4011913933509510329}
   - component: {fileID: 6607388711285602533}
   - component: {fileID: 6564806414796522737}
+  - component: {fileID: 2048919217459952958}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -584,6 +606,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2048919217459952958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5755322784994894969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6465a226641f2b44d84635e8e8fe5ffd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
+  _key: 19
+  _updateOnLanguageChange: 1
 --- !u!1 &6262431009558263383
 GameObject:
   m_ObjectHideFlags: 0
@@ -596,6 +632,7 @@ GameObject:
   - component: {fileID: 3118290204935328154}
   - component: {fileID: 7654402213909231489}
   - component: {fileID: 6411057509145456786}
+  - component: {fileID: 8205563825104390382}
   m_Layer: 0
   m_Name: MainMenuButton
   m_TagString: Untagged
@@ -704,3 +741,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8205563825104390382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6262431009558263383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e280e96d49c0ec43992687537fb7094, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ButtonPressEffect
+  _pressScale: 0.9
+  _scaleDuration: 0.1
+  _scaleEase: 6
+  _usePunch: 1
+  _punchScale: 0.1
+  _punchDuration: 0.2
+  _punchVibrato: 10
+  _punchElasticity: 1

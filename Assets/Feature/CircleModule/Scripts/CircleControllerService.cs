@@ -1,123 +1,92 @@
 using System;
 using System.Collections.Generic;
-using Feature.ColorServiceModule.Scripts;
-using Feature.LoseViewModule.Scripts;
-using Feature.SaveDataModule.Scripts;
-using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.LevelResultModule.Scripts;
+using Feature.StripsModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
-using Feature.UIServiceModule.Scripts;
-using Feature.WinLevelModule.Scripts;
-using UnityEngine;
 using Zenject;
 
 namespace Feature.CircleModule.Scripts {
     public class CircleControllerService : ICircleControllerService, IInitializable, IDisposable {
-        private readonly GameCircleModel _circleModel;
-        private readonly IViewService _viewService;
-        private readonly ISaveDataModel _saveDataModel;
-        private readonly ISaveDataService _saveDataService;
+        private readonly StripModel _stripModel;
         private readonly MoveTrackModel _moveTrackModel;
+        private readonly ILevelResultService _levelResultService;
 
-        private List<CircleController> _filledCircles = new List<CircleController>();
+        private List<StripController> _filledStrips = new List<StripController>();
 
-        public CircleControllerService(GameCircleModel circleModel, IViewService viewService,
-            ISaveDataModel saveDataModel, ISaveDataService saveDataService, MoveTrackModel moveTrackModel) {
-            _circleModel = circleModel;
-            _viewService = viewService;
-            _saveDataModel = saveDataModel;
-            _saveDataService = saveDataService;
+        private bool _isWin;
+        private bool _isLose;
+
+        public CircleControllerService(StripModel stripModel, MoveTrackModel moveTrackModel,
+            ILevelResultService levelResultService) {
+            _stripModel = stripModel;
             _moveTrackModel = moveTrackModel;
+            _levelResultService = levelResultService;
         }
 
         public void Initialize() {
-            _moveTrackModel.OnMovesChanged += OnCircleSegmentChanged;
+            _stripModel.OnStripCompletedStatusChanged += OnStripCompletedStatusChanged;
+            _moveTrackModel.OnMovesChanged += OnMovesChanged;
         }
 
         public void Dispose() {
-            _moveTrackModel.OnMovesChanged -= OnCircleSegmentChanged;
+            _stripModel.OnStripCompletedStatusChanged -= OnStripCompletedStatusChanged;
+            _moveTrackModel.OnMovesChanged -= OnMovesChanged;
+        }
+
+        private void OnMovesChanged() {
+            if (!_isWin)
+                CheckForLose();
+        }
+
+        private void OnStripCompletedStatusChanged(StripController strip, bool isCompleted) {
+            ApplyResultForStrip(strip, isCompleted);
+            if (isCompleted)
+                strip.PlayCompletedAnimation(CheckForMatchResult);
         }
 
         public void Reset() {
-            _filledCircles.Clear();
+            _filledStrips.Clear();
+            _isWin = false;
+            _isLose = false;
+            _levelResultService.Reset();
         }
 
-        private void OnCircleSegmentChanged() {
-            CheckCheckForMatchColors();
-        }
-
-        private void CheckCheckForMatchColors() {
-            UpdateCirclesStates();
-            if(!CheckForWin())
+        private void CheckForMatchResult() {
+            if (!CheckForWin())
                 CheckForLose();
         }
 
         private bool CheckForWin() {
-            if (_filledCircles.Count != _circleModel.Circles.Count || _circleModel.Circles.Count <= 0)
+            if (_filledStrips.Count != _stripModel.Strips.Count || _stripModel.Strips.Count <= 0)
                 return false;
 
-            ApplyWin();
+            _levelResultService.OnLevelWon();
+            _isWin = true;
             return true;
         }
-        
+
         private void CheckForLose() {
             if (_moveTrackModel.MovesLeft == 0) {
-                _viewService.ShowView<LoseView>(ViewType.LoseView);
-            }
-        }
-
-        private void ApplyWin() {
-            _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
-                .Level++;
-            _saveDataService.Save(SaveDataType.PlayerProgress);
-            _viewService.ShowView<WinLevel>(ViewType.WinLevel);
-            
-        }
-
-        private void UpdateCirclesStates() {
-            foreach (CircleController circle in _circleModel.Circles) {
-                bool circleFull = IsCircleUniform(circle);
-                ApplyResultForCircle(circle, circleFull);
-            }
-        }
-
-        private bool IsCircleUniform(CircleController circle) {
-            if (circle.SpawnedSegments.Count == 0 || circle.SpawnedSegments.Count != circle.SegmentCount) {
-                return false;
-            }
-
-            CircleColorType targetColor = CircleColorType.None;
-
-            foreach (CircleSegment segment in circle.SpawnedSegments) {
-                if (targetColor == CircleColorType.None) {
-                    targetColor = segment.ColorType;
-                    
-                    // None or White usually shouldn't count as a completed circle color
-                    if (targetColor == CircleColorType.None) {
-                        return false;
-                    }
-                    continue;
-                }
-
-                if (segment.ColorType != targetColor) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private void ApplyResultForCircle(CircleController circle, bool circleFull) {
-            if (circleFull) {
-                if(_filledCircles.Contains(circle))
+                if (_isLose)
                     return;
 
-                _filledCircles.Add(circle);
+                _isLose = true;
+                _levelResultService.OnLevelLost();
+            }
+        }
+
+        private void ApplyResultForStrip(StripController strip, bool stripFull) {
+            if (stripFull) {
+                if (_filledStrips.Contains(strip))
+                    return;
+
+                _filledStrips.Add(strip);
             }
             else {
-                if(!_filledCircles.Contains(circle))
+                if (!_filledStrips.Contains(strip))
                     return;
 
-                _filledCircles.Remove(circle);
+                _filledStrips.Remove(strip);
             }
         }
     }
