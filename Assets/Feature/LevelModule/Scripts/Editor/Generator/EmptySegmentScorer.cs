@@ -69,10 +69,10 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             var eligible = scored.Where(c => c.Score >= minScore).ToList();
 
             if (eligible.Count <= targetCount)
-                return eligible;
+                return FilterUniqueColors(eligible);
 
-            eligible = eligible.OrderBy(_ => rnd.Next()).ToList();
-            return eligible.Take(targetCount).ToList();
+            var shuffled = eligible.OrderBy(_ => rnd.Next()).ToList();
+            return FilterUniqueColors(shuffled.Take(targetCount).ToList());
         }
 
         public List<ScoredCandidate> SelectHybrid(
@@ -110,9 +110,20 @@ namespace Feature.LevelModule.Scripts.Editor.Generator {
             var all = topK.Concat(remaining).OrderByDescending(c => c.Score).ToList();
 
             if (all.Count <= targetCount)
-                return all;
+                return FilterUniqueColors(all);
 
-            return all.Take(targetCount).ToList();
+            return FilterUniqueColors(all.Take(targetCount).ToList());
+        }
+
+        private List<ScoredCandidate> FilterUniqueColors(List<ScoredCandidate> candidates) {
+            var usedColors = new HashSet<CircleColorType>();
+            var result = new List<ScoredCandidate>();
+            foreach (var c in candidates) {
+                if (usedColors.Contains(c.Color)) continue;
+                usedColors.Add(c.Color);
+                result.Add(c);
+            }
+            return result;
         }
 
         private float ScoreAmbiguity(int ring, int sector, CircleColorType color, byte[,] colors, int sectors) {
