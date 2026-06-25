@@ -69,9 +69,6 @@ namespace Feature.LevelResultModule.Scripts {
             _isLose = true;
 
             if (_challengeService.IsActive) {
-                int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
-                _challengeService.OnChallengeCompleted(result);
                 _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
             }
             else {

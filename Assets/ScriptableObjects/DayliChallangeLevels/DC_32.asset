@@ -160,7 +160,7 @@ MonoBehaviour:
     SlideAreaStatus: 0
     Colors: 
   _difficulty: 16
-  _difficultyMultiplier: 1
+  _difficultyMultiplier: 1.5
   _averageMoves: 30
   _seed: 494139604
   _solutionPath:
