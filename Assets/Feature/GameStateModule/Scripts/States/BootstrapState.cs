@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Feature.CameraServiceModule.Scripts;
 using Feature.ChallengeModule.Scripts;
+using Feature.FirebaseModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
@@ -36,6 +37,7 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IChallengeConfigProvider _challengeConfigProvider;
         private readonly IResourceInfoProvider _resourceInfoProvider;
         private readonly ILocalizationService _localizationService;
+        private readonly IFirebaseService _firebaseService;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
@@ -43,7 +45,8 @@ namespace Feature.GameStateModule.Scripts.States {
             ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
             IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
             IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider,
-            IChallengeConfigProvider challengeConfigProvider, IResourceInfoProvider resourceInfoProvider, ILocalizationService localizationService) {
+            IChallengeConfigProvider challengeConfigProvider, IResourceInfoProvider resourceInfoProvider,
+            ILocalizationService localizationService, IFirebaseService firebaseService) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -59,6 +62,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _challengeConfigProvider = challengeConfigProvider;
             _resourceInfoProvider = resourceInfoProvider;
             _localizationService = localizationService;
+            _firebaseService = firebaseService;
         }
 
         public void Enter() {
@@ -69,6 +73,7 @@ namespace Feature.GameStateModule.Scripts.States {
         public void Exit() { }
 
         private async UniTaskVoid Initialize() {
+            await _firebaseService.Initialize();
             _saveDataService.LoadAll();
             _localizationService.Initialize();
             await _cameraService.Initialize();
