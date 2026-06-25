@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Feature.StripsModule.Scripts;
 using UnityEngine;
 
@@ -21,7 +22,9 @@ namespace Feature.StripsModule.Scripts {
 
         private IEnumerator CompletedAnimation(Action callback) {
             WaitForSeconds wait = new WaitForSeconds(_segmentZoomDuration);
-            foreach (StripSegment segment in _strip.SpawnedSegments) {
+            List<StripSegment> segments = new List<StripSegment>();
+            segments.AddRange(_strip.SpawnedSegments);
+            foreach (StripSegment segment in segments) {
                 segment.ZoomIn();
                 yield return wait;
                 segment.ZoomOut();
