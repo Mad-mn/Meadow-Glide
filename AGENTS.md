@@ -23,7 +23,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**33 module installers** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
+**33 installer calls** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)
@@ -83,7 +83,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) every frame while dragging.
 - `BinaryFormatter` in `SaveDataService` (lines 85, 105) — deprecated, insecure, not supported on IL2CPP/WebGL.
 - `Debug.LogError` fires in `StripController.BuildStrip()` (line 146) during normal gameplay when references are missing.
-- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 17) — auto-generated, fix the Addressable address.
+- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 18) — auto-generated, fix the Addressable address.
 
 ## Key File Paths
 
@@ -98,6 +98,8 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 | Package manifest | `Packages/manifest.json` |
 | Circle geometry docs | `Assets/Docs/CircleGeometrySystem.md` |
 | Level generation docs | `Assets/Docs/LevelGenerationSystem.md` |
+| Daily challenge docs | `Assets/Docs/DailyChallengeSystem.md` |
+| Game design document | `Assets/Docs/GameDesignDocument.md` |
 
 ## Level Data
 

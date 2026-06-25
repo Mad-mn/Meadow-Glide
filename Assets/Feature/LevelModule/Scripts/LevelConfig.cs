@@ -27,7 +27,7 @@ namespace Feature.LevelModule.Scripts {
         public int ShortestSolution => _solutionPath.Count;
 
         public int MovesForLevel =>
-            Mathf.RoundToInt(_difficulty * _difficultyMultiplier);
+            Mathf.RoundToInt(_averageMoves * _difficultyMultiplier);
 
         public void SetConfigs(List<CircleConfig> circles, List<SlideAreaConfig> areas, int difficulty,
             int averageMoves, int seed, List<LevelMoveData> solutionPath) {

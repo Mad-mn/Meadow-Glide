@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "218493842522",
+    "project_id": "color-slide-46368",
+    "storage_bucket": "color-slide-46368.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218493842522:android:821a0b1d9c887db4935463",
+        "android_client_info": {
+          "package_name": "com.AmanaGames.ColorRings"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC91OmOKDXlINdjGdqkjnQx8LM0qNrrAj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,6 +7,7 @@ using Feature.CircleModule.Scripts.Installers;
 using Feature.ColorServiceModule.Scripts.Installers;
 using Feature.CoroutineRunnerModule.Scripts.Installers;
 using Feature.DailyChallengeStartViewModule.Scripts.Installers;
+using Feature.FirebaseModule.Scripts.Installers;
 using Feature.GameStateModule.Scripts.Installers;
 using Feature.InputModule.Scripts.Installers;
 using Feature.LevelInitializeModule.Scripts.Installers;
@@ -68,6 +69,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         MoveEfficiencyModuleInstaller.Install(Container);
         ChallengeModuleInstaller.Install(Container);
         CoroutineRunnerInstaller.Install(Container);
+        FirebaseModuleInstaller.Install(Container);
         LevelResultModuleInstaller.Install(Container);
         DailyChallengeStartViewModuleInstaller.Install(Container);
         LocalizationModuleInstaller.Install(Container);
