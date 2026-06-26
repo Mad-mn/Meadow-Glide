@@ -8,6 +8,7 @@ using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
+using Feature.PerfectMapViewModule.Scripts.Configs;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SoundModule.Scripts;
@@ -38,6 +39,7 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IResourceInfoProvider _resourceInfoProvider;
         private readonly ILocalizationService _localizationService;
         private readonly IFirebaseService _firebaseService;
+        private readonly IPerfectMapRewardConfigProvider _perfectMapRewardConfigProvider;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
@@ -46,7 +48,8 @@ namespace Feature.GameStateModule.Scripts.States {
             IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
             IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider,
             IChallengeConfigProvider challengeConfigProvider, IResourceInfoProvider resourceInfoProvider,
-            ILocalizationService localizationService, IFirebaseService firebaseService) {
+            ILocalizationService localizationService, IFirebaseService firebaseService,
+            IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -63,6 +66,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _resourceInfoProvider = resourceInfoProvider;
             _localizationService = localizationService;
             _firebaseService = firebaseService;
+            _perfectMapRewardConfigProvider = perfectMapRewardConfigProvider;
         }
 
         public void Enter() {
@@ -97,6 +101,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _transactionConfigsProvider.Initialize();
             await _challengeConfigProvider.Initialize();
             await _resourceInfoProvider.Initialize();
+            await _perfectMapRewardConfigProvider.Initialize();
         }
     }
 }

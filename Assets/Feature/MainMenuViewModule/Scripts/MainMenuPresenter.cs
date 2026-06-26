@@ -4,6 +4,7 @@ using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
+using Feature.PerfectMapViewModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
@@ -38,9 +39,13 @@ namespace Feature.MainMenuViewModule.Scripts {
             View.PlayButton.onClick.AddListener(StartSimpleGame);
             View.DebugButton.onClick.AddListener(ShowDebugWindow);
             View.SettingsButton.onClick.AddListener(OnSettingsClick);
+            View.PerfectChallengeButton.onClick.AddListener(OnPerfectChallenge);
             View.DailyChallengeButton.onClick.AddListener(OnDailyChallengeClick);
             LocalizationEvents.OnLanguageChanged += SetupText;
         }
+
+        private void OnPerfectChallenge() =>
+            _viewService.ShowView<PerfectMapView>(ViewType.PerfectMapView);
 
         public override void Show() {
             base.Show();

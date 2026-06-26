@@ -11,6 +11,7 @@ namespace Feature.MainMenuViewModule.Scripts {
         [field: SerializeField] public Button SettingsButton { get; private set; }
         [field: SerializeField] public Button DailyChallengeButton { get; private set; }
         [field: SerializeField] public Button DebugButton { get; private set; }
+        [field: SerializeField] public Button PerfectChallengeButton { get; private set; }
         [field: SerializeField] public TMP_Text CoinsCountText { get; private set; }
         
         public Button PlayButton => _playButton;

@@ -22,5 +22,11 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Win_Title = 19,
         Tutorial_UndoMove = 20,
             Global_Max = 21,
+        Global_Levels = 22,
+        PerfectChallenge_YouResult = 23,
+        PerfectChallenge_Perfect = 24,
+        Global_Claim = 25,
+        Global_Claimed = 26,
+        PerfectChallenge_Title = 27,
 }
 }

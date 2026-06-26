@@ -38,8 +38,8 @@ namespace Feature.LevelModule.Scripts {
                 return _challengeService.GetCurrentLevel();
             }
 
-            PlayerProgressData playerProgressData = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
-            return _levelConfigProvider.LevelDatas[playerProgressData.Level];
+            int level = _levelModel.ReplayLevel ?? _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level;
+            return _levelConfigProvider.LevelDatas[level];
         }
 
         public void LevelStarted() {
@@ -49,6 +49,7 @@ namespace Feature.LevelModule.Scripts {
         }
 
         public void LevelEnded() {
+            _levelModel.ReplayLevel = null;
             _levelModel.EndLevel();
         }
     }

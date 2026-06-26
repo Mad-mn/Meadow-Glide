@@ -38,6 +38,7 @@ namespace Feature.LevelInitializeModule {
         private readonly ISaveDataModel _saveDataModel;
         private readonly ISaveDataService _saveDataService;
         private readonly IChallengeService _challengeService;
+        private readonly LevelModel _levelModel;
 
         private readonly List<StripController> _spawnedStrips = new List<StripController>();
 
@@ -58,7 +59,8 @@ namespace Feature.LevelInitializeModule {
             IMoveEfficiencyService moveEfficiencyService,
             ISaveDataModel saveDataModel,
             ISaveDataService saveDataService,
-            IChallengeService challengeService) {
+            IChallengeService challengeService,
+            LevelModel levelModel) {
             _slideAreaService = slideAreaService;
             _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
@@ -76,6 +78,7 @@ namespace Feature.LevelInitializeModule {
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _challengeService = challengeService;
+            _levelModel = levelModel;
         }
 
         public async UniTask Initialize() {
@@ -123,10 +126,12 @@ namespace Feature.LevelInitializeModule {
         }
 
         public async UniTask ReloadScene() {
+            int? savedReplayLevel = _levelModel.ReplayLevel;
             _viewService.HideView(ViewType.WinLevel);
             _viewService.HideView(ViewType.LoseView);
             _viewService.HideView(ViewType.DailyChallengeCompleteView);
             await Dispose();
+            _levelModel.ReplayLevel = savedReplayLevel;
             await Initialize();
         }
 
@@ -135,7 +140,7 @@ namespace Feature.LevelInitializeModule {
                 return;
             }
             PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
-            int currentLevel = progress.Level;
+            int currentLevel = _levelModel.ReplayLevel ?? progress.Level;
 
             if (progress.CompletedLevels == null)
                 progress.CompletedLevels = new Dictionary<int, LevelCompletionData>();

@@ -5,6 +5,8 @@ namespace Feature.LevelModule.Scripts {
         public event Action OnLevelStart;
         public event Action OnLevelEnd;
 
+        public int? ReplayLevel { get; set; }
+
         public void StartLevel() {
             OnLevelStart?.Invoke();
         }

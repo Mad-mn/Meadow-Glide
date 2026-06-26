@@ -8,12 +8,14 @@ namespace Feature.SaveDataModule.Scripts.SavedData {
     public class LevelCompletionData : ISaveData {
         public MoveEfficiencyResult Status;
         public int Attempts;
+        public int MovesUsed;
     }
 
     [Serializable]
     public class PlayerProgressData : ISaveData {
         public int Level = 1;
         public Dictionary<int, LevelCompletionData> CompletedLevels = new Dictionary<int, LevelCompletionData>();
+        public HashSet<int> ClaimedPerfectMapRewards = new HashSet<int>();
     }
 
     [Serializable]

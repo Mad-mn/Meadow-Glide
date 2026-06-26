@@ -52,3 +52,6 @@ MonoBehaviour:
   - ViewType: 14
     Address: TutorialView
     PresenterTypeName: Feature.TutorialViewModule.Scripts.TutorialPresenter
+  - ViewType: 15
+    Address: PerfectMapView
+    PresenterTypeName: Feature.PerfectMapViewModule.Scripts.PerfectMapPresenter

@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3bbdea45fb7fa274481eb0c7190c67e0
+    m_Address: PerfectMapRewardConfigs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 41daba43fb4162249a06150a35bf8489
     m_Address: ResourceInfoConfig
     m_ReadOnly: 0

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Feature.ChallengeModule.Scripts;
 using Feature.DailyChallengeCompleteViewModule.Scripts;
+using Feature.LevelModule.Scripts;
 using Feature.LoseViewModule.Scripts;
 using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
@@ -20,6 +21,7 @@ namespace Feature.LevelResultModule.Scripts {
         private readonly IEconomyDataProvider _economyDataProvider;
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IViewService _viewService;
+        private readonly LevelModel _levelModel;
 
         private bool _isWin;
         private bool _isLose;
@@ -32,7 +34,8 @@ namespace Feature.LevelResultModule.Scripts {
             IPlayerInventoryService inventoryService,
             IEconomyDataProvider economyDataProvider,
             MoveTrackModel moveTrackModel,
-            IViewService viewService) {
+            IViewService viewService,
+            LevelModel levelModel) {
             _challengeService = challengeService;
             _moveEfficiencyService = moveEfficiencyService;
             _saveDataModel = saveDataModel;
@@ -41,6 +44,7 @@ namespace Feature.LevelResultModule.Scripts {
             _economyDataProvider = economyDataProvider;
             _moveTrackModel = moveTrackModel;
             _viewService = viewService;
+            _levelModel = levelModel;
         }
 
         public void OnLevelWon() {
@@ -57,13 +61,16 @@ namespace Feature.LevelResultModule.Scripts {
             }
             else {
                 PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
-                int completedLevel = progress.Level;
+                bool isReplay = _levelModel.ReplayLevel.HasValue;
+                int completedLevel = _levelModel.ReplayLevel ?? progress.Level;
 
                 int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
                 MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
                 SaveLevelCompletion(progress, completedLevel, result);
 
-                progress.Level++;
+                if (!isReplay) {
+                    progress.Level++;
+                }
                 _saveDataService.Save(SaveDataType.PlayerProgress);
                 _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
                 _viewService.ShowView<WinLevel>(ViewType.WinLevel);
@@ -94,12 +101,13 @@ namespace Feature.LevelResultModule.Scripts {
                 progress.CompletedLevels = new Dictionary<int, LevelCompletionData>();
 
             if (!progress.CompletedLevels.TryGetValue(level, out LevelCompletionData existing)) {
-                progress.CompletedLevels[level] = new LevelCompletionData { Status = result };
+                progress.CompletedLevels[level] = new LevelCompletionData { Status = result, MovesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft };
                 return;
             }
 
             if ((int)result > (int)existing.Status) {
                 existing.Status = result;
+                existing.MovesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
             }
         }
     }

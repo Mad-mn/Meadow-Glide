@@ -4,6 +4,7 @@ using Feature.CircleModule.Scripts;
 using Feature.ColorServiceModule.Scripts;
 using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.PerfectMapViewModule.Scripts.Configs;
 using Feature.PlayerInventoryModule.Configs;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
@@ -35,6 +36,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<TransactionConfigs>(AddressConstants.TransactionConfigs);
             Container.BindAddressableAsset<ChallengeConfigs>(AddressConstants.DailyChallengeConfigs);
             Container.BindAddressableAsset<ResourceInfoConfig>(AddressConstants.ResourceInfoConfig);
+            Container.BindAddressableAsset<PerfectMapRewardConfigs>(AddressConstants.PerfectMapRewardConfigs);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
             

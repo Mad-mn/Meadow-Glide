@@ -65,6 +65,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4fc00a012fd11e44a381949623c9c80
+    m_Address: PerfectMapView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d46a79f9dc319724f8924f88a00872cb
     m_Address: ConfirmBuyView
     m_ReadOnly: 0
