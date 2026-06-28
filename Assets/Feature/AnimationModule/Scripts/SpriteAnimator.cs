@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,40 +9,38 @@ namespace Feature.AnimationModule.Scripts {
         [SerializeField] private float _interval = 1f;
         [SerializeField] private bool _playOnStart = true;
 
-        private int _currentIndex;
-        private float _timer;
+        private Sequence _sequence;
 
         private void Start() {
             if (_playOnStart) Play();
         }
 
-        private void Update() {
-            if (_sprites == null || _sprites.Length == 0 || _image == null)
-                return;
-
-            _timer += Time.deltaTime;
-            if (_timer >= _interval) {
-                _timer -= _interval;
-                _currentIndex = (_currentIndex + 1) % _sprites.Length;
-                _image.sprite = _sprites[_currentIndex];
-            }
+        private void OnDestroy() {
+            _sequence?.Kill();
         }
 
         public void Play() {
-            _timer = 0f;
-            _currentIndex = 0;
-            if (_sprites.Length > 0 && _image != null)
-                _image.sprite = _sprites[0];
-            enabled = true;
+            _sequence?.Kill();
+            if (_sprites == null || _sprites.Length == 0 || _image == null) return;
+
+            _image.sprite = _sprites[0];
+            _sequence = DOTween.Sequence().SetLoops(-1);
+            for (int i = 0; i < _sprites.Length; i++) {
+                var sprite = _sprites[i];
+                _sequence.AppendCallback(() => _image.sprite = sprite);
+                if (i < _sprites.Length - 1)
+                    _sequence.AppendInterval(_interval);
+            }
+            _sequence.AppendInterval(_interval);
         }
 
         public void Stop() {
-            enabled = false;
+            _sequence?.Kill();
+            _sequence = null;
         }
 
         public void SetSprites(Sprite[] sprites) {
             _sprites = sprites;
-            _currentIndex = 0;
             if (_sprites.Length > 0 && _image != null)
                 _image.sprite = _sprites[0];
         }
