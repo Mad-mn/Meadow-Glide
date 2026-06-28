@@ -15,7 +15,7 @@ MonoBehaviour:
   _resources:
   - _resourceType: 1
     _displayName: Coins
-    _icon: {fileID: 6819147291191527595, guid: f9b444f36254bc143a8d9c17a3e8bc84, type: 3}
+    _icon: {fileID: 21300000, guid: 7280c6f58e22cd54ea80256823157c2f, type: 3}
   - _resourceType: 2
     _displayName: Undo Tokens
-    _icon: {fileID: 21300000, guid: cdb19b9a6089e7d41999bedf0e5fdd86, type: 3}
+    _icon: {fileID: 21300000, guid: 21aba2c44497f7449a82e40a333d3663, type: 3}
