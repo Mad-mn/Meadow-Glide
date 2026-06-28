@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Feature.BackgroundViewModule.Scripts;
 using Feature.CameraServiceModule.Scripts;
 using Feature.ChallengeModule.Scripts;
 using Feature.FirebaseModule.Scripts;
@@ -82,6 +83,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _localizationService.Initialize();
             await _cameraService.Initialize();
             await _viewService.Initialize();
+            _viewService.ShowView<BackgroundView>(ViewType.BackgroundView);
             _viewService.ShowView<LoadingView>(ViewType.LoadingView);
             await InitializeDataProviders();
             _audioService.Initialize();

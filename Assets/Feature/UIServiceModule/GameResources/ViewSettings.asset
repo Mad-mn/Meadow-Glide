@@ -55,3 +55,6 @@ MonoBehaviour:
   - ViewType: 15
     Address: PerfectMapView
     PresenterTypeName: Feature.PerfectMapViewModule.Scripts.PerfectMapPresenter
+  - ViewType: 16
+    Address: BackgroundView
+    PresenterTypeName: Feature.BackgroundViewModule.Scripts.BackgroundPresenter
