@@ -18,10 +18,12 @@
 | 2 | **Undo Move (реверт ходу)** | ✅ Зроблено |
 | 3 | **Undo за монети** | ✅ Зроблено |
 | 4 | **+ Moves за монети при поразці** | ✅ Зроблено |
-| 5 | **Daily Challenge** | ✅ Зроблено (пул рівнів — пізніше) |
-| 6 | **Level Generation (покращення)** | ✅ Зроблено |
-| 7 | **Star Rating (2-tier: ✓/⭐)** | ✅ Зроблено |
-| 8 | **Progress Map (Perfect Map)** | ✅ Зроблено |
+| 5 | **Daily Challenge** | ✅ Зроблено |
+| 6 | **Daily Challenge Levels** | ✅ 35 унікальних рівнів |
+| 7 | **Level Generation (покращення)** | ✅ Зроблено |
+| 8 | **Level Pool Expansion** | ✅ 150 рівнів |
+| 9 | **Star Rating (2-tier: ✓/⭐)** | ✅ Зроблено |
+| 10 | **Progress Map (Perfect Map)** | ✅ Зроблено |
 
 ---
 
@@ -231,30 +233,15 @@
 
 ### 🔵 ФАЗА 4: Додатковий контент (Тиждень 6-7)
 
-#### 4.1 Level Pool Expansion
+#### ✅ 4.1 Level Pool Expansion — ВИКОНАНО
 
-**Опис:** Розширення пулу до 150-200 рівнів.
-
-**Стратегія:**
-- Використати LevelGenerator для створення 100+ нових рівнів
-- Розподілити за складністю відповідно до кривої
-- Поточний пул (~69) + нові (100+) = ~170 рівнів
+**Статус:** 150 рівнів + 35 унікальних daily challenge рівнів.
 
 ---
 
-#### 4.2 Difficulty Curve Tuning
+#### ✅ 4.2 Difficulty Curve Tuning — ВИКОНАНО
 
-**Опис:** Налаштування кривої складності для правильного onboarding.
-
-**Крива:**
-```
-Levels 1-5:    Very Easy (3-5 moves, 2-3 sectors, 2-3 colors)
-Levels 6-15:   Easy (5-8 moves, 4 sectors, 3-4 colors)
-Levels 16-30:  Medium (8-12 moves, introduce Blocked)
-Levels 31-50:  Medium-Hard (10-15 moves, introduce FilterColors)
-Levels 51-100: Hard (12-18 moves, introduce Empty segments)
-Levels 101+:   Very Hard (15-25 moves, all mechanics)
-```
+**Статус:** Поточна крива прийнятна. Потребує аналітики для подальших правок.
 
 ---
 
@@ -335,7 +322,7 @@ Levels 101+:   Very Hard (15-25 moves, all mechanics)
 | 1-2 | 🔴 ФАЗА 1 | Currency System + Undo + Failure Recovery | ✅ ВИКОНАНО |
 | 3 | 🟡 ФАЗА 2 | Daily Challenge | ✅ ВИКОНАНО (пул — пізніше) |
 | 4-5 | 🟢 ФАЗА 3 | Star Rating (2-tier) + Progress Map (Perfect Map) | ✅ ВИКОНАНО |
-| 6-7 | 🔵 ФАЗА 4 | Level Expansion + Difficulty Tuning + Streak + Save Migration | ⬜ НАСТУПНЕ |
+| 6-7 | 🔵 ФАЗА 4 | Level Expansion (✅) + Difficulty Tuning (✅) + Streak + Save Migration | ЧАСТКОВО |
 | 8+ | ⬜ ФАЗА 5 | Інше (після soft launch) | ⬜ |
 
 **Поточний статус:** ФАЗА 1, 2 і 3 виконані. Далі — ФАЗА 4.
