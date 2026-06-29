@@ -6,6 +6,10 @@ namespace Feature.PerfectMapViewModule.Scripts.Installers {
         public override void InstallBindings() {
             Container.BindInterfacesAndSelfTo<PerfectMapRewardConfigProvider>()
                 .AsSingle();
+            Container.BindInterfacesAndSelfTo<PerfectMapService>()
+                .AsSingle();
+            Container.Bind<PerfectMapModel>()
+                .AsSingle();
         }
     }
 }

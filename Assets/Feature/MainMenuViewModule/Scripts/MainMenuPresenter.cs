@@ -1,3 +1,4 @@
+using System.Linq;
 using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.DebugViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
@@ -28,10 +29,12 @@ namespace Feature.MainMenuViewModule.Scripts {
         private readonly IPlayerInventoryService _playerInventoryService;
         private readonly ILocalizationService _localizationService;
         private readonly IMessageService _messageService;
+        private readonly IPerfectMapService _perfectMapService;
+        private readonly PerfectMapModel _perfectMapModel;
 
         public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel, IViewService viewService,
             IAudioService audioService, [CanBeNull] IPlayerInventoryService playerInventoryService, ILocalizationService localizationService,
-            IMessageService messageService) : base(view) {
+            IMessageService messageService, IPerfectMapService perfectMapService, PerfectMapModel perfectMapModel) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _viewService = viewService;
@@ -39,6 +42,8 @@ namespace Feature.MainMenuViewModule.Scripts {
             _playerInventoryService = playerInventoryService;
             _localizationService = localizationService;
             _messageService = messageService;
+            _perfectMapService = perfectMapService;
+            _perfectMapModel = perfectMapModel;
         }
 
         public override void Initialize() {
@@ -47,7 +52,15 @@ namespace Feature.MainMenuViewModule.Scripts {
             View.SettingsButton.onClick.AddListener(OnSettingsClick);
             View.PerfectChallengeButton.onClick.AddListener(OnPerfectChallenge);
             View.DailyChallengeButton.onClick.AddListener(OnDailyChallengeClick);
+            _perfectMapModel.OnRewardClaimed += OnChangePerfectMap;
             LocalizationEvents.OnLanguageChanged += SetupText;
+        }
+
+        public override void Show() {
+            base.Show();
+            SetupText();
+            UpdateCoinsCountTxt();
+            UpdateChallengeInfo();
         }
 
         private void OnPerfectChallenge() {
@@ -59,18 +72,15 @@ namespace Feature.MainMenuViewModule.Scripts {
             _viewService.ShowView<PerfectMapView>(ViewType.PerfectMapView);
         }
 
-        public override void Show() {
-            base.Show();
-            SetupText();
-            UpdateCoinsCountTxt();
+        private void OnChangePerfectMap(int level) =>
             UpdateChallengeInfo();
-        }
 
         private void UpdateChallengeInfo() {
-            int level = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
-                .Level;
+            PlayerProgressData data = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+            int level = data.Level;
             View.DailyChallengeLock.SetActive(level < DAILY_CHALLENGE_UNLOCK_LEVEL);
             View.PerfectChallengeLock.SetActive(level < PERFECT_CHALLENGE_UNLOCK_LEVEL);
+            View.PerfectChallengeNotification.SetActive(level >= PERFECT_CHALLENGE_UNLOCK_LEVEL && _perfectMapService.HasUnclaimedRewards());
         }
 
         private void UpdateCoinsCountTxt() {

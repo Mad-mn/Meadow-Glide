@@ -23,6 +23,7 @@ namespace Feature.PerfectMapViewModule.Scripts {
         private readonly IGameStateMachine _gameStateMachine;
         private readonly IInstantiator _instantiator;
         private readonly LevelModel _levelModel;
+        private readonly PerfectMapModel _perfectMapModel;
 
         private LevelConfigProvider _levelConfigProvider;
         private readonly List<LevelInfoPerfectChallenge> _spawnedItems = new List<LevelInfoPerfectChallenge>();
@@ -37,7 +38,8 @@ namespace Feature.PerfectMapViewModule.Scripts {
             IViewService viewService,
             IGameStateMachine gameStateMachine,
             IInstantiator instantiator,
-            LevelModel levelModel) : base(view) {
+            LevelModel levelModel,
+            PerfectMapModel perfectMapModel) : base(view) {
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _levelConfigProviderTask = levelConfigProviderTask;
@@ -47,6 +49,7 @@ namespace Feature.PerfectMapViewModule.Scripts {
             _gameStateMachine = gameStateMachine;
             _instantiator = instantiator;
             _levelModel = levelModel;
+            _perfectMapModel = perfectMapModel;
         }
 
         public override void Initialize() {
@@ -151,6 +154,8 @@ namespace Feature.PerfectMapViewModule.Scripts {
 
             LevelInfoPerfectData data = BuildLevelData(levelId, _levelConfigProvider.LevelDatas[levelId], progress);
             item.Setup(data);
+
+            _perfectMapModel.ClaimReward(levelId);
         }
 
         private void ClearList() {
