@@ -33,9 +33,13 @@ namespace Feature.CircleModule.Scripts {
         }
 
         private void OnMovesChanged() {
-            if (!_isWin)
-                if (!CheckForWin())
+            if (!_isWin) {
+                if (!CheckForWin()) {
+                    if (_moveTrackModel.MovesLeft > 0)
+                        _isLose = false;
                     CheckForLose();
+                }
+            }
         }
 
         private void OnStripCompletedStatusChanged(StripController strip, bool isCompleted) {
