@@ -19,6 +19,7 @@ public static class AddressConstants
     public const string GameBack = "GameBack";
     public const string GameView = "GameView";
     public const string GircleModule = "GircleModule";
+    public const string LanguageFontConfig = "LanguageFontConfig";
     public const string LevelConfigProvider = "LevelConfigProvider";
     public const string LoadingView = "LoadingView";
     public const string LoseView = "LoseView";

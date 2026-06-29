@@ -1983,6 +1983,7 @@ GameObject:
   - component: {fileID: 3968686660343490690}
   - component: {fileID: 3267350025981957453}
   - component: {fileID: 4352514308634578245}
+  - component: {fileID: 571925503727501149}
   m_Layer: 0
   m_Name: Language
   m_TagString: Untagged
@@ -2123,6 +2124,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
   _key: 7
   _updateOnLanguageChange: 1
+--- !u!114 &571925503727501149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8255659005671001552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5d33fc82c32904682beb8f9f0ed43a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedFont
+  _config: {fileID: 11400000, guid: 875fa5b3d2286944698a5c1b52f7618e, type: 2}
 --- !u!1 &8265396580735123455
 GameObject:
   m_ObjectHideFlags: 0
@@ -2710,6 +2724,7 @@ GameObject:
   - component: {fileID: 1142422158716890097}
   - component: {fileID: 563944244837501227}
   - component: {fileID: 8728141924345143511}
+  - component: {fileID: 2965420310132513776}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -2850,6 +2865,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
   _key: 2
   _updateOnLanguageChange: 1
+--- !u!114 &2965420310132513776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8834715512345153074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5d33fc82c32904682beb8f9f0ed43a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedFont
+  _config: {fileID: 11400000, guid: 875fa5b3d2286944698a5c1b52f7618e, type: 2}
 --- !u!1001 &5006067832871728940
 PrefabInstance:
   m_ObjectHideFlags: 0

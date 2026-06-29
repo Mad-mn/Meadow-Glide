@@ -216,6 +216,7 @@ GameObject:
   - component: {fileID: 7134997994346501377}
   - component: {fileID: 7880539950000647979}
   - component: {fileID: 3586922966588347152}
+  - component: {fileID: 5326291227793095473}
   m_Layer: 0
   m_Name: Descriptoion
   m_TagString: Untagged
@@ -342,6 +343,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &5326291227793095473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8804294040823721083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5d33fc82c32904682beb8f9f0ed43a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedFont
+  _config: {fileID: 11400000, guid: 875fa5b3d2286944698a5c1b52f7618e, type: 2}
 --- !u!1 &9107020311827254813
 GameObject:
   m_ObjectHideFlags: 0

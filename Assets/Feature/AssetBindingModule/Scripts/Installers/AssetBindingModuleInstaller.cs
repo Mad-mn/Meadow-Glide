@@ -4,6 +4,7 @@ using Feature.CircleModule.Scripts;
 using Feature.ColorServiceModule.Scripts;
 using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.LocalizationModule.Scripts.Data;
 using Feature.PerfectMapViewModule.Scripts.Configs;
 using Feature.PlayerInventoryModule.Configs;
 using Feature.PlayerInventoryModule.Scripts;

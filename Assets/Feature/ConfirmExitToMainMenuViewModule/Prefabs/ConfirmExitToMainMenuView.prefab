@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 2203640775438935048}
   - component: {fileID: 2666101685371007733}
   - component: {fileID: 5828289814575925394}
+  - component: {fileID: 2157510833556671820}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -289,6 +290,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
   _key: 14
   _updateOnLanguageChange: 1
+--- !u!114 &2157510833556671820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2782755794170527798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5d33fc82c32904682beb8f9f0ed43a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedFont
+  _config: {fileID: 11400000, guid: 875fa5b3d2286944698a5c1b52f7618e, type: 2}
 --- !u!1 &6029326288317921612
 GameObject:
   m_ObjectHideFlags: 0
@@ -451,6 +465,7 @@ GameObject:
   - component: {fileID: 903943937852484906}
   - component: {fileID: 5931598136781552873}
   - component: {fileID: 4817792922805893682}
+  - component: {fileID: 5836171246821752877}
   m_Layer: 0
   m_Name: YEs
   m_TagString: Untagged
@@ -591,6 +606,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
   _key: 12
   _updateOnLanguageChange: 1
+--- !u!114 &5836171246821752877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6259228309680185148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5d33fc82c32904682beb8f9f0ed43a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedFont
+  _config: {fileID: 11400000, guid: 875fa5b3d2286944698a5c1b52f7618e, type: 2}
 --- !u!1 &6358403287446092687
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,6 +773,7 @@ GameObject:
   - component: {fileID: 5241695450070505843}
   - component: {fileID: 8540178374255164430}
   - component: {fileID: 3655278826953028728}
+  - component: {fileID: 6915456451540391596}
   m_Layer: 0
   m_Name: YEs
   m_TagString: Untagged
@@ -885,6 +914,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
   _key: 11
   _updateOnLanguageChange: 1
+--- !u!114 &6915456451540391596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7226057577216301312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5d33fc82c32904682beb8f9f0ed43a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedFont
+  _config: {fileID: 11400000, guid: 875fa5b3d2286944698a5c1b52f7618e, type: 2}
 --- !u!1 &8216039735220601833
 GameObject:
   m_ObjectHideFlags: 0

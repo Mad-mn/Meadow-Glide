@@ -33,5 +33,16 @@ namespace Feature.LocalizationModule.Scripts
 
             return _service.Get(key);
         }
+        
+        public static Language CurrentLanguage()
+        {
+            if (_service == null)
+            {
+                Debug.LogWarning("[Localization] Service not initialized. Call Loc.Initialize() first.");
+                return Language.English;
+            }
+
+            return _service.CurrentLanguage;
+        }
     }
 }
