@@ -32,10 +32,12 @@ namespace Feature.PreGamePlacementModule.Scripts {
         private readonly IInstantiator _instantiator;
         private readonly UniTask<StripController> _stripControllerTask;
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
+        private readonly UniTask<EmptySlotsBack> _emptySlotsBackTask;
 
         private StripController _stripControllerPrefab;
         private CircleParamsConfig _circleParamsConfig;
         private Camera _camera;
+        private EmptySlotsBack _spawnedEmptySlotsBack;
 
         private readonly List<EmptySlot> _emptySlots = new List<EmptySlot>();
         private readonly List<PoolPiece> _poolPieces = new List<PoolPiece>();
@@ -61,7 +63,8 @@ namespace Feature.PreGamePlacementModule.Scripts {
             IAnimationService animationService,
             IInstantiator instantiator,
             UniTask<StripController> stripControllerTask,
-            UniTask<CircleParamsConfig> circleParamsConfigTask) {
+            UniTask<CircleParamsConfig> circleParamsConfigTask,
+            UniTask<EmptySlotsBack> emptySlotsBackTask) {
             _inputService = inputService;
             _interactionStateService = interactionStateService;
             _cameraService = cameraService;
@@ -73,6 +76,7 @@ namespace Feature.PreGamePlacementModule.Scripts {
             _instantiator = instantiator;
             _stripControllerTask = stripControllerTask;
             _circleParamsConfigTask = circleParamsConfigTask;
+            _emptySlotsBackTask = emptySlotsBackTask;
         }
 
         public async void Initialize() {
@@ -193,6 +197,8 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
             int segmentsPerStripe = _emptySlots.Count > 0 ? _emptySlots[0].Strip.SegmentCount : 1;
             float desiredSpan = _circleParamsConfig.StripLoopLength / segmentsPerStripe;
+
+            SpawnEmptySlotsBack(availableColors.Count, poolY, totalWidth);
 
             for (int i = 0; i < availableColors.Count; i++) {
                 Vector3 pos = new Vector3(startX + i * PoolSpacing, poolY, 0);
@@ -344,6 +350,11 @@ namespace Feature.PreGamePlacementModule.Scripts {
             }
             _emptySlots.Clear();
             _highlightedSlots.Clear();
+
+            if (_spawnedEmptySlotsBack != null) {
+                UnityEngine.Object.Destroy(_spawnedEmptySlotsBack.gameObject);
+                _spawnedEmptySlotsBack = null;
+            }
         }
 
         private StripController FindStripByIndex(int index) {
@@ -352,6 +363,23 @@ namespace Feature.PreGamePlacementModule.Scripts {
                     return strip;
             }
             return null;
+        }
+
+        private async void SpawnEmptySlotsBack(int pieceCount, float poolY, float totalWidth) {
+            EmptySlotsBack prefab = await _emptySlotsBackTask;
+            if (prefab == null) return;
+
+            _spawnedEmptySlotsBack = UnityEngine.Object.Instantiate(prefab);
+
+            float width = totalWidth + PoolSpacing;
+            float height = _circleParamsConfig.StripHeight * 2f;
+
+            SpriteRenderer sr = _spawnedEmptySlotsBack.GetComponent<SpriteRenderer>();
+            float spriteWidth = sr != null && sr.sprite != null ? sr.sprite.rect.width / sr.sprite.pixelsPerUnit : 1f;
+            float spriteHeight = sr != null && sr.sprite != null ? sr.sprite.rect.height / sr.sprite.pixelsPerUnit : 1f;
+
+            _spawnedEmptySlotsBack.transform.position = new Vector3(0f, poolY, 0f);
+            _spawnedEmptySlotsBack.transform.localScale = new Vector3(width / spriteWidth, height / spriteHeight, 1f);
         }
 
         private UniTask WaitUntilComplete() {

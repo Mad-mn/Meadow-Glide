@@ -39,11 +39,13 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<PerfectMapRewardConfigs>(AddressConstants.PerfectMapRewardConfigs);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
-            
+
+            Container.BindAddressablePrefabComponent<GameBack>(AddressConstants.GameBack);
             Container.BindAddressablePrefabComponent<Camera>(AddressConstants.Camera);
             Container.BindAddressablePrefabComponent<CircleController>(AddressConstants.GircleModule);
             Container.BindAddressablePrefabComponent<StripController>(AddressConstants.Strip);
             Container.BindAddressablePrefabComponent<SlideArea>(AddressConstants.SlideArea);
+            Container.BindAddressablePrefabComponent<EmptySlotsBack>(AddressConstants.EmptySlotsBack);
         }
     }
 }

@@ -39,8 +39,13 @@ namespace Feature.LevelInitializeModule {
         private readonly ISaveDataService _saveDataService;
         private readonly IChallengeService _challengeService;
         private readonly LevelModel _levelModel;
+        private readonly UniTask<GameBack> _gameBackPrefabTask;
+        private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
+        private readonly IInstantiator _instantiator;
 
         private readonly List<StripController> _spawnedStrips = new List<StripController>();
+        private GameObject _spawnedGameBack;
+        private CircleParamsConfig _circleParamsConfig;
 
         public LevelInitializeService(
             ISlideAreaService slideAreaService,
@@ -60,7 +65,10 @@ namespace Feature.LevelInitializeModule {
             ISaveDataModel saveDataModel,
             ISaveDataService saveDataService,
             IChallengeService challengeService,
-            LevelModel levelModel) {
+            LevelModel levelModel,
+            UniTask<GameBack> gameBackPrefabTask,
+            UniTask<CircleParamsConfig> circleParamsConfigTask,
+            IInstantiator instantiator) {
             _slideAreaService = slideAreaService;
             _stripRotationService = stripRotationService;
             _slideSegmentService = slideSegmentService;
@@ -79,12 +87,16 @@ namespace Feature.LevelInitializeModule {
             _saveDataService = saveDataService;
             _challengeService = challengeService;
             _levelModel = levelModel;
+            _gameBackPrefabTask = gameBackPrefabTask;
+            _circleParamsConfigTask = circleParamsConfigTask;
+            _instantiator = instantiator;
         }
 
         public async UniTask Initialize() {
             _interactionStateService.ResetInputBlock();
             _undoService.Clear();
             IncrementAttempt();
+            _circleParamsConfig = await _circleParamsConfigTask;
 
             LevelData levelData = _levelService.GetLevelDataForCurrentLevel();
             _moveTrackModel.CacheMovesForLevel(levelData);
@@ -120,6 +132,12 @@ namespace Feature.LevelInitializeModule {
             }
 
             _spawnedStrips.Clear();
+
+            if (_spawnedGameBack != null) {
+                Object.Destroy(_spawnedGameBack);
+                _spawnedGameBack = null;
+            }
+
             _levelService.LevelEnded();
 
             await UniTask.CompletedTask;
@@ -169,6 +187,33 @@ namespace Feature.LevelInitializeModule {
                 StripController strip = _stripSpawnService.SpawnStrip(config, i, totalStripCount);
                 _spawnedStrips.Add(strip);
             }
+
+            SpawnGameBack(totalStripCount);
+        }
+
+        private async void SpawnGameBack(int totalStripCount) {
+            if (_circleParamsConfig == null)
+                return;
+
+            GameBack prefab = await _gameBackPrefabTask;
+            if (prefab == null) return;
+
+            _spawnedGameBack = _instantiator.InstantiatePrefab(prefab);
+
+            float spacing = _circleParamsConfig.GetStripSpacing();
+            float stripHeight = _circleParamsConfig.StripHeight;
+            float stripLoopLength = _circleParamsConfig.StripLoopLength;
+
+            float totalHeight = (totalStripCount - 1) * spacing + stripHeight;
+            float margin = stripHeight;
+
+            SpriteRenderer sr = _spawnedGameBack.GetComponent<SpriteRenderer>();
+            float spriteWidth = sr != null && sr.sprite != null ? sr.sprite.rect.width / sr.sprite.pixelsPerUnit : 1f;
+            float spriteHeight = sr != null && sr.sprite != null ? sr.sprite.rect.height / sr.sprite.pixelsPerUnit : 1f;
+
+            float desiredWidth = stripLoopLength + margin * 2f;
+            float desiredHeight = totalHeight + margin * 2f;
+            _spawnedGameBack.transform.localScale = new Vector3(desiredWidth / spriteWidth, desiredHeight / spriteHeight, 1f);
         }
     }
 }
