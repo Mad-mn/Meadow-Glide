@@ -8,10 +8,11 @@ Unity 6 (6000.3.10f1) puzzle game — rotate and slide colored ring segments to 
 
 - **Zenject** for DI (project-scoped via `ProjectContextInstaller` → `ScriptableObjectInstaller`)
 - **UniTask** for async/await (replaces coroutines in services)
-- **DOTween** for animations
+- **DOTween** for animations (via `Assets/Plugins/Demigiant/DOTween/`, not UPM)
 - **Unity Addressables** for asset loading
 - **Unity Input System** (new) for input
 - **TextMeshPro** for UI text
+- **Firebase** for analytics/remote config
 
 ## Architecture
 
@@ -23,7 +24,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**34 installer calls** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
+**35 installer calls** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)

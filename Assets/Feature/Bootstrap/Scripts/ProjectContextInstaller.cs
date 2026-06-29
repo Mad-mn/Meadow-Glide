@@ -14,6 +14,7 @@ using Feature.LevelInitializeModule.Scripts.Installers;
 using Feature.LevelModule.Scripts.Installers;
 using Feature.LevelResultModule.Scripts.Installers;
 using Feature.LocalizationModule.Scripts.Installers;
+using Feature.MessageViewModule.Scripts.Installers;
 using Feature.MoveEfficiencyModule.Scripts.Installers;
 using Feature.PerfectMapViewModule.Scripts.Installers;
 using Feature.PlayerInventoryModule.Scripts.Installers;
@@ -75,5 +76,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         DailyChallengeStartViewModuleInstaller.Install(Container);
         LocalizationModuleInstaller.Install(Container);
         PerfectMapViewModuleInstaller.Install(Container);
+        MessageViewModuleInstaller.Install(Container);
     }
 }

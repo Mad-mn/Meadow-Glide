@@ -58,3 +58,6 @@ MonoBehaviour:
   - ViewType: 16
     Address: BackgroundView
     PresenterTypeName: Feature.BackgroundViewModule.Scripts.BackgroundPresenter
+  - ViewType: 17
+    Address: MessageView
+    PresenterTypeName: Feature.MessageViewModule.Scripts.MessagePresenter

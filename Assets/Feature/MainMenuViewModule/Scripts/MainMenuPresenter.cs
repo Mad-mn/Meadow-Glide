@@ -4,6 +4,7 @@ using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
+using Feature.MessageViewModule.Scripts;
 using Feature.PerfectMapViewModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
@@ -18,21 +19,26 @@ using AudioType = Feature.SoundModule.Scripts.AudioType;
 
 namespace Feature.MainMenuViewModule.Scripts {
     public class MainMenuPresenter : PresenterBase<MainMenuView> {
+        private const int PERFECT_CHALLENGE_UNLOCK_LEVEL = 30;
+        private const int DAILY_CHALLENGE_UNLOCK_LEVEL = 12;
         private readonly IGameStateMachine _gameStateMachine;
         private readonly SaveDataModel _saveDataModel;
         private readonly IViewService _viewService;
         private readonly IAudioService _audioService;
         private readonly IPlayerInventoryService _playerInventoryService;
         private readonly ILocalizationService _localizationService;
+        private readonly IMessageService _messageService;
 
         public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel, IViewService viewService,
-            IAudioService audioService, [CanBeNull] IPlayerInventoryService playerInventoryService, ILocalizationService localizationService) : base(view) {
+            IAudioService audioService, [CanBeNull] IPlayerInventoryService playerInventoryService, ILocalizationService localizationService,
+            IMessageService messageService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _viewService = viewService;
             _audioService = audioService;
             _playerInventoryService = playerInventoryService;
             _localizationService = localizationService;
+            _messageService = messageService;
         }
 
         public override void Initialize() {
@@ -44,13 +50,27 @@ namespace Feature.MainMenuViewModule.Scripts {
             LocalizationEvents.OnLanguageChanged += SetupText;
         }
 
-        private void OnPerfectChallenge() =>
+        private void OnPerfectChallenge() {
+            if (_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
+                    .Level < PERFECT_CHALLENGE_UNLOCK_LEVEL) {
+                _messageService.Show(LocalizationKey.PerfectChallenge_Locked);
+                return;
+            }
             _viewService.ShowView<PerfectMapView>(ViewType.PerfectMapView);
+        }
 
         public override void Show() {
             base.Show();
             SetupText();
             UpdateCoinsCountTxt();
+            UpdateChallengeInfo();
+        }
+
+        private void UpdateChallengeInfo() {
+            int level = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
+                .Level;
+            View.DailyChallengeLock.SetActive(level < DAILY_CHALLENGE_UNLOCK_LEVEL);
+            View.PerfectChallengeLock.SetActive(level < PERFECT_CHALLENGE_UNLOCK_LEVEL);
         }
 
         private void UpdateCoinsCountTxt() {
@@ -68,6 +88,11 @@ namespace Feature.MainMenuViewModule.Scripts {
         }
 
         private void OnDailyChallengeClick() {
+            if (_saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress)
+                    .Level < DAILY_CHALLENGE_UNLOCK_LEVEL) {
+                _messageService.Show(LocalizationKey.DailyChallenge_Locked);
+                return;
+            }
             _viewService.ShowView<DailyChallengeStartView>(ViewType.DailyChallengeStartView);
         }
 

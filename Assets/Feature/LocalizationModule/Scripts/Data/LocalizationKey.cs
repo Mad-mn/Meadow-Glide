@@ -28,5 +28,7 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Global_Claim = 25,
         Global_Claimed = 26,
         PerfectChallenge_Title = 27,
+        Global_Locked = 28,
+        PerfectChallenge_Locked = 29,
 }
 }

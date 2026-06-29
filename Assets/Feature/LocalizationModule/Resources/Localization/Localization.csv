@@ -3,7 +3,7 @@
 2,Global_Settings,Налаштування,Settings,Ustawienia,Einstellungen,Paramètres,Configuración,Impostazioni,Configurações,Ayarlar,إعدادات,सेटिंग्स
 3,DailyChallenge_Title,Щоденний виклик,Daily Challenge,Wyzwanie Dnia,Tagesherausforderung,Défi du Jour,Reto del Día,Sfida del Giorno,Desafio Diário,Günlük Mücadele,تحدي اليوم,दैनिक चुनौती
 4,Global_Level,Рівень,Level,Poziom,Stufe,Niveau,Nivel,Livello,Nível,Seviye,مستوى,स्तर
-5,Settings_Sound,Звук,Sound,Dźwięk,Ton,Sonido,sonoro,Som,Sonido,Ses,Ses,ध्वनि
+5,Settings_Sound,Звук,Sound,Dźwięk,Ton,Sonido,Sonoro,Som,Sonido,Ses,Ses,ध्वनि
 6,Settings_Vibration,Вібрація,Vibration,Wibracje,Vibration,Vibratione,Vibración,Vibrazione,Vibração,titreş,titreşme,कंपन
 7,Settings_Language,Мова,Language,Język,Sprache,Langue,Idioma,Lingua,Idioma,Dil,اللغة,भाषा
 8,Global_Moves,Ходів,Moves,Ruchów,Züge,Mouvements,Movidas,Mosse,Movimentos,Hamle,حركات,चालें
@@ -19,10 +19,12 @@
 18,Reward_Title,Нагорода,Reward,Nagroda,Belohning,Récompense,Recompensa,Ricompensa,Recompensa,Ödül,مكافأة,पुरस्कार
 19,Win_Title,Пройдено,Completed,Ukończono,Abgeschlossen,Complété,Completado,Completato,Concluído,Tamamlandı,مكتمل,पूर्ण
 20,Tutorial_UndoMove,Тепер ти можеш відмінити свій останній хід,Now you can undo your last move,Możesz cofnąć swój ostatni ruch,Sie können Ihren letzten Zug rückgängig machen,Maintenant vous pouvez annuler votre dernier coup,Ahora puedes deshacer tu último movimiento,Ora puoi annullare la tua ultima mossa,Agora você pode desfazer seu último movimento,Artık son hareketinizi geri alabilirsiniz,يمكنك الآن التراجع عن حركتك الأخيرة,अब आप अपनी अंतिम चाल वापस ले सकते हैं
-21,Global_Max,Максимум,Maximum,Maksimum,Maximum,Maximum,Maximum,Massimo,Maximum,Maksimum,الحد الأقصा,अधिकतम
-22,Global_Levels,Рівні,Levels,Poziomy,Stufen,Niveaux,Niveles,Livelli,Níveis,Seviye,مستويات,स्तर
-23,PerfectChallenge_YouResult,Твій результат,Your result,Twój wynik,Dein Ergebnis,Ton résultat,Tu resultado,Il tuo risultato,Seu resultado,Sonuç,نتيجتك,आपका परिणाम
-24,PerfectChallenge_Perfect,Ідеально,Perfect,Ideal,Perfekt,Parfait,Perfecto,Perfetto,Perfeito,Mükemmel,مثالي,बिल्कुल सही
-25,Global_Claim,Отримати,Claim,Odbierz,Belohnung,Récompense,Recompensa,Ricompensa,Recompensa,Ödül,المطالبة,दावा करें
-26,Global_Claimed,Отримано,Claimed,Odebrano,Erhalten,Récompensé,Recompensado,Ricompensato,Recompensado,Aldı,تم المطالبة,दावा किया
-27,PerfectChallenge_Title,Ідеальний рівень,Perfect Challenge,Wyzwanie Perfekcyjne,Perfekte Herausforderung,Défi Parfait,Reto Perfecto,Sfida Perfetta,Desafio Perfeito,Mükemmel Challenge,تحدي مثالي,बिल्कुल सही चुनौती
+21,Global_Max,,Maximum,,,,,,,,,
+22,Global_Levels,,Levels,,,,,,,,,
+23,PerfectChallenge_YouResult,,Your result,,,,,,,,,
+24,PerfectChallenge_Perfect,,Perfect,,,,,,,,,
+25,Global_Claim,,Claim,,,,,,,,,
+26,Global_Claimed,,Claimed,,,,,,,,,
+27,PerfectChallenge_Title,,Perfect Challenge,,,,,,,,,
+28,Global_Locked,,Available from level,,,,,,,,,
+29,PerfectChallenge_Locked,,Available from level 30,,,,,,,,,
