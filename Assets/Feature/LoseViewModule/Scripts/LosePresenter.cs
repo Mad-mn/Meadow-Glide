@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Feature.AnalyticsModule.Scripts;
 using Feature.ConfirmBuyViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
@@ -7,6 +8,8 @@ using Feature.LevelInitializeModule;
 using Feature.LevelModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
+using Feature.SaveDataModule.Scripts;
+using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.TrackMoveModule.Scripts;
 using Feature.TransactionModule.Scripts;
 using Feature.TransactionModule.Scripts.Configs;
@@ -23,10 +26,14 @@ namespace Feature.LoseViewModule.Scripts {
         private readonly ConfirmBuyViewModel _confirmBuyViewModel;
         private readonly ITransactionConfigsProvider _transactionConfigsProvider;
         private readonly ILocalizationService _localizationService;
+        private readonly IAnalyticsService _analyticsService;
+        private readonly LevelModel _levelModel;
+        private readonly ISaveDataModel _saveDataModel;
 
         public LosePresenter(LoseView view, IGameStateMachine gameStateMachine, ILevelInitializeService levelInitializeService,
             IViewService viewService, IMoveTrackService moveTrackService, IInteractionStateService interactionStateService,
-            ConfirmBuyViewModel confirmBuyViewModel, ITransactionConfigsProvider transactionConfigsProvider, ILocalizationService localizationService) : base(view) {
+            ConfirmBuyViewModel confirmBuyViewModel, ITransactionConfigsProvider transactionConfigsProvider, ILocalizationService localizationService,
+            IAnalyticsService analyticsService, LevelModel levelModel, ISaveDataModel saveDataModel) : base(view) {
             _gameStateMachine = gameStateMachine;
             _levelInitializeService = levelInitializeService;
             _viewService = viewService;
@@ -35,6 +42,9 @@ namespace Feature.LoseViewModule.Scripts {
             _confirmBuyViewModel = confirmBuyViewModel;
             _transactionConfigsProvider = transactionConfigsProvider;
             _localizationService = localizationService;
+            _analyticsService = analyticsService;
+            _levelModel = levelModel;
+            _saveDataModel = saveDataModel;
         }
 
         public override void Initialize() {
@@ -68,6 +78,8 @@ namespace Feature.LoseViewModule.Scripts {
                 _confirmBuyViewModel.OnConfirmSuccess -= OnConfirmSuccess;
                 _viewService.HideView(ViewType.LoseView);
                 _moveTrackService.AddMoves(_transactionConfigsProvider.GetConfig(TransactionId.BuyExtraMoves).Rewards[0].Amount);
+                int levelId = _levelModel.ReplayLevel ?? _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level;
+                _analyticsService.ExtraMovesPurchased(levelId);
             }
             
         }

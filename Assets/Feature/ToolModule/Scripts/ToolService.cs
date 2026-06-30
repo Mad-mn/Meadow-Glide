@@ -7,6 +7,7 @@ using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.ToolModule.Scripts.Factory;
 using Feature.ToolModule.Scripts.Tools;
+using Feature.UndoModule.Scripts;
 using UnityEngine;
 
 namespace Feature.ToolModule.Scripts {
@@ -15,18 +16,23 @@ namespace Feature.ToolModule.Scripts {
         private readonly SaveDataModel _saveData;
         private readonly IToolFactory _toolFactory;
         private readonly IPlayerInventoryService _playerInventoryService;
+        private readonly IUndoService _undoService;
 
         private readonly Dictionary<ToolType, ITool> _tools = new();
-        
+
         public ToolService(IToolConfigProvider toolConfigProvider, SaveDataModel saveData, IToolFactory toolFactory,
-            IPlayerInventoryService playerInventoryService) {
+            IPlayerInventoryService playerInventoryService, IUndoService undoService) {
             _toolConfigProvider = toolConfigProvider;
             _saveData = saveData;
             _toolFactory = toolFactory;
             _playerInventoryService = playerInventoryService;
+            _undoService = undoService;
         }
         public void ExecuteTool(ToolType toolType) {
             if(!CanUseTool(toolType))
+                return;
+
+            if(toolType == ToolType.Undo && !_undoService.CanUndo)
                 return;
 
             ITool tool = GetTool(toolType);

@@ -1,4 +1,4 @@
-﻿Id,Key,Ukrainian,English,Polish,German,French,Spanish,Italian,Portuguese,Turkish,Arabic,Hindi
+Id,Key,Ukrainian,English,Polish,German,French,Spanish,Italian,Portuguese,Turkish,Arabic,Hindi
 1,Global_Play,Грати,Play,Graj,Spelen,Jouer,Jugar,Giocare,Jogar,Oyna,لعبة,खेलें
 2,Global_Settings,Налаштування,Settings,Ustawienia,Einstellungen,Paramètres,Configuración,Impostazioni,Configurações,Ayarlar,إعدادات,सेटिंग्स
 3,DailyChallenge_Title,Щоденний виклик,Daily Challenge,Wyzwanie Dnia,Tagesherausforderung,Défi du Jour,Reto del Día,Sfida del Giorno,Desafio Diário,Günlük Mücadele,تحدي اليوم,दैनिक चुनौती
@@ -9,8 +9,8 @@
 8,Global_Moves,Ходів,Moves,Ruchów,Züge,Mouvements,Movidas,Mosse,Movimentos,Hamle,حركات,चालें
 9,Lose_Title,Ходи закінчились,Moves are out,Brak ruchów,Züge aufgebraucht,Plus de coups,Sin movidas,Nessuna mossa,Sem movimentos,Hamle bitti,لا حركات,चालें समाप्त
 10,DailyChallenge_Locked,Доступно з 12 рівня,Available from level 12,Dostępne od poziomu 12,Ab Level 12 verfügbar,Disponible au niveau 12,Disponible desde el nivel 12,Disponibile dal livello 12,Disponível a partir do nível 12,12. seviyeden itibaren متاح,متاح من المستوى 12,स्तर 12 से उपलब्ध
-11,Global_Yes,Так,Yes,Tak,Ja,Oui,Sì,Sim,Evet,نعم,हाँ,
-12,Global_No,Ні,Nie,Nie,Nein,Non,No,No,Hayır,لا,नहीं,
+11,Global_Yes,Так,Yes,Tak,Ja,Oui,Sì,Sim,Evet,نعم,हाँ,हाँ
+12,Global_No,Ні,No,Nie,Nein,Non,No,No,Hayır,لا,नहीं,नहीं
 13,Global_ConfirmBuy,Хочеш купити,Want to buy,Chcesz kupić,Möchten Sie kaufen,Voulez-vous acheter,¿Quieres comprar,Vuoi acquistare,Quer comprar,Satın almak istiyor musun,هل تريد الشراء,खरीदना चाहते हैं
 14,Global_ConfirmExit,Вийти до головного меню?,Exit to main menu?,Wyjść do głównego menu?,Zum Hauptmenü?,Retour au menu principal?,¿Salir al menú principal?,Esci al menu principale?,Sair para o menu principal?,Ana menüye çık?,الخروج إلى القائمة الرئيسية?,मुख्य मेनू पर वापस जाएँ?
 15,Reward_Tools_UndoMove,Скасувати хід,Undo move,Cofnij ruch,Zug rückgängig,Annuler le coup,Deshacer movimiento,Annulla mossa,Desfazer movimento,Hamleyi geri al,تراجع عن الحركة,चाल वापस लें
@@ -19,4 +19,14 @@
 18,Reward_Title,Нагорода,Reward,Nagroda,Belohning,Récompense,Recompensa,Ricompensa,Recompensa,Ödül,مكافأة,पुरस्कार
 19,Win_Title,Пройдено,Completed,Ukończono,Abgeschlossen,Complété,Completado,Completato,Concluído,Tamamlandı,مكتمل,पूर्ण
 20,Tutorial_UndoMove,Тепер ти можеш відмінити свій останній хід,Now you can undo your last move,Możesz cofnąć swój ostatni ruch,Sie können Ihren letzten Zug rückgängig machen,Maintenant vous pouvez annuler votre dernier coup,Ahora puedes deshacer tu último movimiento,Ora puoi annullare la tua ultima mossa,Agora você pode desfazer seu último movimento,Artık son hareketinizi geri alabilirsiniz,يمكنك الآن التراجع عن حركتك الأخيرة,अब आप अपनी अंतिम चाल वापस ले सकते हैं
-21,Global_Max,,Maximum,,,,,,,,,
+21,Global_Max,Максимум,Maximum,Maksimum,Maximum,Maximum,Máximo,Massimo,Máximo,Maksimum,الحد الأقصى,अधिकतम
+22,Global_Levels,Рівні,Levels,Poziomy,Stufen,Niveaux,Niveles,Livelli,Níveis,Seviyeler,المستويات,स्तर
+23,PerfectChallenge_YouResult,Твій результат,Your result,Twój wynik,Dein Ergebnis,Ton résultat,Tu resultado,Il tuo risultato,Seu resultado,Sonucun,نتيجتك,आपका परिणाम
+24,PerfectChallenge_Perfect,Ідеально,Perfect,Idealnie,Perfekt,Parfait,Perfecto,Perfetto,Perfeito,Mükemmel,مثالي,परफेक्ट
+25,Global_Claim,Отримати,Claim,Odbierz,Einlösen,Réclamar,Reclamar,Riscuotere,Resgatar,Talep et,احصل عليها,प्राप्त करें
+26,Global_Claimed,Отримано,Claimed,Odebrano,Eingelöst,Réclamé,Reclamado,Riscosso,Resgatado,Talep edildi,تم الحصول عليها,प्राप्त किया
+27,PerfectChallenge_Title,Ідеальний виклик,Perfect Challenge,Idealne Wyzwanie,Perfekte Herausforderung,Défi Parfait,Reto Perfecto,Sfida Perfetta,Desafio Perfeito,Mükemmel Mücadele,التحدي المثالي,परफेक्ट चुनौती
+28,Global_Locked,Доступно з рівня,Available from level,Dostępne od poziomu,Verfügbar ab Level,Disponible au niveau,Disponible desde el nivel,Disponibile dal livello,Disponível a partir do nível,Seviyeden itibaren,متاح من المستوى,स्तर से उपलब्ध
+29,PerfectChallenge_Locked,Доступно з 30 рівня,Available from level 30,Dostępne od poziomu 30,Verfügbar ab Level 30,Disponible au niveau 30,Disponible desde el nivel 30,Disponibile dal livello 30,Disponível a partir do nível 30,30. seviyeden itibaren,متاح من المستوى 30,स्तर 30 से उपलब्ध
+30,Global_YouCompleteAll,Нові рівні скоро будуть. Можеш тим часом пройти всі рівні ідеально,New levels coming soon. Meanwhile, you can complete all levels perfectly.,Nowe poziomy wkrótce. W międzyczasie możesz ukończyć wszystkie poziomy idealnie.,Neue Level kommen bald. In der Zwischenzeit kannst du alle Level perfekt abschließen.,Nouveaux niveaux bientôt. En attendant, vous pouvez terminer tous les niveaux parfaitement.,Nuevos niveles próximamente. Mientras tanto, puedes completar todos los niveles perfectamente.,Nuovi livelli in arrivo. Nel frattempo puoi completare tutti i livelli perfettamente.,Novos níveis em breve. Enquanto isso, você pode completar todos os níveis perfeitamente.,Yeni seviyeler yakında gelecek. Bu arada tüm seviyeleri mükemmel tamamlayabilirsin.,مستويات جديدة قادمة قريباً. في هذه الأثناء يمكنك إكمال جميع المستويات بشكل مثالي.,नए स्तर जल्द आ रहे हैं। इस बीच आप सभी स्तरों को पूर्णता से पूरा कर सकते हैं।
+31,Tutorial_Goal,Збери сегменти одного кольору в одну смугу,Match segments of the same color into one strip,Zbierz segmenty tego samego koloru w jeden pasek,Sammeln Sie Segmente derselben Farbe in einem Streifen,Rassemblez les segments de même couleur dans une seule bande,Reúne segmentos del mismo color en una sola tira,Raccogli segmenti dello stesso colore in una singola striscia,Reúna segmentos da mesma cor em uma única faixa,Aynı renkteki segmentleri tek bir şeritte topla,اجمع أجزاء اللون ذاته في شريط واحد,एक ही रंग के सेगमेंट को एक पट्टी में इकट्ठा करें

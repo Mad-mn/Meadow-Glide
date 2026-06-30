@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Prefabs
   m_GUID: 60ac0215af79e2c4992ccacf8604c3d3
   m_SerializeEntries:
+  - m_GUID: 3771aba4232eb0948aaa478b7c6feabd
+    m_Address: EmptySlotsBack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 438da0ce5a4d419438d2473c13bc2c74
     m_Address: GircleModule
     m_ReadOnly: 0
@@ -32,6 +37,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a5e5549b6873df741bcf1238f6d58b33
     m_Address: SlideArea
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: af3e3808b4e62c54490014929e6d7e6a
+    m_Address: GameBack
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -14,5 +14,8 @@ namespace Feature.UIServiceModule.Scripts {
         DailyChallengeStartView = 12,
         DailyChallengeCompleteView = 13,
         TutorialView = 14,
+        PerfectMapView = 15,
+        BackgroundView = 16,
+        MessageView = 17,
 }
 }

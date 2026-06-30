@@ -1,4 +1,5 @@
 using Feature.AddressableModule.Scripts.Installers;
+using Feature.AnalyticsModule.Scripts.Installers;
 using Feature.AnimationModule.Scripts.Installers;
 using Feature.AssetBindingModule.Scripts.Installers;
 using Feature.CameraServiceModule.Scripts.Installers;
@@ -14,7 +15,9 @@ using Feature.LevelInitializeModule.Scripts.Installers;
 using Feature.LevelModule.Scripts.Installers;
 using Feature.LevelResultModule.Scripts.Installers;
 using Feature.LocalizationModule.Scripts.Installers;
+using Feature.MessageViewModule.Scripts.Installers;
 using Feature.MoveEfficiencyModule.Scripts.Installers;
+using Feature.PerfectMapViewModule.Scripts.Installers;
 using Feature.PlayerInventoryModule.Scripts.Installers;
 using Feature.PreGamePlacementModule.Scripts.Installers;
 using Feature.SaveDataModule.Scripts.Installers;
@@ -41,6 +44,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
     {
         AnimationModuleInstaller.Install(Container);
         AddressableModuleInstaller.Install(Container);
+        AnalyticsModuleInstaller.Install(Container);
         AssetBindingModuleInstaller.Install(Container);
         CameraServiceModuleInstaller.Install(Container);
         AudioModuleInstaller.Install(Container);
@@ -73,5 +77,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         LevelResultModuleInstaller.Install(Container);
         DailyChallengeStartViewModuleInstaller.Install(Container);
         LocalizationModuleInstaller.Install(Container);
+        PerfectMapViewModuleInstaller.Install(Container);
+        MessageViewModuleInstaller.Install(Container);
     }
 }

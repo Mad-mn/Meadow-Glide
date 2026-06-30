@@ -16,8 +16,7 @@ namespace Feature.CircleModule.Scripts {
         private bool _isWin;
         private bool _isLose;
 
-        public CircleControllerService(StripModel stripModel, MoveTrackModel moveTrackModel,
-            ILevelResultService levelResultService) {
+        public CircleControllerService(StripModel stripModel, MoveTrackModel moveTrackModel, ILevelResultService levelResultService) {
             _stripModel = stripModel;
             _moveTrackModel = moveTrackModel;
             _levelResultService = levelResultService;
@@ -34,8 +33,13 @@ namespace Feature.CircleModule.Scripts {
         }
 
         private void OnMovesChanged() {
-            if (!_isWin)
-                CheckForLose();
+            if (!_isWin) {
+                if (!CheckForWin()) {
+                    if (_moveTrackModel.MovesLeft > 0)
+                        _isLose = false;
+                    CheckForLose();
+                }
+            }
         }
 
         private void OnStripCompletedStatusChanged(StripController strip, bool isCompleted) {
@@ -52,15 +56,18 @@ namespace Feature.CircleModule.Scripts {
         }
 
         private void CheckForMatchResult() {
-            if (!CheckForWin())
-                CheckForLose();
+            if (CheckForWin()) {
+                _levelResultService.OnLevelWon();
+                return;
+            }
+
+            CheckForLose();
         }
 
         private bool CheckForWin() {
             if (_filledStrips.Count != _stripModel.Strips.Count || _stripModel.Strips.Count <= 0)
                 return false;
 
-            _levelResultService.OnLevelWon();
             _isWin = true;
             return true;
         }

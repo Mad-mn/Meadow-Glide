@@ -17,8 +17,6 @@ namespace Feature.LevelModule.Scripts {
         private readonly IChallengeService _challengeService;
         private LevelConfigProvider _levelConfigProvider;
 
-        private int _startedLevelId;
-
         public LevelService(UniTask<LevelConfigProvider> levelConfigProviderTask, ISaveDataModel saveDataModel, ITutorialService tutorialService,
             ISegmentStatusService segmentStatusService, LevelModel levelModel, MoveTrackModel moveTrackModel,
             IChallengeService challengeService) {
@@ -35,32 +33,28 @@ namespace Feature.LevelModule.Scripts {
             _levelConfigProvider = await _levelConfigProviderTask;
         }
 
+        public bool HasLevel(int level) {
+            return _levelConfigProvider != null && _levelConfigProvider.LevelDatas.ContainsKey(level);
+        }
+
         public LevelData GetLevelDataForCurrentLevel() {
             if (_challengeService.IsActive) {
                 return _challengeService.GetCurrentLevel();
             }
 
-            PlayerProgressData playerProgressData = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
-            if (_levelConfigProvider.LevelDatas.Count <= playerProgressData.Level) {
-                return _levelConfigProvider.LevelDatas[19];
-            }
-            return _levelConfigProvider.LevelDatas[playerProgressData.Level];
+            int level = _levelModel.ReplayLevel ?? _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level;
+            return _levelConfigProvider.LevelDatas[level];
         }
 
         public void LevelStarted() {
             _tutorialService.TryActivateTutorial();
             _segmentStatusService.UpdateStatus();
             _levelModel.StartLevel();
-            _startedLevelId = GetLevelDataForCurrentLevel()
-                .LevelID;
-            TinySauce.OnGameStarted(_startedLevelId);
         }
 
         public void LevelEnded() {
+            _levelModel.ReplayLevel = null;
             _levelModel.EndLevel();
-            bool isUserCompleteLvl = GetLevelDataForCurrentLevel()
-                .LevelID > _startedLevelId;
-            TinySauce.OnGameFinished(isUserCompleteLvl, 0);
         }
     }
 }

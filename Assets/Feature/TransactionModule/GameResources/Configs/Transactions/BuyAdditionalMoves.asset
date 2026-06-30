@@ -16,8 +16,8 @@ MonoBehaviour:
   FailureMessage: 
   Costs:
   - Type: 1
-    Amount: 200
+    Amount: 80
   Rewards:
   - Type: 3
-    Amount: 5
+    Amount: 3
     NameKey: 16

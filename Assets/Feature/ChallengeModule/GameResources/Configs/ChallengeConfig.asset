@@ -54,10 +54,8 @@ MonoBehaviour:
   - RequiredResult: 1
     Rewards:
     - Type: 1
-      Amount: 250
+      Amount: 100
   - RequiredResult: 2
     Rewards:
     - Type: 1
-      Amount: 350
-    - Type: 2
-      Amount: 6
+      Amount: 300

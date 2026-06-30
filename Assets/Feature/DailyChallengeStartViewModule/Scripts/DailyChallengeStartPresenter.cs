@@ -48,7 +48,6 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
 
         public override void Show() {
             base.Show();
-            SetupLock();
             SetupMilestones();
             StartTimer();
             SetupMaxMovesText();
@@ -57,12 +56,6 @@ namespace Feature.DailyChallengeStartViewModule.Scripts {
         private void SetupMaxMovesText() {
             int moves = _challengeService.GetMinMoves();
             View.MaxMovesText.text = $"{_localizationService.Get(LocalizationKey.Global_Max)} {moves} {_localizationService.Get(LocalizationKey.Global_Moves)}";
-        }
-
-        private void SetupLock() {
-            bool locked = !_challengeService.IsDailyChallengeAvailable();
-            View.LockIcon.gameObject.SetActive(locked);
-            View.LockText.gameObject.SetActive(locked);
         }
 
         public override void Hide() {

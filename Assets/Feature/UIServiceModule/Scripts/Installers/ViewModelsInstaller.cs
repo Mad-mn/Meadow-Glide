@@ -1,4 +1,5 @@
 using Feature.ConfirmBuyViewModule.Scripts;
+using Feature.MessageViewModule.Scripts;
 using Feature.ToolButtonViewModule.Scripts;
 using Zenject;
 
@@ -8,6 +9,8 @@ namespace Feature.UIServiceModule.Scripts.Installers {
             Container.Bind<ConfirmBuyViewModel>()
                 .AsSingle();
             Container.Bind<ToolButtonsViewModel>()
+                .AsSingle();
+            Container.Bind<MessageViewModel>()
                 .AsSingle();
         }
     }

@@ -9,6 +9,11 @@ namespace Feature.SaveDataModule.Scripts
         void LoadAll();
 
         /// <summary>
+        /// Returns true if a save file for the given type exists on disk.
+        /// </summary>
+        bool HasSaveData(SaveDataType type);
+
+        /// <summary>
         /// Saves a specific data type from the Model to disk.
         /// </summary>
         void Save(SaveDataType type);
@@ -24,7 +29,7 @@ namespace Feature.SaveDataModule.Scripts
         void Clear(SaveDataType type);
 
         /// <summary>
-        /// Clears all data in Model and deletes all files on disk.
+        /// Clears all data types in Model and deletes all files on disk.
         /// </summary>
         void ClearAll();
     }

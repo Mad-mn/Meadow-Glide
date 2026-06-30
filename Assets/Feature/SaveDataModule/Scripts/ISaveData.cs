@@ -1,7 +1,7 @@
 namespace Feature.SaveDataModule.Scripts
 {
-    // All implementations of ISaveData MUST have [System.Serializable] attribute
-    // for BinaryFormatter to work correctly.
+    // [Serializable] attribute is kept for legacy compatibility.
+    // Json.NET serializes public fields/properties regardless.
     public interface ISaveData
     {
     }

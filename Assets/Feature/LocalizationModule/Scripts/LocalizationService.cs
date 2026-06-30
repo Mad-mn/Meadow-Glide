@@ -118,8 +118,46 @@ namespace Feature.LocalizationModule.Scripts
 
         private void LoadSavedLanguage()
         {
-            var settings = _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings);
-            _currentLanguage = settings.SelectedLanguage;
+            bool isFirstLaunch = !_saveDataService.HasSaveData(SaveDataType.Settings);
+
+            if (isFirstLaunch)
+            {
+                _currentLanguage = DetectDeviceLanguage();
+                SaveLanguage();
+            }
+            else
+            {
+                var settings = _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings);
+                _currentLanguage = settings.SelectedLanguage;
+            }
+        }
+
+        private Language DetectDeviceLanguage()
+        {
+            Language detected = MapSystemLanguage(Application.systemLanguage);
+
+            if (_database.GetAllData().ContainsKey(detected))
+                return detected;
+
+            return Language.English;
+        }
+
+        private static Language MapSystemLanguage(SystemLanguage systemLanguage)
+        {
+            switch (systemLanguage)
+            {
+                case SystemLanguage.Ukrainian: return Language.Ukrainian;
+                case SystemLanguage.Polish: return Language.Polish;
+                case SystemLanguage.German: return Language.German;
+                case SystemLanguage.French: return Language.French;
+                case SystemLanguage.Spanish: return Language.Spanish;
+                case SystemLanguage.Italian: return Language.Italian;
+                case SystemLanguage.Portuguese: return Language.Portuguese;
+                case SystemLanguage.Turkish: return Language.Turkish;
+                case SystemLanguage.Arabic: return Language.Arabic;
+                case SystemLanguage.Hindi: return Language.Hindi;
+                default: return Language.English;
+            }
         }
 
         private void SaveLanguage()
