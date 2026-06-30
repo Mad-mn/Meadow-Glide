@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Feature.AnalyticsModule.Scripts;
 using Feature.ChallengeModule.Scripts;
 using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
@@ -39,6 +40,7 @@ namespace Feature.LevelInitializeModule {
         private readonly ISaveDataService _saveDataService;
         private readonly IChallengeService _challengeService;
         private readonly LevelModel _levelModel;
+        private readonly IAnalyticsService _analyticsService;
         private readonly UniTask<GameBack> _gameBackPrefabTask;
         private readonly UniTask<CircleParamsConfig> _circleParamsConfigTask;
         private readonly IInstantiator _instantiator;
@@ -66,6 +68,7 @@ namespace Feature.LevelInitializeModule {
             ISaveDataService saveDataService,
             IChallengeService challengeService,
             LevelModel levelModel,
+            IAnalyticsService analyticsService,
             UniTask<GameBack> gameBackPrefabTask,
             UniTask<CircleParamsConfig> circleParamsConfigTask,
             IInstantiator instantiator) {
@@ -87,6 +90,7 @@ namespace Feature.LevelInitializeModule {
             _saveDataService = saveDataService;
             _challengeService = challengeService;
             _levelModel = levelModel;
+            _analyticsService = analyticsService;
             _gameBackPrefabTask = gameBackPrefabTask;
             _circleParamsConfigTask = circleParamsConfigTask;
             _instantiator = instantiator;
@@ -114,6 +118,8 @@ namespace Feature.LevelInitializeModule {
 
             await UniTask.Delay(1);
             _levelService.LevelStarted();
+
+            SendAnalytics(levelData);
         }
 
         public async UniTask Dispose() {
@@ -214,6 +220,19 @@ namespace Feature.LevelInitializeModule {
             float desiredWidth = stripLoopLength + margin * 2f;
             float desiredHeight = totalHeight + margin * 2f;
             _spawnedGameBack.transform.localScale = new Vector3(desiredWidth / spriteWidth, desiredHeight / spriteHeight, 1f);
+        }
+
+        private void SendAnalytics(LevelData levelData) {
+            int levelId = levelData.LevelID;
+            if (_challengeService.IsActive) {
+                _analyticsService.DailyChallengeStarted(levelId);
+            }
+            else if (_levelModel.ReplayLevel.HasValue) {
+                _analyticsService.PerfectMapLevelStarted(levelId);
+            }
+            else {
+                _analyticsService.LevelStarted(levelId);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Feature.AnalyticsModule.Scripts;
 using Feature.ChallengeModule.Scripts;
 using Feature.DailyChallengeCompleteViewModule.Scripts;
 using Feature.LevelModule.Scripts;
@@ -22,6 +23,7 @@ namespace Feature.LevelResultModule.Scripts {
         private readonly MoveTrackModel _moveTrackModel;
         private readonly IViewService _viewService;
         private readonly LevelModel _levelModel;
+        private readonly IAnalyticsService _analyticsService;
 
         private bool _isWin;
         private bool _isLose;
@@ -35,7 +37,8 @@ namespace Feature.LevelResultModule.Scripts {
             IEconomyDataProvider economyDataProvider,
             MoveTrackModel moveTrackModel,
             IViewService viewService,
-            LevelModel levelModel) {
+            LevelModel levelModel,
+            IAnalyticsService analyticsService) {
             _challengeService = challengeService;
             _moveEfficiencyService = moveEfficiencyService;
             _saveDataModel = saveDataModel;
@@ -45,6 +48,7 @@ namespace Feature.LevelResultModule.Scripts {
             _moveTrackModel = moveTrackModel;
             _viewService = viewService;
             _levelModel = levelModel;
+            _analyticsService = analyticsService;
         }
 
         public void OnLevelWon() {
@@ -54,27 +58,46 @@ namespace Feature.LevelResultModule.Scripts {
             _isWin = true;
 
             if (_challengeService.IsActive) {
-                int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
-                _challengeService.OnChallengeCompleted(result);
-                _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
+                CompleteForDailyChallenge();
             }
             else {
-                PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
-                bool isReplay = _levelModel.ReplayLevel.HasValue;
-                int completedLevel = _levelModel.ReplayLevel ?? progress.Level;
-
-                int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
-                MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
-                SaveLevelCompletion(progress, completedLevel, result);
-
-                if (!isReplay) {
-                    progress.Level++;
-                }
-                _saveDataService.Save(SaveDataType.PlayerProgress);
-                _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
-                _viewService.ShowView<WinLevel>(ViewType.WinLevel);
+                CompleteForSimpleGame();
             }
+        }
+
+        private void CompleteForSimpleGame() {
+            PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+            bool isReplay = _levelModel.ReplayLevel.HasValue;
+            int completedLevel = _levelModel.ReplayLevel ?? progress.Level;
+
+            int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
+            MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
+            SaveLevelCompletion(progress, completedLevel, result);
+
+            SendAnalytics(progress, completedLevel, movesUsed);
+
+            if (!isReplay) {
+                progress.Level++;
+            }
+            _saveDataService.Save(SaveDataType.PlayerProgress);
+            _inventoryService.Add(ResourceType.Coins, _economyDataProvider.EconomyConfig.LevelWinReward);
+            _viewService.ShowView<WinLevel>(ViewType.WinLevel);
+        }
+
+        private void SendAnalytics(PlayerProgressData progress, int completedLevel, int movesUsed) {
+            int attempts = 0;
+            if (progress.CompletedLevels.TryGetValue(completedLevel, out LevelCompletionData completionData)) {
+                attempts = completionData.Attempts;
+            }
+            _analyticsService.LevelCompleted(completedLevel, attempts, movesUsed);
+        }
+
+        private void CompleteForDailyChallenge() {
+            int movesUsed = _moveTrackModel.MaxMovesForCurrentLevel - _moveTrackModel.MovesLeft;
+            MoveEfficiencyResult result = _moveEfficiencyService.Evaluate(movesUsed);
+            _challengeService.OnChallengeCompleted(result);
+            _analyticsService.DailyChallengeCompleted(0, result == MoveEfficiencyResult.PerfectClear);
+            _viewService.ShowView<DailyChallengeCompleteView>(ViewType.DailyChallengeCompleteView);
         }
 
         public void OnLevelLost() {

@@ -1,4 +1,5 @@
 using Feature.AddressableModule.Scripts.Installers;
+using Feature.AnalyticsModule.Scripts.Installers;
 using Feature.AnimationModule.Scripts.Installers;
 using Feature.AssetBindingModule.Scripts.Installers;
 using Feature.CameraServiceModule.Scripts.Installers;
@@ -43,6 +44,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
     {
         AnimationModuleInstaller.Install(Container);
         AddressableModuleInstaller.Install(Container);
+        AnalyticsModuleInstaller.Install(Container);
         AssetBindingModuleInstaller.Install(Container);
         CameraServiceModuleInstaller.Install(Container);
         AudioModuleInstaller.Install(Container);
