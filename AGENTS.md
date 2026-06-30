@@ -49,6 +49,8 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 | `Tools/Save Data/Clear All Saves` | Clears all save data |
 | `Tools/Save Data/Open Persistent Data Path` | Opens persistent data folder |
 | `Tools/Automatic UI Anchoring/Anchor Selected UI Objects` | Quick-anchors selected UI elements (F1 shortcut) |
+| `Tools/Localization/Load Localization` | Import localized strings from Google Sheets CSV |
+| `Tools/Localization/Validate Localization` | Check localization key consistency |
 
 ## Project Constraints
 
@@ -87,7 +89,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - `DestroyImmediate` used in play mode in both `CircleController.ClearCircle()` (line 145) and `StripController.ClearStrip()` (line 276) — should be `Destroy()`.
 - `FindObjectOfType<MonoBehaviour>()` called on every audio operation in `AudioService.GetMonoBehaviour()` (line 193) — no caching.
 - `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) runs every frame during drag.
-- `BinaryFormatter` in `SaveDataService` (lines 85, 105) — deprecated, insecure, not supported on IL2CPP/WebGL.
+- `BinaryFormatter` in `SaveDataService.MigrateLegacySave()` — retained only for one-time migration from legacy `.dat` files. New saves use JSON via Newtonsoft.Json.
 - LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` (line 94) on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` (lines 105, 177) on segment updates.
 - `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 21) — auto-generated, fix the Addressable address.
 
@@ -97,3 +99,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 2. Create an installer class and register it in `ProjectContextInstaller.cs`
 3. For new UI views: use `Tools/UI/Create View Module` to scaffold — this also updates `ViewType` enum and `ViewSettings` ScriptableObject
 4. Add any new Addressable assets, then run `Tools/GenerateAdresablesNames`
+
+## Further Reference
+
+- `PROJECT_ANALYSIS.md` — detailed architecture diagrams, dependency graphs, and performance/refactoring notes for the full codebase.

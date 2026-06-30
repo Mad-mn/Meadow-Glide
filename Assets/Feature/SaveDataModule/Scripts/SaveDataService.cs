@@ -1,9 +1,9 @@
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json;
 using UnityEngine;
 using System;
 using Feature.SaveDataModule.Scripts.SavedData;
-using Object = System.Object;
 
 namespace Feature.SaveDataModule.Scripts
 {
@@ -18,7 +18,7 @@ namespace Feature.SaveDataModule.Scripts
 
         private string GetPath(SaveDataType type)
         {
-            return Path.Combine(Application.persistentDataPath, $"{type.ToString().ToLower()}_save.dat");
+            return Path.Combine(Application.persistentDataPath, $"{type.ToString().ToLower()}_save.json");
         }
 
         public void LoadAll()
@@ -54,7 +54,7 @@ namespace Feature.SaveDataModule.Scripts
 
         public void Clear(SaveDataType type)
         {
-            _model.Set(type, null); 
+            _model.Set(type, null);
 
             string path = GetPath(type);
             if (File.Exists(path))
@@ -78,28 +78,26 @@ namespace Feature.SaveDataModule.Scripts
 
         private T LoadFromDisk<T>(SaveDataType type) where T : ISaveData, new()
         {
-            string path = GetPath(type);
-            if (!File.Exists(path))
-            {
-                Debug.Log($"Save file for {type} not found at {path}. Creating new data with default parameters.");
-                return new T();
-            }
+            string jsonPath = GetPath(type);
 
-            try
+            if (File.Exists(jsonPath))
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                using (FileStream stream = new FileStream(path, FileMode.Open))
+                try
                 {
-                    var data = (T)formatter.Deserialize(stream);
-                    Debug.Log($"Successfully loaded {type} from {path}.");
+                    string json = File.ReadAllText(jsonPath);
+                    var data = JsonConvert.DeserializeObject<T>(json);
+                    Debug.Log($"Successfully loaded {type} from {jsonPath}.");
                     return data;
                 }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Failed to load {type} from {jsonPath}. Using default parameters. Error: {e.Message}");
+                    return new T();
+                }
             }
-            catch (Exception e)
-            {
-                Debug.LogError($"Failed to load {type} from {path}. Using default parameters. Error: {e.Message}");
-                return new T();
-            }
+
+            Debug.Log($"Save file for {type} not found. Creating new data with default parameters.");
+            return new T();
         }
 
         private void SaveToDisk(SaveDataType type, ISaveData data)
@@ -107,11 +105,8 @@ namespace Feature.SaveDataModule.Scripts
             string path = GetPath(type);
             try
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                using (FileStream stream = new FileStream(path, FileMode.Create))
-                {
-                    formatter.Serialize(stream, data);
-                }
+                string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+                File.WriteAllText(path, json);
             }
             catch (Exception e)
             {

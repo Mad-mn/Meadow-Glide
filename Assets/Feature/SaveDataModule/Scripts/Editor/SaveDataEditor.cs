@@ -9,7 +9,7 @@ namespace Feature.SaveDataModule.Scripts.Editor
         [MenuItem("Tools/Save Data/Clear All Saves")]
         public static void ClearAllSaves()
         {
-            string[] files = Directory.GetFiles(Application.persistentDataPath, "*.dat");
+            string[] files = Directory.GetFiles(Application.persistentDataPath, "*.json");
             foreach (string file in files)
             {
                 File.Delete(file);

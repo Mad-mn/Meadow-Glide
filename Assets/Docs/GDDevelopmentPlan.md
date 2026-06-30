@@ -245,7 +245,7 @@
 
 ---
 
-#### 4.3 Streak System (Система серій)
+#### ⏭️ 4.3 Streak System — ПРОПУЩЕНО (повернемось пізніше)
 
 **Опис:** Гравець отримує бонуси за щоденне входження.
 
@@ -266,19 +266,19 @@
 
 ---
 
-#### 4.4 Save System Migration (JSON)
+#### ⬜ 4.4 Save System (Newtonsoft.Json) — ЗАЛИШИЛОСЬ
 
-**Опис:** Замінити BinaryFormatter на JSON (JsonUtility або Newtonsoft).
+**Опис:** Замінити BinaryFormatter на Newtonsoft.Json.
 
-**Чому:**
-- BinaryFormatter deprecated
-- Не працює на IL2CPP/WebGL
-- Має проблеми з безпекою
+**Чому Newtonsoft.Json:**
+- Працює зі всім (Dictionary, приватні поля, наслідування)
+- Pretty print вбудований
+- Гнучкіший за JsonUtility
+- Потрібен пакет: `com.unity.nuget.newtonsoft-json`
 
-**Міграція:**
-- При першому запуску: спробувати прочитати BinaryFormatter
-- Якщо успішно → конвертувати в JSON, зберегти, видалити старий файл
-- Далі — тільки JSON
+**Реалізація:**
+- Просто замінити BinaryFormatter на JsonConvert
+- Гра ще не релізилась → міграція не потрібна
 
 ---
 
@@ -322,7 +322,7 @@
 | 1-2 | 🔴 ФАЗА 1 | Currency System + Undo + Failure Recovery | ✅ ВИКОНАНО |
 | 3 | 🟡 ФАЗА 2 | Daily Challenge | ✅ ВИКОНАНО (пул — пізніше) |
 | 4-5 | 🟢 ФАЗА 3 | Star Rating (2-tier) + Progress Map (Perfect Map) | ✅ ВИКОНАНО |
-| 6-7 | 🔵 ФАЗА 4 | Level Expansion (✅) + Difficulty Tuning (✅) + Streak + Save Migration | ЧАСТКОВО |
+| 6-7 | 🔵 ФАЗА 4 | Level Expansion (✅) + Difficulty Tuning (✅) + Streak (⏳) + Save System (⬜) | ЧАСТКОВО |
 | 8+ | ⬜ ФАЗА 5 | Інше (після soft launch) | ⬜ |
 
 **Поточний статус:** ФАЗА 1, 2 і 3 виконані. Далі — ФАЗА 4.
