@@ -32,5 +32,6 @@ namespace Feature.LocalizationModule.Scripts.Data {
         PerfectChallenge_Locked = 29,
         Global_YouCompleteAll = 30,
         Tutorial_Goal = 31,
+        DailyChallenge_FirstTarget = 32,
     }
 }
