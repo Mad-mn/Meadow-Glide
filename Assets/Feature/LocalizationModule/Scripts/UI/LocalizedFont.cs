@@ -27,14 +27,11 @@ namespace Feature.LocalizationModule.Scripts.UI {
         }
 
         private void ApplyFont() {
-            Debug.LogError(1);
             if (_textComponent == null)
                 _textComponent = GetComponent<TMP_Text>();
 
-            Debug.LogError(3);
             TMP_FontAsset font = _config.GetFont(Loc.CurrentLanguage());
             if (font != null) {
-                Debug.LogError(4);
                 _textComponent.font = font;
             }
         }

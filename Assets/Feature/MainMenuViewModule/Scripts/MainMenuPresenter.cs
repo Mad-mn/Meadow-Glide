@@ -3,6 +3,7 @@ using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.DebugViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
+using Feature.LevelModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
 using Feature.MessageViewModule.Scripts;
@@ -31,10 +32,11 @@ namespace Feature.MainMenuViewModule.Scripts {
         private readonly IMessageService _messageService;
         private readonly IPerfectMapService _perfectMapService;
         private readonly PerfectMapModel _perfectMapModel;
+        private readonly ILevelService _levelService;
 
         public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel, IViewService viewService,
             IAudioService audioService, [CanBeNull] IPlayerInventoryService playerInventoryService, ILocalizationService localizationService,
-            IMessageService messageService, IPerfectMapService perfectMapService, PerfectMapModel perfectMapModel) : base(view) {
+            IMessageService messageService, IPerfectMapService perfectMapService, PerfectMapModel perfectMapModel, ILevelService levelService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _viewService = viewService;
@@ -44,6 +46,7 @@ namespace Feature.MainMenuViewModule.Scripts {
             _messageService = messageService;
             _perfectMapService = perfectMapService;
             _perfectMapModel = perfectMapModel;
+            _levelService = levelService;
         }
 
         public override void Initialize() {
@@ -111,6 +114,11 @@ namespace Feature.MainMenuViewModule.Scripts {
         }
 
         private void StartSimpleGame() {
+            PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+            if (!_levelService.HasLevel(progress.Level)) {
+                _messageService.Show(LocalizationKey.Global_YouCompleteAll);
+                return;
+            }
             _audioService.PlaySound(AudioType.ButtonClick);
             _gameStateMachine.EnterState(typeof(GameSimpleState));
         }

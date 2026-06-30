@@ -1,7 +1,10 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
 using Feature.UIServiceModule.Scripts;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Feature.MessageViewModule.Scripts {
     public class MessagePresenter : PresenterBase<MessageView> {
@@ -42,8 +45,20 @@ namespace Feature.MessageViewModule.Scripts {
             LocalizationKey messageKey = _viewModel.ConsumePending();
             string message = _localizationService.Get(messageKey);
             View.SetMessage(message);
+           ShowWithDelay().Forget();
+        }
+
+        private async UniTaskVoid ShowWithDelay() {
+            await UniTask.Yield();
+            RebuiltRectTransforms();
             View.Mask.fillOrigin = 0;
             View.Mask.DOFillAmount(1, DURATION);
+        }
+
+        private void RebuiltRectTransforms() {
+            foreach (RectTransform rect in View.RectTransforms) {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+            }
         }
 
         private void OnMessageRequested(LocalizationKey messageKey) {

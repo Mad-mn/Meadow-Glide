@@ -33,6 +33,10 @@ namespace Feature.LevelModule.Scripts {
             _levelConfigProvider = await _levelConfigProviderTask;
         }
 
+        public bool HasLevel(int level) {
+            return _levelConfigProvider != null && _levelConfigProvider.LevelDatas.ContainsKey(level);
+        }
+
         public LevelData GetLevelDataForCurrentLevel() {
             if (_challengeService.IsActive) {
                 return _challengeService.GetCurrentLevel();

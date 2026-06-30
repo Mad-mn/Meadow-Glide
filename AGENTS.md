@@ -24,7 +24,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**35 installer calls** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
+**36 installer calls** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)
@@ -101,6 +101,8 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 | Level generation docs | `Assets/Docs/LevelGenerationSystem.md` |
 | Daily challenge docs | `Assets/Docs/DailyChallengeSystem.md` |
 | Game design document | `Assets/Docs/GameDesignDocument.md` |
+| Currency balance doc | `Assets/Docs/CurrencyBalanceDocument.md` |
+| GD development plan | `Assets/Docs/GDDevelopmentPlan.md` |
 
 ## Level Data
 
