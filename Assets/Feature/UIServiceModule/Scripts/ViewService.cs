@@ -100,6 +100,12 @@ namespace Feature.UIServiceModule.Scripts {
                 return null;
             }
 
+            // Another path may have added this view while we were loading
+            if (_activeViews.TryGetValue(viewType, out active)) {
+                _addressableService.ReleaseInstance(instance);
+                return (T)active.view;
+            }
+
             T view = instance.GetComponent<T>();
             if (view == null) {
                 Debug.LogError($"Prefab at {config.Address} does not have component {typeof(T).Name}");

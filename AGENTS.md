@@ -34,13 +34,18 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 ### State Flow
 `BootstrapState` → `MainMenuState` → `GameSimpleState`
 
+### Level Data
+- `Assets/ScriptableObjects/Levels/` — hand-crafted level configs (newBalance)
+- `Assets/ScriptableObjects/GeneratedLevels/` — procedurally generated levels (A* solver)
+- Level configs loaded via Addressables as `UniTask<LevelConfigProvider>` (lazy)
+
 ## Editor Tools
 
 | Menu Path | Purpose |
 |-----------|---------|
-| `Tools/GenerateAdresablesNames` | Regenerates `Assets/Scripts/AddressConstants.cs` from Addressable entries |
+| `Tools/GenerateAdresablesNames` | Regenerates `Assets/Scripts/AddressConstants.cs` from Addressable addresses |
 | `Tools/ColorRings/Level Generator` | Level designer with A* solver and difficulty rating |
-| `Tools/UI/Create View Module` | Scaffolds a new MVP View module (View + Presenter + installer registration) |
+| `Tools/UI/Create View Module` | Scaffolds a new MVP View module (View + Presenter + updates `ViewType.cs` enum + `ViewSettings` ScriptableObject) |
 | `Tools/Save Data/Clear All Saves` | Clears all save data |
 | `Tools/Save Data/Open Persistent Data Path` | Opens persistent data folder |
 | `Tools/Automatic UI Anchoring/Anchor Selected UI Objects` | Quick-anchors selected UI elements (F1 shortcut) |
@@ -71,7 +76,7 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - **Models are plain C#** — no MonoBehaviour inheritance, no DI dependencies.
 - **UI is global** — `UIRoot` uses `DontDestroyOnLoad` across all scenes.
 
-## Code Generation / Tooling
+## Code Generation
 
 - `AddressConstants.cs` → generated from Addressable asset addresses (`Assets/Scripts/Editor/AddressablesNamesGenerator.cs`)
 - `ViewModuleGenerator` → scaffolds View + Presenter + updates `ViewType.cs` enum + `ViewSettings` ScriptableObject
@@ -79,36 +84,12 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 
 ## Gotchas
 
-- `DestroyImmediate` is used in play mode in `CircleController.ClearCircle()` (line 145) — should be `Destroy()`.
-- `FindObjectOfType` called on every audio play in `AudioService.GetMonoBehaviour()` (line 193) — no caching.
-- `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) every frame while dragging.
+- `DestroyImmediate` used in play mode in both `CircleController.ClearCircle()` (line 145) and `StripController.ClearStrip()` (line 276) — should be `Destroy()`.
+- `FindObjectOfType<MonoBehaviour>()` called on every audio operation in `AudioService.GetMonoBehaviour()` (line 193) — no caching.
+- `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) runs every frame during drag.
 - `BinaryFormatter` in `SaveDataService` (lines 85, 105) — deprecated, insecure, not supported on IL2CPP/WebGL.
-- `Debug.LogError` fires in `StripController.BuildStrip()` (line 146) during normal gameplay when references are missing.
-- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 18) — auto-generated, fix the Addressable address.
-
-## Key File Paths
-
-| What | Path |
-|------|------|
-| Project installer | `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs` |
-| Game state machine | `Assets/Feature/GameStateModule/Scripts/GameStateMachine.cs` |
-| Addressable constants (generated) | `Assets/Scripts/AddressConstants.cs` |
-| Level generator (editor) | `Assets/Feature/LevelModule/Scripts/Editor/Generator/LevelGeneratorWindow.cs` |
-| View module generator (editor) | `Assets/Feature/UIServiceModule/Editor/ViewModuleGenerator.cs` |
-| Addressable names generator (editor) | `Assets/Scripts/Editor/AddressablesNamesGenerator.cs` |
-| Package manifest | `Packages/manifest.json` |
-| Circle geometry docs | `Assets/Docs/CircleGeometrySystem.md` |
-| Level generation docs | `Assets/Docs/LevelGenerationSystem.md` |
-| Daily challenge docs | `Assets/Docs/DailyChallengeSystem.md` |
-| Game design document | `Assets/Docs/GameDesignDocument.md` |
-| Currency balance doc | `Assets/Docs/CurrencyBalanceDocument.md` |
-| GD development plan | `Assets/Docs/GDDevelopmentPlan.md` |
-
-## Level Data
-
-- `Assets/ScriptableObjects/Levels/` — hand-crafted level configs (newBalance)
-- `Assets/ScriptableObjects/GeneratedLevels/` — procedurally generated levels (A* solver)
-- Level configs loaded via Addressables as `UniTask<LevelConfigProvider>` (lazy)
+- LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` (line 94) on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` (lines 105, 177) on segment updates.
+- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 21) — auto-generated, fix the Addressable address.
 
 ## Adding a New Feature Module
 

@@ -71,6 +71,11 @@ namespace Feature.SaveDataModule.Scripts
             }
         }
 
+        public bool HasSaveData(SaveDataType type)
+        {
+            return File.Exists(GetPath(type));
+        }
+
         private T LoadFromDisk<T>(SaveDataType type) where T : ISaveData, new()
         {
             string path = GetPath(type);

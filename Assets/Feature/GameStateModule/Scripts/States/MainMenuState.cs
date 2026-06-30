@@ -22,6 +22,8 @@ namespace Feature.GameStateModule.Scripts.States {
 
         public void Enter() {
             LoadMainMenuScene().Forget();
+            _viewService.HideView(ViewType.WinLevel);
+
             _viewService.ReleasePrewarmedView(ViewType.WinLevel);
             _viewService.ReleasePrewarmedView(ViewType.LoseView);
             _viewService.ReleasePrewarmedView(ViewType.ConfirmBuyView);

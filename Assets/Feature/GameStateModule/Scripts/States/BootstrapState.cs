@@ -44,12 +44,10 @@ namespace Feature.GameStateModule.Scripts.States {
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
-            ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider,
-            ILevelService levelService, IAudioDataProvider audioDataProvider, IAudioService audioService,
-            IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
-            IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider,
-            IChallengeConfigProvider challengeConfigProvider, IResourceInfoProvider resourceInfoProvider,
-            ILocalizationService localizationService, IFirebaseService firebaseService,
+            ISegmentStatusVisualDataProvider segmentsVisualDataProvider, ISlideAreaDataProvider slideAreaDataProvider, ILevelService levelService,
+            IAudioDataProvider audioDataProvider, IAudioService audioService, IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
+            IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider, IChallengeConfigProvider challengeConfigProvider,
+            IResourceInfoProvider resourceInfoProvider, ILocalizationService localizationService, IFirebaseService firebaseService,
             IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
@@ -91,7 +89,16 @@ namespace Feature.GameStateModule.Scripts.States {
             await _levelService.Initialize();
             await _viewService.PrewarmView<MainMenuView>(ViewType.MainMenu);
             await _viewService.PrewarmView<GameView>(ViewType.GameView);
-            ChangeState?.Invoke(typeof(MainMenuState));
+            ExitFromState();
+        }
+
+        private void ExitFromState() {
+            var data = _levelService.GetLevelDataForCurrentLevel();
+            Type nextStateType = data.LevelID == 1
+                ? typeof(GameSimpleState)
+                : typeof(MainMenuState);
+
+            ChangeState?.Invoke(nextStateType);
         }
 
         private async UniTask InitializeDataProviders() {
