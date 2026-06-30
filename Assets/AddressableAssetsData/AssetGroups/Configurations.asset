@@ -50,11 +50,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 875fa5b3d2286944698a5c1b52f7618e
-    m_Address: LanguageFontConfig
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9f34809b41b3cda4abf5b5d8c7e92f8a
     m_Address: DailyChallengeConfigs
     m_ReadOnly: 0

@@ -19,12 +19,10 @@ public static class AddressConstants
     public const string GameBack = "GameBack";
     public const string GameView = "GameView";
     public const string GircleModule = "GircleModule";
-    public const string LanguageFontConfig = "LanguageFontConfig";
     public const string LevelConfigProvider = "LevelConfigProvider";
     public const string LoadingView = "LoadingView";
     public const string LoseView = "LoseView";
     public const string MainMenuView = "MainMenuView";
-    public const string MessageView = "MessageView";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_GeometryPool_GeometryPoolKernels_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/GeometryPool/GeometryPoolKernels.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Common_Utilities_CopyBuffer_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Common/Utilities/CopyBuffer.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_bit_histogram_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/bit_histogram.compute";
@@ -35,7 +33,6 @@ public static class AddressConstants
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_restructure_bvh_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/restructure_bvh.compute";
     public const string Packages_com_unity_render_pipelines_core_Runtime_UnifiedRayTracing_Compute_RadeonRays_kernels_scatter_compute = "Packages/com.unity.render-pipelines.core/Runtime/UnifiedRayTracing/Compute/RadeonRays/kernels/scatter.compute";
     public const string PerfectMapRewardConfigs = "PerfectMapRewardConfigs";
-    public const string PerfectMapView = "PerfectMapView";
     public const string ResourceInfoConfig = "ResourceInfoConfig";
     public const string SegmentStatusVisualConfig = "SegmentStatusVisualConfig";
     public const string SettingsView = "SettingsView";
