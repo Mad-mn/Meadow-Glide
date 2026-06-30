@@ -16,7 +16,7 @@ MonoBehaviour:
   FailureMessage: 
   Costs:
   - Type: 1
-    Amount: 50
+    Amount: 60
   Rewards:
   - Type: 2
     Amount: 3

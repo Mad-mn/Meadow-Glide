@@ -14,22 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.PerfectMapViewModule.Scripts.Configs.PerfectMapRewardConfigs
   _configs:
   - _fromLevel: 1
-    _toLevel: 15
-    _rewardType: 1
-    _rewardAmount: 50
-  - _fromLevel: 16
     _toLevel: 30
     _rewardType: 1
-    _rewardAmount: 100
+    _rewardAmount: 30
   - _fromLevel: 31
-    _toLevel: 50
+    _toLevel: 60
     _rewardType: 1
-    _rewardAmount: 150
-  - _fromLevel: 51
+    _rewardAmount: 50
+  - _fromLevel: 61
     _toLevel: 100
     _rewardType: 1
-    _rewardAmount: 200
+    _rewardAmount: 75
   - _fromLevel: 101
     _toLevel: 200
     _rewardType: 1
-    _rewardAmount: 300
+    _rewardAmount: 100

@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf0dd4b2eaaef304d9c93d0c3e182c71, type: 3}
   m_Name: EconomyConfig
   m_EditorClassIdentifier: Assembly-CSharp::Feature.PlayerInventoryModule.Configs.EconomyConfig
-  LevelWinReward: 50
+  LevelWinReward: 30
