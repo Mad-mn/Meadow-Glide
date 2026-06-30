@@ -24,6 +24,7 @@ namespace Feature.TutorialModule.Scripts.Factory {
 
         private List<ITutorialState> GetStatesForFirstTutorial() {
             List<ITutorialState> states = new List<ITutorialState>();
+            states.Add(_container.Instantiate<ShowGoalTextState>());
             states.Add(_container.Instantiate<ShowPointerOnCircleState>());
             states.Add(_container.Instantiate<ShowPointerOnSlideAreaState>());
             return states;

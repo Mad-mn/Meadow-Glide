@@ -31,5 +31,6 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Global_Locked = 28,
         PerfectChallenge_Locked = 29,
         Global_YouCompleteAll = 30,
-}
+        Tutorial_Goal = 31,
+    }
 }
