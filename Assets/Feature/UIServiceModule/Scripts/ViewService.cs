@@ -19,6 +19,7 @@ namespace Feature.UIServiceModule.Scripts {
         private Dictionary<ViewType, ViewSettings.ViewConfigEntry> _configs;
         private readonly Dictionary<ViewType, (ViewBase view, IPresenter presenter)> _activeViews = new();
         private readonly List<ViewType> _prewarmedViews = new();
+        private readonly HashSet<ViewType> _hidingViews = new();
 
         public ViewService(
             IAddressableService addressableService, 
@@ -66,17 +67,20 @@ namespace Feature.UIServiceModule.Scripts {
         private async UniTaskVoid ShowViewTask<T>(ViewType viewType) where T : ViewBase {
             await InitializeIfNeeded();
 
-            if (TryShow<T>(viewType))
+            if (await TryShow<T>(viewType))
                 return;
 
             await GetOrInitializeView<T>(viewType);
-            TryShow<T>(viewType);
+            await TryShow<T>(viewType);
         }
 
-        private bool TryShow<T>(ViewType viewType) where T : ViewBase {
+        private async UniTask<bool> TryShow<T>(ViewType viewType) where T : ViewBase {
             if (_activeViews.TryGetValue(viewType, out var active)) {
+                if (_hidingViews.Contains(viewType)) {
+                    CancelHide(viewType, active.view);
+                }
                 active.presenter.Show();
-                active.view.Show();
+                await active.view.ShowAsync();
                 return true;
             }
 
@@ -100,7 +104,6 @@ namespace Feature.UIServiceModule.Scripts {
                 return null;
             }
 
-            // Another path may have added this view while we were loading
             if (_activeViews.TryGetValue(viewType, out active)) {
                 _addressableService.ReleaseInstance(instance);
                 return (T)active.view;
@@ -124,14 +127,43 @@ namespace Feature.UIServiceModule.Scripts {
         public void HideView(ViewType viewType) {
             if (!_activeViews.TryGetValue(viewType, out var active)) return;
 
-            active.view.Hide();
             active.presenter.Hide();
 
-            if (active.view.DestroyOnClose) {
-                active.presenter?.Dispose();
-                _addressableService.ReleaseInstance(active.view.gameObject);
-                _activeViews.Remove(viewType);
+            if (active.view.UseAnimation && active.view.DestroyOnClose) {
+                HideAnimatedAsync(viewType, active.view, active.presenter).Forget();
+            } else {
+                active.view.Hide();
+                if (active.view.DestroyOnClose) {
+                    DestroyView(viewType, active.presenter, active.view);
+                }
             }
+        }
+
+        private async UniTaskVoid HideAnimatedAsync(ViewType viewType, ViewBase view, IPresenter presenter) {
+            _hidingViews.Add(viewType);
+            try {
+                await view.HideAsync();
+            } finally {
+                _hidingViews.Remove(viewType);
+            }
+
+            if (_activeViews.ContainsKey(viewType)) {
+                DestroyView(viewType, presenter, view);
+            }
+        }
+
+        private void CancelHide(ViewType viewType, ViewBase view) {
+            _hidingViews.Remove(viewType);
+            if (view.UseAnimation) {
+                var transition = view.GetComponent<ViewTransition>();
+                transition?.KillActive();
+            }
+        }
+
+        private void DestroyView(ViewType viewType, IPresenter presenter, ViewBase view) {
+            presenter?.Dispose();
+            _addressableService.ReleaseInstance(view.gameObject);
+            _activeViews.Remove(viewType);
         }
 
         public bool IsViewOpen(ViewType viewType) {

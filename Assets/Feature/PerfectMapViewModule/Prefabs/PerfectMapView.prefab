@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 5847894201820573498}
   - component: {fileID: 1130617826621928679}
   - component: {fileID: 1453820027904565760}
+  - component: {fileID: 6461131795370321901}
   m_Layer: 0
   m_Name: PerfectMapView
   m_TagString: Untagged
@@ -135,10 +136,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.PerfectMapViewModule.Scripts.PerfectMapView
   _destroyOnClose: 0
+  _useAnimation: 1
   <InfoPrefab>k__BackingField: {fileID: 613980467492674213, guid: 821fb345ac190ef4480a54a96c106c25, type: 3}
   <InfoParent>k__BackingField: {fileID: 8827166012569545106}
   <ScrollRect>k__BackingField: {fileID: 788044946225292275}
   <CloseButton>k__BackingField: {fileID: 7414709625279121709}
+--- !u!114 &6461131795370321901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423806369584540399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cfb4fc0d736e3b4889d62d01a85cba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ViewTransition
+  _animationTarget: {fileID: 8216683585954906055}
+  _animateShow: 1
+  _showDuration: 0.25
+  _showEase: 6
+  _showScaleFrom: 0.92
+  _showSlideOffsetY: 40
+  _animateHide: 1
+  _hideDuration: 0.2
+  _hideEase: 5
+  _hideScaleTo: 0.95
+  _hideSlideOffsetY: 30
 --- !u!1 &4678881915242337464
 GameObject:
   m_ObjectHideFlags: 0
