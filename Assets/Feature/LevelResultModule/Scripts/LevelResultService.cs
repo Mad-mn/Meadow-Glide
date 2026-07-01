@@ -119,6 +119,10 @@ namespace Feature.LevelResultModule.Scripts {
             _isLose = false;
         }
 
+        public void ResetLose() {
+            _isLose = false;
+        }
+
         private void SaveLevelCompletion(PlayerProgressData progress, int level, MoveEfficiencyResult result) {
             if (progress.CompletedLevels == null)
                 progress.CompletedLevels = new Dictionary<int, LevelCompletionData>();

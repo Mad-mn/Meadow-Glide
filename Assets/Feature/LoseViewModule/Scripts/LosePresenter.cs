@@ -5,6 +5,7 @@ using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.InputModule.Scripts;
 using Feature.LevelInitializeModule;
+using Feature.LevelResultModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
@@ -29,11 +30,12 @@ namespace Feature.LoseViewModule.Scripts {
         private readonly IAnalyticsService _analyticsService;
         private readonly LevelModel _levelModel;
         private readonly ISaveDataModel _saveDataModel;
+        private readonly ILevelResultService _levelResultService;
 
         public LosePresenter(LoseView view, IGameStateMachine gameStateMachine, ILevelInitializeService levelInitializeService,
             IViewService viewService, IMoveTrackService moveTrackService, IInteractionStateService interactionStateService,
             ConfirmBuyViewModel confirmBuyViewModel, ITransactionConfigsProvider transactionConfigsProvider, ILocalizationService localizationService,
-            IAnalyticsService analyticsService, LevelModel levelModel, ISaveDataModel saveDataModel) : base(view) {
+            IAnalyticsService analyticsService, LevelModel levelModel, ISaveDataModel saveDataModel, ILevelResultService levelResultService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _levelInitializeService = levelInitializeService;
             _viewService = viewService;
@@ -45,6 +47,7 @@ namespace Feature.LoseViewModule.Scripts {
             _analyticsService = analyticsService;
             _levelModel = levelModel;
             _saveDataModel = saveDataModel;
+            _levelResultService = levelResultService;
         }
 
         public override void Initialize() {
@@ -78,6 +81,7 @@ namespace Feature.LoseViewModule.Scripts {
                 _confirmBuyViewModel.OnConfirmSuccess -= OnConfirmSuccess;
                 _viewService.HideView(ViewType.LoseView);
                 _moveTrackService.AddMoves(_transactionConfigsProvider.GetConfig(TransactionId.BuyExtraMoves).Rewards[0].Amount);
+                _levelResultService.ResetLose();
                 int levelId = _levelModel.ReplayLevel ?? _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress).Level;
                 _analyticsService.ExtraMovesPurchased(levelId);
             }
