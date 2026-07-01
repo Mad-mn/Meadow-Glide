@@ -11,5 +11,6 @@ namespace Feature.SoundModule.Scripts {
         void ResumeAll();
         void StopAll();
         void ChangeEnabledState(bool enabled);
+        void ChangeEnabledMusicState(bool enabled);
     }
 }

@@ -184,6 +184,7 @@ MonoBehaviour:
   _destroyOnClose: 0
   <CloseButton>k__BackingField: {fileID: 8809102481357198956}
   <SoundsToggle>k__BackingField: {fileID: 5390866398927093387}
+  <MusicToggle>k__BackingField: {fileID: 2812281219635714721}
   <VibrationToggle>k__BackingField: {fileID: 4721473617637604399}
   <Language>k__BackingField: {fileID: 5510624343162641816}
 --- !u!1 &767711755277157161
@@ -2806,7 +2807,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.1
+  m_fontSize: 25.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

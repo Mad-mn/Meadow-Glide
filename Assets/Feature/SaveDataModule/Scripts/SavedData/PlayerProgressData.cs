@@ -21,6 +21,7 @@ namespace Feature.SaveDataModule.Scripts.SavedData {
     [Serializable]
     public class PlayerSettingsData : ISaveData {
         public bool SoundsEnabled = true;
+        public bool MusicEnabled = true;
         public bool VibrationEnabled = true;
         public Language SelectedLanguage = Language.English;
     }

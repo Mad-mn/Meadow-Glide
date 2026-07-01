@@ -18,6 +18,7 @@ namespace Feature.SoundModule.Scripts {
         private float _musicVolume = 1f;
         private float _sfxVolume = 1f;
         private bool _canPlay = true;
+        private bool _canPlayMusic = true;
 
         private Coroutine _currentFadeCoroutine;
 
@@ -39,6 +40,8 @@ namespace Feature.SoundModule.Scripts {
             _sfxSource.playOnAwake = false;
             _sfxSource.loop = false;
             ChangeEnabledState(_saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings).SoundsEnabled);
+            ChangeEnabledMusicState(_saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings).MusicEnabled);
+            PlayMusic(AudioType.Music);
         }
 
         public void PlaySound(AudioType audioType, float volume = 1f) {
@@ -55,7 +58,7 @@ namespace Feature.SoundModule.Scripts {
         }
 
         public void PlayMusic(AudioType audioType, bool loop = true, float fadeDuration = 1f) {
-            if(!_canPlay)
+            if(!_canPlayMusic)
                 return;
             
             AudioClip clip = GetClip(audioType);
@@ -127,6 +130,9 @@ namespace Feature.SoundModule.Scripts {
 
         public void ChangeEnabledState(bool enabled) {
             _canPlay = enabled;
+        }
+        public void ChangeEnabledMusicState(bool enabled) {
+            _canPlayMusic = enabled;
         }
 
         private AudioClip GetClip(AudioType audioType) {
