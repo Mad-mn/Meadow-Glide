@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Feature.AnalyticsModule.Scripts;
+using Feature.ChallengeModule.Scripts;
 using Feature.ConfirmBuyViewModule.Scripts;
 using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
@@ -31,11 +32,13 @@ namespace Feature.LoseViewModule.Scripts {
         private readonly LevelModel _levelModel;
         private readonly ISaveDataModel _saveDataModel;
         private readonly ILevelResultService _levelResultService;
+        private readonly IChallengeService _challengeService;
 
         public LosePresenter(LoseView view, IGameStateMachine gameStateMachine, ILevelInitializeService levelInitializeService,
             IViewService viewService, IMoveTrackService moveTrackService, IInteractionStateService interactionStateService,
             ConfirmBuyViewModel confirmBuyViewModel, ITransactionConfigsProvider transactionConfigsProvider, ILocalizationService localizationService,
-            IAnalyticsService analyticsService, LevelModel levelModel, ISaveDataModel saveDataModel, ILevelResultService levelResultService) : base(view) {
+            IAnalyticsService analyticsService, LevelModel levelModel, ISaveDataModel saveDataModel, ILevelResultService levelResultService,
+            IChallengeService challengeService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _levelInitializeService = levelInitializeService;
             _viewService = viewService;
@@ -48,6 +51,7 @@ namespace Feature.LoseViewModule.Scripts {
             _levelModel = levelModel;
             _saveDataModel = saveDataModel;
             _levelResultService = levelResultService;
+            _challengeService = challengeService;
         }
 
         public override void Initialize() {
@@ -89,6 +93,7 @@ namespace Feature.LoseViewModule.Scripts {
         }
 
         private void OnMainMenuButtonClick() {
+            _challengeService.Deactivate();
             _gameStateMachine.EnterState(typeof(MainMenuState));
         }
 

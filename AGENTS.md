@@ -16,7 +16,7 @@ Unity 6 (6000.3.10f1) puzzle game — rotate and slide colored ring segments to 
 
 ## Architecture
 
-Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` contains:
+Feature-based modular layout. **50+ modules** under `Assets/Feature/<ModuleName>/`, each containing:
 - Service interfaces (`I*Service`) and implementations
 - Models (plain C# data holders, not MonoBehaviours)
 - MonoBehaviours for view/visual components
@@ -33,6 +33,9 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 
 ### State Flow
 `BootstrapState` → `MainMenuState` → `GameSimpleState`
+
+### Scene Installers
+- `GameSceneInstaller.cs` exists at `Assets/Feature/Bootstrap/Scripts/` but is currently empty (no-op).
 
 ### Level Data
 - `Assets/ScriptableObjects/Levels/` — hand-crafted level configs (newBalance)
@@ -111,4 +114,4 @@ Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key poin
 
 ## Further Reference
 
-- `PROJECT_ANALYSIS.md` — detailed architecture diagrams, dependency graphs, and performance/refactoring notes for the full codebase.
+- `PROJECT_ANALYSIS.md` — detailed architecture diagrams, dependency graphs, and performance/refactoring notes for the full codebase. Note: some figures are stale (e.g., says "20 module installers" — actual count is 37).
