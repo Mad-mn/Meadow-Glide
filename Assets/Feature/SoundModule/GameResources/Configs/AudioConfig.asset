@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.SoundModule.Scripts.AudioConfig
   _audioData:
   - AudioType: 1
-    AudioClip: {fileID: 0}
+    AudioClip: {fileID: 8300000, guid: edd9ae3b7e7f76f4fbe833026fd94f79, type: 3}
   - AudioType: 2
     AudioClip: {fileID: 8300000, guid: e25c3ed995c48944e8f122db66ebc8b7, type: 3}
   - AudioType: 3

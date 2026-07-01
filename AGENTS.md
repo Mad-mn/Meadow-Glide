@@ -78,6 +78,15 @@ Feature-based modular layout. Each module under `Assets/Feature/<ModuleName>/` c
 - **Models are plain C#** — no MonoBehaviour inheritance, no DI dependencies.
 - **UI is global** — `UIRoot` uses `DontDestroyOnLoad` across all scenes.
 
+## UI View System (MVP)
+
+Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key points:
+- Views inherit from `ViewBase`, Presenters from `PresenterBase<TView>`
+- All views registered in `ViewSettings` ScriptableObject with ViewType enum
+- Use `_viewService.ShowView<T>(ViewType)` / `_viewService.HideView(ViewType)`
+- View creation and Presenter lifecycle managed by `ViewService`
+- Business logic goes in Presenter, UI logic stays in View
+
 ## Code Generation
 
 - `AddressConstants.cs` → generated from Addressable asset addresses (`Assets/Scripts/Editor/AddressablesNamesGenerator.cs`)

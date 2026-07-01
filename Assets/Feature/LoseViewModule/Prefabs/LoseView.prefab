@@ -227,6 +227,7 @@ GameObject:
   - component: {fileID: 5847894201820573498}
   - component: {fileID: 1130617826621928679}
   - component: {fileID: 1053172357474751904}
+  - component: {fileID: 8158027434023570997}
   m_Layer: 0
   m_Name: LoseView
   m_TagString: Untagged
@@ -276,10 +277,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.LoseViewModule.Scripts.LoseView
   _destroyOnClose: 0
+  _useAnimation: 1
   <RestartButton>k__BackingField: {fileID: 7596350241470415923}
   <MainMenuButton>k__BackingField: {fileID: 2323499502303141702}
   <AddMovesButton>k__BackingField: {fileID: 6467125586977226800}
   <AddMovesButtonText>k__BackingField: {fileID: 6828979933970806012}
+--- !u!114 &8158027434023570997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423806369584540399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cfb4fc0d736e3b4889d62d01a85cba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ViewTransition
+  _animationTarget: {fileID: 1554236678391751530}
+  _animateShow: 1
+  _showDuration: 0.25
+  _showEase: 6
+  _showScaleFrom: 0.92
+  _showSlideOffsetY: 40
+  _animateHide: 1
+  _hideDuration: 0.2
+  _hideEase: 5
+  _hideScaleTo: 0.95
+  _hideSlideOffsetY: 30
 --- !u!1 &1027704918985552140
 GameObject:
   m_ObjectHideFlags: 0
@@ -657,7 +682,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 66.7
+  m_fontSize: 19.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1013,7 +1038,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 41.55
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

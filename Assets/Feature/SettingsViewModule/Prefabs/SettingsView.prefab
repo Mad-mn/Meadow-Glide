@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 5847894201820573498}
   - component: {fileID: 1130617826621928679}
   - component: {fileID: 78132270814683164}
+  - component: {fileID: 3102542057204250385}
   m_Layer: 0
   m_Name: SettingsView
   m_TagString: Untagged
@@ -182,10 +183,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.SettingsViewModule.Scripts.SettingsView
   _destroyOnClose: 0
+  _useAnimation: 1
   <CloseButton>k__BackingField: {fileID: 8809102481357198956}
   <SoundsToggle>k__BackingField: {fileID: 5390866398927093387}
+  <MusicToggle>k__BackingField: {fileID: 2812281219635714721}
   <VibrationToggle>k__BackingField: {fileID: 4721473617637604399}
   <Language>k__BackingField: {fileID: 5510624343162641816}
+--- !u!114 &3102542057204250385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423806369584540399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cfb4fc0d736e3b4889d62d01a85cba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ViewTransition
+  _animationTarget: {fileID: 7658278843332985250}
+  _animateShow: 1
+  _showDuration: 0.25
+  _showEase: 6
+  _showScaleFrom: 0.92
+  _showSlideOffsetY: 40
+  _animateHide: 1
+  _hideDuration: 0.2
+  _hideEase: 5
+  _hideScaleTo: 0.95
+  _hideSlideOffsetY: 30
 --- !u!1 &767711755277157161
 GameObject:
   m_ObjectHideFlags: 0
@@ -1535,7 +1561,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 9d82f810001f76344ba7a13a99d87718, type: 3}
   m_Type: 0
-  m_PreserveAspect: 1
+  m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -2304,7 +2330,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 51.45
+  m_fontSize: 18
   m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2806,7 +2832,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 93.35
+  m_fontSize: 27.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

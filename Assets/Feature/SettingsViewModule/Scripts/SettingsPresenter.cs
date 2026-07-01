@@ -31,6 +31,7 @@ namespace Feature.SettingsViewModule.Scripts {
         public override void Initialize() {
             View.CloseButton.onClick.AddListener(CloseSettings);
             View.SoundsToggle.onValueChanged.AddListener(SoundsToggle);
+            View.MusicToggle.onValueChanged.AddListener(MusicToggle);
             View.VibrationToggle.onValueChanged.AddListener(VibrationToggle);
             View.Language.onValueChanged.AddListener(OnLanguageChanged);
 
@@ -77,6 +78,20 @@ namespace Feature.SettingsViewModule.Scripts {
             SaveSettings();
             _audioService.ChangeEnabledState(enabled);
             _audioService.PlaySound(AudioType.ButtonClick);
+        }
+        
+        private void MusicToggle(bool enabled) {
+            _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings)
+                .MusicEnabled = enabled;
+            SaveSettings();
+            _audioService.ChangeEnabledMusicState(enabled);
+            _audioService.PlaySound(AudioType.ButtonClick);
+            if (enabled) {
+                _audioService.PlayMusic(AudioType.Music);
+            }
+            else {
+                _audioService.StopMusic();
+            }
         }
 
         private void SaveSettings() {

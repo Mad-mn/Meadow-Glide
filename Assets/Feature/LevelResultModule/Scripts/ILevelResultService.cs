@@ -3,5 +3,6 @@ namespace Feature.LevelResultModule.Scripts {
         void OnLevelWon();
         void OnLevelLost();
         void Reset();
+        void ResetLose();
     }
 }

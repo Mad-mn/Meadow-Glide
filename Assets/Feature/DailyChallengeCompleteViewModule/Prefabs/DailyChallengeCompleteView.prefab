@@ -93,7 +93,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 194.45
+  m_fontSize: 56.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -162,6 +162,7 @@ GameObject:
   - component: {fileID: 5847894201820573498}
   - component: {fileID: 1130617826621928679}
   - component: {fileID: 424757914366769173}
+  - component: {fileID: 5138678246136620916}
   m_Layer: 0
   m_Name: DailyChallengeCompleteView
   m_TagString: Untagged
@@ -211,6 +212,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.DailyChallengeCompleteViewModule.Scripts.DailyChallengeCompleteView
   _destroyOnClose: 0
+  _useAnimation: 1
   _movesCountText: {fileID: 2313537276441014727}
   _maxMovesText: {fileID: 7415921613406986075}
   _milestones:
@@ -218,6 +220,29 @@ MonoBehaviour:
   - {fileID: 9000518615231978330}
   _mainMenuButton: {fileID: 2761814788224722738}
   _restartButton: {fileID: 1937397200458039400}
+--- !u!114 &5138678246136620916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423806369584540399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cfb4fc0d736e3b4889d62d01a85cba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ViewTransition
+  _animationTarget: {fileID: 4188130167987781898}
+  _animateShow: 1
+  _showDuration: 0.25
+  _showEase: 6
+  _showScaleFrom: 0.92
+  _showSlideOffsetY: 40
+  _animateHide: 1
+  _hideDuration: 0.2
+  _hideEase: 5
+  _hideScaleTo: 0.95
+  _hideSlideOffsetY: 30
 --- !u!1 &1147925792248394041
 GameObject:
   m_ObjectHideFlags: 0
@@ -376,7 +401,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 87.15
+  m_fontSize: 25.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -542,7 +567,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 84.25
+  m_fontSize: 27.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

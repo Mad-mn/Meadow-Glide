@@ -107,10 +107,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 4188130167987781898}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.4183971, y: 0.5939593}
-  m_AnchorMax: {x: 0.82282853, y: 0.6508324}
-  m_AnchoredPosition: {x: 0, y: 48}
-  m_SizeDelta: {x: 0.0000038146973, y: 0}
+  m_AnchorMin: {x: 0.4183971, y: 0.6085426}
+  m_AnchorMax: {x: 0.82282853, y: 0.66541576}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0.0000009536743, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8743526151353134469
 CanvasRenderer:
@@ -223,6 +223,7 @@ GameObject:
   - component: {fileID: 5847894201820573498}
   - component: {fileID: 1130617826621928679}
   - component: {fileID: 5035315989477063827}
+  - component: {fileID: 1036999565505701185}
   m_Layer: 0
   m_Name: DailyChallengeStartView
   m_TagString: Untagged
@@ -272,6 +273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.DailyChallengeStartViewModule.Scripts.DailyChallengeStartView
   _destroyOnClose: 0
+  _useAnimation: 1
   _milestones:
   - {fileID: 1274239034849214523}
   - {fileID: 2802796904593563075}
@@ -279,6 +281,29 @@ MonoBehaviour:
   _maxMovesText: {fileID: 4388597839638272450}
   _playButton: {fileID: 2494527235260768028}
   _closeButton: {fileID: 4737824057989722700}
+--- !u!114 &1036999565505701185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423806369584540399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cfb4fc0d736e3b4889d62d01a85cba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.UIServiceModule.Scripts.ViewTransition
+  _animationTarget: {fileID: 4188130167987781898}
+  _animateShow: 1
+  _showDuration: 0.25
+  _showEase: 6
+  _showScaleFrom: 0.92
+  _showSlideOffsetY: 40
+  _animateHide: 1
+  _hideDuration: 0.2
+  _hideEase: 5
+  _hideScaleTo: 0.95
+  _hideSlideOffsetY: 30
 --- !u!1 &2782755794170527798
 GameObject:
   m_ObjectHideFlags: 0
@@ -373,7 +398,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 78.55
+  m_fontSize: 22.9
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -616,9 +641,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 4188130167987781898}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.29778704, y: 0.5963542}
-  m_AnchorMax: {x: 0.39037964, y: 0.6484375}
-  m_AnchoredPosition: {x: 0, y: 48}
+  m_AnchorMin: {x: 0.29778704, y: 0.61093754}
+  m_AnchorMax: {x: 0.39037964, y: 0.66302085}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6588100793571750459
@@ -1012,7 +1037,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8804294040823721083, guid: 960018f7d8c7c3c46bac1a843c07632f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5091282674455840286}
   m_SourcePrefab: {fileID: 100100000, guid: 960018f7d8c7c3c46bac1a843c07632f, type: 3}
 --- !u!114 &1274239034849214523 stripped
 MonoBehaviour:
@@ -1030,6 +1058,25 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2856270442945218007, guid: 960018f7d8c7c3c46bac1a843c07632f, type: 3}
   m_PrefabInstance: {fileID: 4209361920280303402}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4631260165251791697 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8804294040823721083, guid: 960018f7d8c7c3c46bac1a843c07632f, type: 3}
+  m_PrefabInstance: {fileID: 4209361920280303402}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5091282674455840286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4631260165251791697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6465a226641f2b44d84635e8e8fe5ffd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Feature.LocalizationModule.Scripts.UI.LocalizedText
+  _key: 32
+  _updateOnLanguageChange: 1
 --- !u!1001 &7230500091881461975
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1040,7 +1087,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 331527117257797054, guid: 691fca8cf5eb9024fa13b724553c00ff, type: 3}
       propertyPath: m_fontSize
-      value: 109.2
+      value: 31.85
       objectReference: {fileID: 0}
     - target: {fileID: 7303088821168222717, guid: 691fca8cf5eb9024fa13b724553c00ff, type: 3}
       propertyPath: m_Pivot.x
