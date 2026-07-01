@@ -218,7 +218,7 @@ namespace Feature.LevelInitializeModule {
             float spriteHeight = sr != null && sr.sprite != null ? sr.sprite.rect.height / sr.sprite.pixelsPerUnit : 1f;
 
             float desiredWidth = stripLoopLength + margin * 2f;
-            float desiredHeight = totalHeight + margin * 2f;
+            float desiredHeight = totalHeight + margin * 1.5f;
             _spawnedGameBack.transform.localScale = new Vector3(desiredWidth / spriteWidth, desiredHeight / spriteHeight, 1f);
         }
 
