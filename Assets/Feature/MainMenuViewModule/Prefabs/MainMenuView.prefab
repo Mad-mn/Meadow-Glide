@@ -208,6 +208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.MainMenuViewModule.Scripts.MainMenuView
   _destroyOnClose: 0
+  _useAnimation: 0
   _playButton: {fileID: 2836863030489839168}
   _levelText: {fileID: 8855299478905207318}
   <SettingsButton>k__BackingField: {fileID: 5123520281889408561}
@@ -741,7 +742,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 17.6
+  m_fontSize: 14.45
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1215,11 +1216,11 @@ RectTransform:
   - {fileID: 346484392603156598}
   - {fileID: 2169889703620153870}
   - {fileID: 1935275299534425968}
-  - {fileID: 5489392063004018968}
   - {fileID: 1522389477958152491}
   - {fileID: 5531210549519951948}
   - {fileID: 2684141004223167156}
   - {fileID: 2349104940133045460}
+  - {fileID: 5489392063004018968}
   m_Father: {fileID: 5847894201820573498}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2053,7 +2054,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27
+  m_fontSize: 22.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3993,7 +3994,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 331527117257797054, guid: 691fca8cf5eb9024fa13b724553c00ff, type: 3}
       propertyPath: m_fontSize
-      value: 33.35
+      value: 27.35
       objectReference: {fileID: 0}
     - target: {fileID: 7303088821168222717, guid: 691fca8cf5eb9024fa13b724553c00ff, type: 3}
       propertyPath: m_Pivot.x
