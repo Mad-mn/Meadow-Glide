@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.ToolModule.Scripts.ToolConfig
   _tools:
   - ToolType: 1
-    UnlockLevel: 2
+    UnlockLevel: 3
