@@ -2,6 +2,7 @@ using Feature.AddressableModule.Scripts.Installers;
 using Feature.AnalyticsModule.Scripts.Installers;
 using Feature.AnimationModule.Scripts.Installers;
 using Feature.AssetBindingModule.Scripts.Installers;
+using Feature.ByteBrewModule.Scripts.Installers;
 using Feature.CameraServiceModule.Scripts.Installers;
 using Feature.ChallengeModule.Scripts.Installers;
 using Feature.CircleModule.Scripts.Installers;
@@ -79,5 +80,6 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         LocalizationModuleInstaller.Install(Container);
         PerfectMapViewModuleInstaller.Install(Container);
         MessageViewModuleInstaller.Install(Container);
+        ByteBrewModuleInstaller.Install(Container);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Feature.BackgroundViewModule.Scripts;
+using Feature.ByteBrewModule.Scripts;
 using Feature.CameraServiceModule.Scripts;
 using Feature.ChallengeModule.Scripts;
 using Feature.FirebaseModule.Scripts;
@@ -41,6 +42,7 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly ILocalizationService _localizationService;
         private readonly IFirebaseService _firebaseService;
         private readonly IPerfectMapRewardConfigProvider _perfectMapRewardConfigProvider;
+        private readonly IByteBrewInitializeService _byteBrewInitializeService;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
@@ -48,7 +50,7 @@ namespace Feature.GameStateModule.Scripts.States {
             IAudioDataProvider audioDataProvider, IAudioService audioService, IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
             IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider, IChallengeConfigProvider challengeConfigProvider,
             IResourceInfoProvider resourceInfoProvider, ILocalizationService localizationService, IFirebaseService firebaseService,
-            IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider) {
+            IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider, IByteBrewInitializeService byteBrewInitializeService) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -66,6 +68,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _localizationService = localizationService;
             _firebaseService = firebaseService;
             _perfectMapRewardConfigProvider = perfectMapRewardConfigProvider;
+            _byteBrewInitializeService = byteBrewInitializeService;
         }
 
         public void Enter() {
@@ -77,6 +80,7 @@ namespace Feature.GameStateModule.Scripts.States {
 
         private async UniTaskVoid Initialize() {
             await _firebaseService.Initialize();
+            _byteBrewInitializeService.Initialize();
             _saveDataService.LoadAll();
             _localizationService.Initialize();
             await _cameraService.Initialize();
