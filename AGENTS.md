@@ -98,7 +98,7 @@ Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key poin
 - `DestroyImmediate` used in play mode in both `CircleController.ClearCircle()` (line 145) and `StripController.ClearStrip()` (line 276) — should be `Destroy()`.
 - `FindObjectOfType<MonoBehaviour>()` called on every audio operation in `AudioService.GetMonoBehaviour()` (line 193) — no caching.
 - `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) runs every frame during drag.
-- `BinaryFormatter` in `SaveDataService.MigrateLegacySave()` — retained only for one-time migration from legacy `.dat` files. New saves use JSON via Newtonsoft.Json.
+- `SaveDataService` has an unused `using System.Runtime.Serialization.Formatters.Binary;` import — BinaryFormatter was replaced by Newtonsoft.Json. Clean it up if you touch the file.
 - LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` (line 94) on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` (lines 105, 177) on segment updates.
 - `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 21) — auto-generated, fix the Addressable address.
 
