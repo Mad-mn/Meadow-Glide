@@ -37,15 +37,15 @@ namespace Feature.AnalyticsModule.Scripts {
         }
 
         public void UndoMoveUsed(int levelId) {
-            SendCustomEvent(AnalyticsEvents.UndoMoveUsed, levelId);
+            SendByteBrewEvent(AnalyticsEvents.UndoMoveUsed, levelId);
         }
 
         public void ExtraMovesPurchased(int levelId) {
-            SendCustomEvent(AnalyticsEvents.ExtraMovesPurchased, levelId);
+            SendByteBrewEvent(AnalyticsEvents.ExtraMovesPurchased, levelId);
         }
 
         public void DailyChallengeStarted(int levelId) {
-            SendCustomEvent(AnalyticsEvents.DailyChallengeStarted, levelId);
+            SendByteBrewEvent(AnalyticsEvents.DailyChallengeStarted, levelId);
         }
 
         public void DailyChallengeCompleted(int levelId, bool isPerfect) {
@@ -57,10 +57,10 @@ namespace Feature.AnalyticsModule.Scripts {
         }
 
         public void PerfectMapLevelStarted(int levelId) {
-            SendCustomEvent(AnalyticsEvents.PerfectMapLevelStarted, levelId);
+            SendByteBrewEvent(AnalyticsEvents.PerfectMapLevelStarted, levelId);
         }
 
-        private static void SendCustomEvent(string eventName, int levelId) {
+        private static void SendByteBrewEvent(string eventName, int levelId) {
             var parameters = new Dictionary<string, string> {
                 { AnalyticsParams.LevelId, levelId.ToString() }
             };
