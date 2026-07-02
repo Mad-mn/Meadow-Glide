@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
           xmlns:tools="http://schemas.android.com/tools" 
           package="com.unity3d.player" 
@@ -17,7 +17,7 @@
           attribute='**APPLICATION_ATTRIBUTES**'
           android:theme="@android:style/Theme.NoTitleBar" 
           tools:ignore="GoogleAppIndexingWarning,MissingTvBanner" 
-          tools:replace="fullBackupContent,allowBackup">
+          tools:replace="fullBackupContent">
     
     <!-- UNITY -->
     <activity 
