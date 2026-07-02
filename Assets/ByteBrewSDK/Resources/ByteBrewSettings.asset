@@ -15,9 +15,9 @@ MonoBehaviour:
   iosEnabled: 0
   iosGameID: 
   iosSDKKey: 
-  androidEnabled: 0
-  androidGameID: 
-  androidSDKKey: 
+  androidEnabled: 1
+  androidGameID: 9HKbpXO90
+  androidSDKKey: ndLNkXusSVTHI3nX4LpsdsWNmoVzaGZKlnJxMDL+ougSYME+0T2FRbHMvgMEhFYf
   webEnabled: 0
   webGameID: 
   webSDKKey: 
