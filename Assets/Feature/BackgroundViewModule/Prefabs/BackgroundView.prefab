@@ -60,6 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.BackgroundViewModule.Scripts.BackgroundView
   _destroyOnClose: 0
+  _useAnimation: 0
 --- !u!223 &178031269403526514
 Canvas:
   m_ObjectHideFlags: 0
@@ -1475,7 +1476,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 10
+      scalar: 5
       minScalar: 10
       maxCurve:
         serializedVersion: 2
