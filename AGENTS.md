@@ -24,7 +24,7 @@ Feature-based modular layout. **50+ modules** under `Assets/Feature/<ModuleName>
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**36 installer calls** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
+**39 installer calls** are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)
@@ -54,6 +54,7 @@ Feature-based modular layout. **50+ modules** under `Assets/Feature/<ModuleName>
 | `Tools/Automatic UI Anchoring/Anchor Selected UI Objects` | Quick-anchors selected UI elements (F1 shortcut) |
 | `Tools/Localization/Load Localization` | Import localized strings from Google Sheets CSV |
 | `Tools/Localization/Validate Localization` | Check localization key consistency |
+| `Tools/Ad Recording/Create Config` | Creates AdRecordingConfig in Resources folder |
 
 ## Project Constraints
 
@@ -102,7 +103,7 @@ Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key poin
 - `FindObjectOfType<MonoBehaviour>()` called on every audio operation in `AudioService.GetMonoBehaviour()` (line 193) — no caching.
 - `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) runs every frame during drag.
 - `SaveDataService` has an unused `using System.Runtime.Serialization.Formatters.Binary;` import — BinaryFormatter was replaced by Newtonsoft.Json. Clean it up if you touch the file.
-- LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` (line 94) on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` (lines 105, 177) on segment updates.
+- LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` (line 94) and `StripRotationService` (line 119) on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` (lines 105, 177) on segment updates.
 - `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 21) — auto-generated, fix the Addressable address.
 
 ## Adding a New Feature Module
@@ -114,4 +115,4 @@ Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key poin
 
 ## Further Reference
 
-- `PROJECT_ANALYSIS.md` — detailed architecture diagrams, dependency graphs, and performance/refactoring notes for the full codebase. Note: some figures are stale (e.g., says "20 module installers" — actual count is 37).
+- `PROJECT_ANALYSIS.md` — detailed architecture diagrams, dependency graphs, and performance/refactoring notes for the full codebase. Note: some figures are stale (e.g., says "20 module installers" — actual count is 39).

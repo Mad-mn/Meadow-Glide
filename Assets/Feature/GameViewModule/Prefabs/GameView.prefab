@@ -63,6 +63,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.GameViewModule.Scripts.GameView
   _destroyOnClose: 0
+  _useAnimation: 0
   _mainMenuButton: {fileID: 4053183636084007373}
   <ResetLevelButton>k__BackingField: {fileID: 8987196712055437694}
   _levelTxt: {fileID: 5041213063631350665}
@@ -666,8 +667,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294942591
-  m_fontColor: {r: 0.49803925, g: 0.62352943, b: 1, a: 1}
+    rgba: 4291521613
+  m_fontColor: {r: 0.3019608, g: 0.42352945, b: 0.7960785, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
