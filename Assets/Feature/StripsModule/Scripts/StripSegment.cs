@@ -122,6 +122,8 @@ namespace Feature.StripsModule.Scripts {
             _lineRenderer.sortingOrder = order;
             if (_animationController != null)
                 _animationController.SetBaseSortingOrder(order);
+            if (_statusIcon != null)
+                _statusIcon.sortingOrder = order + 1;
         }
 
         public void SetRadius(float y) {

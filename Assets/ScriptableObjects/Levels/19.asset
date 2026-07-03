@@ -127,7 +127,7 @@ MonoBehaviour:
   - MoveType: Slide
     Index: 2
     Offset: 2
-  <TutorialLevelConfig>k__BackingField: {fileID: 0}
+  <TutorialLevelConfig>k__BackingField: {fileID: 11400000, guid: d0f3d887b23ad27449785b06d978ff74, type: 2}
 --- !u!114 &159848981874798762
 MonoBehaviour:
   m_ObjectHideFlags: 0
