@@ -116,7 +116,7 @@ MonoBehaviour:
   - MoveType: Slide
     Index: 1
     Offset: 1
-  <TutorialLevelConfig>k__BackingField: {fileID: 0}
+  <TutorialLevelConfig>k__BackingField: {fileID: 11400000, guid: a0c06c3bdd4e6344cb0f60849f8b3c51, type: 2}
 --- !u!114 &2078542287720285131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -218,7 +218,7 @@ MonoBehaviour:
   - ColorType: 6
     Radius: 0
     Angle: 0
-    SegmentStatus: 0
+    SegmentStatus: 4
   - ColorType: 5
     Radius: 0
     Angle: 0
@@ -256,7 +256,7 @@ MonoBehaviour:
   - ColorType: 10
     Radius: 0
     Angle: 0
-    SegmentStatus: 4
+    SegmentStatus: 0
   - ColorType: 5
     Radius: 0
     Angle: 0

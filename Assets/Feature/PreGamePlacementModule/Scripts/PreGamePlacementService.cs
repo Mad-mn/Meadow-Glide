@@ -52,6 +52,15 @@ namespace Feature.PreGamePlacementModule.Scripts {
 
         public bool IsActive => _isPlacing;
 
+        public IReadOnlyList<StripController> GetPoolPieces() {
+            var result = new List<StripController>();
+            foreach (var piece in _poolPieces) {
+                if (piece.Strip != null)
+                    result.Add(piece.Strip);
+            }
+            return result;
+        }
+
         public PreGamePlacementService(
             IInputService inputService,
             IInteractionStateService interactionStateService,

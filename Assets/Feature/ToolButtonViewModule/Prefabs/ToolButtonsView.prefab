@@ -32,10 +32,10 @@ RectTransform:
   - {fileID: 5388219222782954738}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: -0.000009494358, y: 0.07411276}
-  m_AnchorMax: {x: 0.9999905, y: 0.20921507}
-  m_AnchoredPosition: {x: 0, y: -0.00012207031}
-  m_SizeDelta: {x: 0, y: 0.00006866455}
+  m_AnchorMin: {x: -0.000009494358, y: 0.025154408}
+  m_AnchorMax: {x: 0.9999905, y: 0.16025676}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0.0000076293945}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &-2516131115128031062
 MonoBehaviour:
@@ -50,6 +50,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Feature.ToolButtonViewModule.Scripts.ToolButtonView
   _destroyOnClose: 0
+  _useAnimation: 0
   _toolButtons:
   - {fileID: 5981361715499436134}
 --- !u!1001 &5295516085244013763
@@ -139,6 +140,10 @@ PrefabInstance:
     - target: {fileID: 269018640932593713, guid: 433ec629504448643a1579df6d408623, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 714049470317625211, guid: 433ec629504448643a1579df6d408623, type: 3}
+      propertyPath: m_fontSize
+      value: 31.75
       objectReference: {fileID: 0}
     - target: {fileID: 9005662863545916836, guid: 433ec629504448643a1579df6d408623, type: 3}
       propertyPath: m_Name

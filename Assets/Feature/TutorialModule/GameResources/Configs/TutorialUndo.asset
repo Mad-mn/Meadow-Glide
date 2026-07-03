@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.TutorialModule.Scripts.Configs.TutorialLevelConfig
   <TutorialType>k__BackingField: 3
   _assetsForTutorial: 
+  _textZones: 02000000

@@ -4,5 +4,6 @@ namespace Feature.TutorialModule.Scripts {
         First = 1,
         BlockedSegments = 2,
         UndoMove = 3,
+        EmptySegments = 4,
     }
 }
