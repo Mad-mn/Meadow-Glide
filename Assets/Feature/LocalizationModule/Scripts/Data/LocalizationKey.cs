@@ -33,5 +33,7 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Global_YouCompleteAll = 30,
         Tutorial_Goal = 31,
         DailyChallenge_FirstTarget = 32,
+        Tutorial_BlockedSegments = 33,
+        Tutorial_EmptySegments = 34,
     }
 }

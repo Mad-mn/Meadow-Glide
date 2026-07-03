@@ -5,19 +5,22 @@ using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.TutorialModule.Scripts.Factory;
 using Feature.TutorialModule.Scripts.Tutorials;
+using Feature.TutorialViewModule.Scripts;
 
 namespace Feature.TutorialModule.Scripts {
     public class TutorialService : ITutorialService {
         private readonly ISaveDataModel _saveDataModel;
         private readonly ITutorialFactory _factory;
         private readonly ITutorialAssetProvider _tutorialAssetProvider;
+        private readonly TutorialViewModel _viewModel;
         private LevelData _currentLevelData;
 
         public TutorialService(ISaveDataModel saveDataModel, ITutorialFactory factory,
-            ITutorialAssetProvider tutorialAssetProvider) {
+            ITutorialAssetProvider tutorialAssetProvider, TutorialViewModel viewModel) {
             _saveDataModel = saveDataModel;
             _factory = factory;
             _tutorialAssetProvider = tutorialAssetProvider;
+            _viewModel = viewModel;
         }
 
         public async UniTask Initialize(LevelData currentLevelData) {
@@ -41,6 +44,7 @@ namespace Feature.TutorialModule.Scripts {
         }
 
         private void ActivateTutorial(TutorialType tutorialType) {
+           _viewModel.SetTextZones(_currentLevelData.LevelConfig.TutorialLevelConfig?.TextZones);
            ITutorial tutorial = _factory.CreateTutorial(tutorialType);
            if(tutorial is null)
                return;

@@ -1,4 +1,7 @@
 using Feature.AddressableModule.Scripts.Installers;
+#if UNITY_EDITOR
+using Feature.AdRecordingModule.Scripts.Installers;
+#endif
 using Feature.AnalyticsModule.Scripts.Installers;
 using Feature.AnimationModule.Scripts.Installers;
 using Feature.AssetBindingModule.Scripts.Installers;
@@ -81,5 +84,8 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         PerfectMapViewModuleInstaller.Install(Container);
         MessageViewModuleInstaller.Install(Container);
         ByteBrewModuleInstaller.Install(Container);
+#if UNITY_EDITOR
+        AdRecordingModuleInstaller.Install(Container);
+#endif
     }
 }

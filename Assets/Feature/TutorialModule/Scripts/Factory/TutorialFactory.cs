@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Feature.TutorialModule.Scripts.Tutorials;
+using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.BlockedSegmentsTutorialStates;
+using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.EmptySegmentsTutorialStates;
 using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialStates;
 using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.UndoMoveTutorialStates;
 using Zenject;
@@ -17,6 +19,10 @@ namespace Feature.TutorialModule.Scripts.Factory {
                     return new Tutorial(GetStatesForFirstTutorial());
                 case TutorialType.UndoMove:
                     return new Tutorial(GetStatesForUndoMoveTutorial());
+                case TutorialType.BlockedSegments:
+                    return new Tutorial(GetStatesForBlockedSegmentsTutorial());
+                case TutorialType.EmptySegments:
+                    return new Tutorial(GetStatesForEmptySegmentsTutorial());
             }
 
             return null;
@@ -33,6 +39,18 @@ namespace Feature.TutorialModule.Scripts.Factory {
         private List<ITutorialState> GetStatesForUndoMoveTutorial() {
             List<ITutorialState> states = new List<ITutorialState>();
             states.Add(_container.Instantiate<ShowUndoMoveTutorialState>());
+            return states;
+        }
+
+        private List<ITutorialState> GetStatesForBlockedSegmentsTutorial() {
+            List<ITutorialState> states = new List<ITutorialState>();
+            states.Add(_container.Instantiate<ShowBlockedSegmentsState>());
+            return states;
+        }
+
+        private List<ITutorialState> GetStatesForEmptySegmentsTutorial() {
+            List<ITutorialState> states = new List<ITutorialState>();
+            states.Add(_container.Instantiate<ShowEmptySegmentsState>());
             return states;
         }
 

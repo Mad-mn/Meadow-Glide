@@ -16,9 +16,9 @@ namespace Feature.TutorialViewModule.Scripts {
         public override void Initialize() {
             _viewModel.OnTextRequested += HandleTextRequested;
 
-            LocalizationKey pending = _viewModel.ConsumePending();
+            LocalizationKey pending = _viewModel.ConsumePending(out int zone);
             if (pending != LocalizationKey.None)
-                HandleTextRequested(pending);
+                HandleTextRequested(pending, zone);
         }
 
         public override void Dispose() {
@@ -26,8 +26,8 @@ namespace Feature.TutorialViewModule.Scripts {
             _viewModel.OnTextRequested -= HandleTextRequested;
         }
 
-        private void HandleTextRequested(LocalizationKey key) {
-            View.SetTutorialText(_localizationService.Get(key));
+        private void HandleTextRequested(LocalizationKey key, int zone) {
+            View.SetTutorialText(_localizationService.Get(key), zone);
         }
     }
 }

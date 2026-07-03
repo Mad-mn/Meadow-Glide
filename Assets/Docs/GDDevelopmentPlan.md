@@ -24,6 +24,10 @@
 | 8 | **Level Pool Expansion** | ✅ 150 рівнів |
 | 9 | **Star Rating (2-tier: ✓/⭐)** | ✅ Зроблено |
 | 10 | **Progress Map (Perfect Map)** | ✅ Зроблено |
+| 11 | **Analytics System** | ✅ Зроблено |
+| 12 | **Crash Reporting (Firebase Crashlytics)** | ✅ Зроблено |
+| 13 | **Haptic/Sound Polish** | ✅ Зроблено |
+| 14 | **Tutorial System** | ✅ Працює |
 
 ---
 
@@ -291,17 +295,17 @@
 
 ### ⬜ ФАЗА 5: Пізніше (Після soft launch)
 
-| # | Фіча | Оцінка часу |
-|---|------|-------------|
-| 1 | **New Puzzle Mechanic (Color Filter)** | 7-10 днів |
-| 2 | **Achievement System** | 3-5 днів |
-| 3 | **Social Features (Leaderboard)** | 5-7 днів |
-| 4 | **Seasonal Events** | 5-7 днів |
-| 5 | **Tutorial System Fixes** | 2-3 дні |
-| 6 | **Haptic/Sound Polish** | 2-3 дні |
-| 7 | **Analytics System** | 2-3 дні |
-| 8 | **Crash Reporting (Firebase Crashlytics)** | 1 день |
-| 9 | **Remove Debug UI** | 0.5 дня |
+| # | Фіча | Оцінка часу | Статус |
+|---|------|-------------|--------|
+| 1 | **Analytics System** | 2-3 дні | ✅ Зроблено |
+| 2 | **Crash Reporting (Firebase Crashlytics)** | 1 день | ✅ Зроблено |
+| 3 | **Remove Debug UI** | 0.5 дня | ⬜ |
+| 4 | **Tutorial System Fixes** | 2-3 дні | ✅ Працює (виправлення не потрібні) |
+| 5 | **Haptic/Sound Polish** | 2-3 дні | ✅ Зроблено |
+| 6 | **Streak System** | 2-3 дні | ⏭️ Пропущено |
+| 7 | **New Puzzle Mechanic (Color Filter)** | 7-10 днів | ⬜ |
+| 8 | **Achievement System** | 3-5 днів | ⬜ |
+| 9 | **Social Features (Leaderboard)** | 5-7 днів | ⬜ |
 
 ---
 
