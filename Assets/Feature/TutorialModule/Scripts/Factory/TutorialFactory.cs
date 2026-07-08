@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Feature.LocalizationModule.Scripts.Data;
 using Feature.TutorialModule.Scripts.Tutorials;
 using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.BlockedSegmentsTutorialStates;
 using Feature.TutorialModule.Scripts.Tutorials.TutorialStates.EmptySegmentsTutorialStates;
@@ -30,9 +31,10 @@ namespace Feature.TutorialModule.Scripts.Factory {
 
         private List<ITutorialState> GetStatesForFirstTutorial() {
             List<ITutorialState> states = new List<ITutorialState>();
-            states.Add(_container.Instantiate<ShowGoalTextState>());
-            states.Add(_container.Instantiate<ShowPointerOnCircleState>());
-            states.Add(_container.Instantiate<ShowPointerOnSlideAreaState>());
+            states.Add(_container.Instantiate<GuidedMoveState>(new object[] { 2, 3, LocalizationKey.Tutorial_Rotation }));
+            states.Add(_container.Instantiate<ShowAllSlideAreasState>());
+            states.Add(_container.Instantiate<ShowSpecificSlideAreaState>(new object[] { 0, LocalizationKey.Tutorial_SlideArea }));
+            states.Add(_container.Instantiate<ShowWinConditionState>());
             return states;
         }
 

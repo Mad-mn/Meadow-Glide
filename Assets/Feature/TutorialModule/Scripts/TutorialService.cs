@@ -10,14 +10,16 @@ using Feature.TutorialViewModule.Scripts;
 namespace Feature.TutorialModule.Scripts {
     public class TutorialService : ITutorialService {
         private readonly ISaveDataModel _saveDataModel;
+        private readonly ISaveDataService _saveDataService;
         private readonly ITutorialFactory _factory;
         private readonly ITutorialAssetProvider _tutorialAssetProvider;
         private readonly TutorialViewModel _viewModel;
         private LevelData _currentLevelData;
 
-        public TutorialService(ISaveDataModel saveDataModel, ITutorialFactory factory,
+        public TutorialService(ISaveDataModel saveDataModel, ISaveDataService saveDataService, ITutorialFactory factory,
             ITutorialAssetProvider tutorialAssetProvider, TutorialViewModel viewModel) {
             _saveDataModel = saveDataModel;
+            _saveDataService = saveDataService;
             _factory = factory;
             _tutorialAssetProvider = tutorialAssetProvider;
             _viewModel = viewModel;
@@ -62,7 +64,15 @@ namespace Feature.TutorialModule.Scripts {
         }
 
         private void HandleCompleteTutorial() {
-            
+            PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+            if (progress.CompletedTutorials == null)
+                progress.CompletedTutorials = new HashSet<int>();
+
+            int levelId = _currentLevelData.LevelID;
+            if (!progress.CompletedTutorials.Contains(levelId)) {
+                progress.CompletedTutorials.Add(levelId);
+                _saveDataService.Save(SaveDataType.PlayerProgress);
+            }
         }
 
         private TutorialType GetTutorialType() {
@@ -74,7 +84,8 @@ namespace Feature.TutorialModule.Scripts {
 
         private bool IsTutorialCompleted {
             get {
-                return false;
+                PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+                return progress.CompletedTutorials?.Contains(_currentLevelData.LevelID) ?? false;
             }
         }
     }
