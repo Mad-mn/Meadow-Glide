@@ -37,5 +37,9 @@ namespace Feature.SlideAreaModule.Scripts {
             _spawnedAreas.Clear();
             _spawnedAreas.AddRange(spawnedAreas);
         }
+
+        public int GetIndexOfArea(SlideArea area) {
+            return _spawnedAreas.IndexOf(area);
+        }
     }
 }

@@ -69,10 +69,10 @@ namespace Feature.TutorialModule.Scripts {
                 progress.CompletedTutorials = new HashSet<int>();
 
             int levelId = _currentLevelData.LevelID;
-            if (!progress.CompletedTutorials.Contains(levelId)) {
+            /*if (!progress.CompletedTutorials.Contains(levelId)) {
                 progress.CompletedTutorials.Add(levelId);
                 _saveDataService.Save(SaveDataType.PlayerProgress);
-            }
+            }*/
         }
 
         private TutorialType GetTutorialType() {

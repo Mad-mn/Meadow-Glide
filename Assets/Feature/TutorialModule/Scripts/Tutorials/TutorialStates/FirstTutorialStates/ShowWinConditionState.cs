@@ -15,7 +15,7 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private readonly TutorialViewModel _tutorialViewModel;
         private readonly IInputService _inputService;
         private readonly StripModel _stripModel;
-        private readonly ILocalizationService _localizationService;
+        private readonly IInteractionStateService _interactionState;
 
         public event Action OnComplete;
 
@@ -27,18 +27,19 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             TutorialViewModel tutorialViewModel,
             IInputService inputService,
             StripModel stripModel,
-            ILocalizationService localizationService) {
+            IInteractionStateService interactionState) {
             _viewService = viewService;
             _tutorialViewModel = tutorialViewModel;
             _inputService = inputService;
             _stripModel = stripModel;
-            _localizationService = localizationService;
+            _interactionState = interactionState;
         }
 
         public void Enter() {
             _isTapped = false;
             _tutorialViewModel.RequestText(LocalizationKey.Tutorial_WinCondition);
             _viewService.ShowView<TutorialView>(ViewType.TutorialView);
+            _interactionState.BlockInput();
             HighlightCompletedStrip();
             _inputService.PointerDown += HandlePointerDown;
         }
@@ -79,6 +80,7 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         public void Exit() {
             _inputService.PointerDown -= HandlePointerDown;
             _viewService.HideView(ViewType.TutorialView);
+            _interactionState.UnblockInput();
             RestoreSegments();
         }
     }

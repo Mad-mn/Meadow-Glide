@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Feature.InputModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
+using Feature.SlideAreaModule.Scripts;
 using Feature.StripsModule.Scripts;
 using Feature.TutorialModule.Scripts.Hints;
 using Feature.TrackMoveModule.Scripts;
@@ -18,6 +21,7 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private const int FINGER_HINT_ORDER = 20000;
         private const float MOVE_DURATION = 1.5f;
         private const float DELAY_FOR_LOOP = 0.5f;
+        private const float AUTO_ROTATE_DURATION = 0.3f;
 
         private readonly StripModel _stripModel;
         private readonly MoveTrackModel _moveTrackModel;
@@ -26,9 +30,11 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private readonly IInputService _inputService;
         private readonly IViewService _viewService;
         private readonly TutorialViewModel _tutorialViewModel;
+        private readonly IInteractionStateService _interactionState;
+        private readonly ISlideSegmentService _slideSegmentService;
 
         private readonly int _targetStripIndex;
-        private readonly int _targetOffsetSegments;
+        private readonly int _targetSegmentIndex;
         private readonly LocalizationKey _textKey;
 
         public event Action OnComplete;
@@ -40,6 +46,8 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private bool _moveCompleted;
         private StripController _targetStrip;
         private float _segmentSpan;
+        private int _targetScrollSegments;
+        private CancellationTokenSource _autoRotateCts;
         private readonly List<(StripSegment segment, int originalOrder)> _highlightedSegments = new();
 
         public GuidedMoveState(
@@ -50,8 +58,10 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             IInputService inputService,
             IViewService viewService,
             TutorialViewModel tutorialViewModel,
+            IInteractionStateService interactionState,
+            ISlideSegmentService slideSegmentService,
             int targetStripIndex,
-            int targetOffsetSegments,
+            int targetSegmentIndex,
             LocalizationKey textKey) {
             _stripModel = stripModel;
             _moveTrackModel = moveTrackModel;
@@ -60,20 +70,27 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             _inputService = inputService;
             _viewService = viewService;
             _tutorialViewModel = tutorialViewModel;
+            _interactionState = interactionState;
+            _slideSegmentService = slideSegmentService;
             _targetStripIndex = targetStripIndex;
-            _targetOffsetSegments = targetOffsetSegments;
+            _targetSegmentIndex = targetSegmentIndex;
             _textKey = textKey;
         }
 
         public void Enter() {
             _moveCompleted = false;
+            _autoRotateCts?.Cancel();
+            _autoRotateCts = new CancellationTokenSource();
             CacheTargetStrip();
             if (_targetStrip == null) return;
 
+            CalculateTargetScroll();
             ShowText();
             HighlightTargetStrip();
             InstantiateHint();
             CachePositions();
+            _interactionState.BlockInput();
+            _interactionState.AllowedStripIndex = _targetStrip.PositionIndex;
             _stripModel.OnStripRotationStatusChanged += HandleStripRotationChanged;
             StartHintAnimation();
         }
@@ -84,6 +101,11 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             _segmentSpan = _targetStrip.GetSegmentSpan();
         }
 
+        private void CalculateTargetScroll() {
+            int segCount = _targetStrip.SegmentCount;
+            _targetScrollSegments = _targetSegmentIndex % segCount;
+        }
+
         private void CachePositions() {
             _positionY = _targetStrip.CenterY;
             int segCount = _targetStrip.SegmentCount;
@@ -91,17 +113,8 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             float segWidth = loopLength / segCount;
             float halfLoop = loopLength * 0.5f;
 
-            int fromSeg = Mathf.Clamp(segCount - 1, 0, segCount - 1);
-            int toSeg = Mathf.Clamp(segCount - 1 - Mathf.Abs(_targetOffsetSegments), 0, segCount - 1);
-
-            if (_targetOffsetSegments > 0) {
-                fromSeg = segCount - 1;
-                toSeg = segCount - 1 - _targetOffsetSegments;
-            }
-            else if (_targetOffsetSegments < 0) {
-                fromSeg = 0;
-                toSeg = Mathf.Abs(_targetOffsetSegments);
-            }
+            int fromSeg = _targetSegmentIndex;
+            int toSeg = (_targetSegmentIndex - _targetScrollSegments + segCount) % segCount;
 
             _startX = (fromSeg + 0.5f) * segWidth - halfLoop;
             _endX = (toSeg + 0.5f) * segWidth - halfLoop;
@@ -133,11 +146,6 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             FingerHint hintPrefab = _tutorialAssetProvider.GetAsset<FingerHint>(TutorialAssetType.FingerHint);
             _fingerHint = _container.InstantiatePrefab(hintPrefab).GetComponent<FingerHint>();
             _fingerHint.Enable();
-            SetHintSortingOrder();
-        }
-
-        private void SetHintSortingOrder() {
-            if (_fingerHint == null) return;
             var renderers = _fingerHint.GetComponentsInChildren<Renderer>();
             foreach (var r in renderers) {
                 r.sortingOrder = FINGER_HINT_ORDER;
@@ -173,10 +181,45 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             float offset = strip.ScrollOffset;
             int snapped = Mathf.RoundToInt(offset / _segmentSpan);
 
-            if (snapped == _targetOffsetSegments) {
+            if (snapped == _targetScrollSegments) {
+                _autoRotateCts?.Cancel();
                 _moveCompleted = true;
+                _slideSegmentService.UpdateSegmentsInAreas();
+                _stripModel.SegmentsChanged();
                 Complete();
             }
+            else {
+                AutoRotateToCorrect().Forget();
+            }
+        }
+
+        private async UniTaskVoid AutoRotateToCorrect() {
+            _autoRotateCts?.Cancel();
+            _autoRotateCts = new CancellationTokenSource();
+            var ct = _autoRotateCts.Token;
+
+            await UniTask.Delay(100, cancellationToken: ct);
+            float targetOffset = _targetScrollSegments * _segmentSpan;
+            float currentOffset = _targetStrip.ScrollOffset;
+            float elapsed = 0f;
+
+            while (elapsed < AUTO_ROTATE_DURATION) {
+                if (ct.IsCancellationRequested) return;
+                elapsed += Time.deltaTime;
+                float t = elapsed / AUTO_ROTATE_DURATION;
+                t = 1f - Mathf.Pow(1f - t, 3f);
+                float offset = Mathf.Lerp(currentOffset, targetOffset, t);
+                _targetStrip.SetScrollOffset(offset, false);
+                await UniTask.Yield(ct);
+            }
+
+            if (ct.IsCancellationRequested) return;
+            _targetStrip.SetScrollOffset(targetOffset, false);
+            _targetStrip.ClearWrapGhosts();
+            _slideSegmentService.UpdateSegmentsInAreas();
+            _stripModel.SegmentsChanged();
+            _moveCompleted = true;
+            Complete();
         }
 
         private void Complete() {
@@ -185,9 +228,13 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         }
 
         private void Cleanup() {
+            _autoRotateCts?.Cancel();
+            _autoRotateCts = null;
             _stripModel.OnStripRotationStatusChanged -= HandleStripRotationChanged;
             RestoreHighlightedSegments();
             _viewService.HideView(ViewType.TutorialView);
+            _interactionState.AllowedStripIndex = -1;
+            _interactionState.UnblockInput();
             if (_fingerHint != null) {
                 _fingerHint.Disable();
                 UnityEngine.Object.Destroy(_fingerHint.gameObject);

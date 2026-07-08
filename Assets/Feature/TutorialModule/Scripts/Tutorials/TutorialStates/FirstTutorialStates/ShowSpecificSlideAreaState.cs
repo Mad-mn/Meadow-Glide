@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Feature.InputModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
@@ -29,6 +30,8 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private readonly IInputService _inputService;
         private readonly IViewService _viewService;
         private readonly TutorialViewModel _tutorialViewModel;
+        private readonly IInteractionStateService _interactionState;
+        private readonly ISlideSegmentService _slideSegmentService;
 
         private readonly int _targetAreaIndex;
         private readonly LocalizationKey _textKey;
@@ -42,7 +45,6 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private float _columnX;
         private bool _moveCompleted;
         private StripController _targetStrip;
-        private float _segmentSpan;
         private readonly List<(StripSegment segment, int originalOrder)> _highlightedSegments = new();
 
         public ShowSpecificSlideAreaState(
@@ -54,6 +56,8 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             IInputService inputService,
             IViewService viewService,
             TutorialViewModel tutorialViewModel,
+            IInteractionStateService interactionState,
+            ISlideSegmentService slideSegmentService,
             int targetAreaIndex,
             LocalizationKey textKey) {
             _stripModel = stripModel;
@@ -64,6 +68,8 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             _inputService = inputService;
             _viewService = viewService;
             _tutorialViewModel = tutorialViewModel;
+            _interactionState = interactionState;
+            _slideSegmentService = slideSegmentService;
             _targetAreaIndex = targetAreaIndex;
             _textKey = textKey;
         }
@@ -75,9 +81,12 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
 
             CacheTargetStrip();
             ShowText();
+            _slideSegmentService.UpdateSegmentsInAreas();
             HighlightSlideAreaSegments();
             InstantiateHint();
             CachePositions();
+            _interactionState.BlockInput();
+            _interactionState.AllowedSlideAreaIndex = _targetAreaIndex;
             _stripModel.OnStripCompletedStatusChanged += HandleStripCompleted;
             _moveTrackModel.OnMovesChanged += HandleAnyMove;
             StartHintAnimation();
@@ -91,7 +100,6 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
         private void CacheTargetStrip() {
             int endIdx = Mathf.Min(_targetArea.EndCircleIndex, _stripModel.Strips.Count - 1);
             _targetStrip = _stripModel.Strips[endIdx];
-            _segmentSpan = _targetStrip.GetSegmentSpan();
         }
 
         private void CachePositions() {
@@ -115,13 +123,23 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
 
         private void HighlightSlideAreaSegments() {
             _highlightedSegments.Clear();
+            int sectorIdx = _targetArea.SectorIndex;
+            int startCircle = _targetArea.StartCircleIndex;
+            int endCircle = _targetArea.EndCircleIndex;
+
             foreach (StripController strip in _stripModel.Strips) {
-                foreach (StripSegment segment in strip.SpawnedSegments) {
-                    if (_slideAreaModel.SegmentsInAreas.Contains(segment)) {
-                        int original = segment.GetSortingOrder();
-                        _highlightedSegments.Add((segment, original));
-                        segment.SetSortingOrder(SEGMENT_HIGHLIGHT_ORDER);
-                    }
+                if (strip.PositionIndex < startCircle || strip.PositionIndex > endCircle)
+                    continue;
+
+                int scrollSegments = strip.GetScrollSegments();
+                int segCount = strip.SegmentCount;
+                int slotIndex = ((sectorIdx + scrollSegments) % segCount + segCount) % segCount;
+
+                if (slotIndex >= 0 && slotIndex < strip.SpawnedSegments.Count) {
+                    StripSegment segment = strip.SpawnedSegments[slotIndex];
+                    int original = segment.GetSortingOrder();
+                    _highlightedSegments.Add((segment, original));
+                    segment.SetSortingOrder(SEGMENT_HIGHLIGHT_ORDER);
                 }
             }
         }
@@ -192,6 +210,8 @@ namespace Feature.TutorialModule.Scripts.Tutorials.TutorialStates.FirstTutorialS
             _moveTrackModel.OnMovesChanged -= HandleAnyMove;
             RestoreSegments();
             _viewService.HideView(ViewType.TutorialView);
+            _interactionState.AllowedSlideAreaIndex = -1;
+            _interactionState.UnblockInput();
             if (_fingerHint != null) {
                 _fingerHint.Disable();
                 UnityEngine.Object.Destroy(_fingerHint.gameObject);

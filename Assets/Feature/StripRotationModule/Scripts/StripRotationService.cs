@@ -84,7 +84,9 @@ namespace Feature.StripRotationModule.Scripts {
         private void OnPointerDown() {
             if (_moveTrackModel.MovesLeft <= 0)
                 return;
-            if (_interactionStateService.IsSlideActive || _interactionStateService.InputBlocked)
+            if (_interactionStateService.IsSlideActive)
+                return;
+            if (_interactionStateService.InputBlocked && _interactionStateService.AllowedStripIndex < 0)
                 return;
 
             TryStartRotation();
@@ -122,6 +124,11 @@ namespace Feature.StripRotationModule.Scripts {
 
             if (_activeStrip == null)
                 return;
+
+            if (_interactionStateService.AllowedStripIndex >= 0 && _activeStrip.PositionIndex != _interactionStateService.AllowedStripIndex) {
+                _activeStrip = null;
+                return;
+            }
 
             _startPointerX = worldPos.x;
             _initialScrollOffset = _activeStrip.ScrollOffset;
