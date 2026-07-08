@@ -39,5 +39,6 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Tutorial_SlideArea = 36,
         Tutorial_WinCondition = 37,
         Tutorial_DontBreak = 38,
+        Tutorial_TrySlideHere = 39,
     }
 }

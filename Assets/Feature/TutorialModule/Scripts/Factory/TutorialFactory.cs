@@ -33,7 +33,7 @@ namespace Feature.TutorialModule.Scripts.Factory {
             List<ITutorialState> states = new List<ITutorialState>();
             states.Add(_container.Instantiate<GuidedMoveState>(new object[] { 2, 3, LocalizationKey.Tutorial_Rotation }));
             states.Add(_container.Instantiate<ShowAllSlideAreasState>());
-            states.Add(_container.Instantiate<ShowSpecificSlideAreaState>(new object[] { 0, LocalizationKey.Tutorial_SlideArea }));
+            states.Add(_container.Instantiate<ShowSpecificSlideAreaState>(new object[] { 0, LocalizationKey.Tutorial_TrySlideHere }));
             states.Add(_container.Instantiate<ShowWinConditionState>());
             return states;
         }
