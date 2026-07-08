@@ -134,7 +134,9 @@ namespace Feature.SlideAreaModule.Scripts {
             if (_moveTrackModel.MovesLeft <= 0)
                 return;
 
-            if (_interactionState.IsRotationActive || _interactionState.InputBlocked)
+            if (_interactionState.IsRotationActive)
+                return;
+            if (_interactionState.InputBlocked && _interactionState.AllowedSlideAreaIndex < 0)
                 return;
 
             if (_isSnapping)
@@ -152,6 +154,14 @@ namespace Feature.SlideAreaModule.Scripts {
             worldPos.z = 0;
 
             _activeArea = FindSlideArea(worldPos);
+
+            if (_activeArea != null && _interactionState.AllowedSlideAreaIndex >= 0) {
+                int areaIdx = _slideAreaModel.GetIndexOfArea(_activeArea);
+                if (areaIdx != _interactionState.AllowedSlideAreaIndex) {
+                    _activeArea = null;
+                    return;
+                }
+            }
 
             if (_activeArea != null) {
                 _interactionState.IsSlideActive = true;

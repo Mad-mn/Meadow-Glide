@@ -4,9 +4,12 @@ namespace Feature.InputModule.Scripts {
         bool IsSlideActive { get; set; }
         bool AnyInteractionActive => IsRotationActive || IsSlideActive;
         bool InputBlocked { get; }
+        int AllowedStripIndex { get; set; }
+        int AllowedSlideAreaIndex { get; set; }
         void BlockInput();
         void UnblockInput();
         void ResetInputBlock();
+        void ResetFilters();
     }
 
     public class InteractionStateService : IInteractionStateService {
@@ -15,6 +18,8 @@ namespace Feature.InputModule.Scripts {
         public bool IsRotationActive { get; set; }
         public bool IsSlideActive { get; set; }
         public bool InputBlocked => _blockCount > 0;
+        public int AllowedStripIndex { get; set; } = -1;
+        public int AllowedSlideAreaIndex { get; set; } = -1;
 
         public void BlockInput() {
             _blockCount++;
@@ -27,6 +32,11 @@ namespace Feature.InputModule.Scripts {
 
         public void ResetInputBlock() {
             _blockCount = 0;
+        }
+
+        public void ResetFilters() {
+            AllowedStripIndex = -1;
+            AllowedSlideAreaIndex = -1;
         }
     }
 }

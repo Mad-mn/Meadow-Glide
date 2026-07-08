@@ -16,6 +16,7 @@ namespace Feature.SaveDataModule.Scripts.SavedData {
         public int Level = 1;
         public Dictionary<int, LevelCompletionData> CompletedLevels = new Dictionary<int, LevelCompletionData>();
         public HashSet<int> ClaimedPerfectMapRewards = new HashSet<int>();
+        public HashSet<int> CompletedTutorials = new HashSet<int>();
     }
 
     [Serializable]

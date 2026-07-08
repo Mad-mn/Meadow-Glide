@@ -35,5 +35,10 @@ namespace Feature.LocalizationModule.Scripts.Data {
         DailyChallenge_FirstTarget = 32,
         Tutorial_BlockedSegments = 33,
         Tutorial_EmptySegments = 34,
+        Tutorial_Rotation = 35,
+        Tutorial_SlideArea = 36,
+        Tutorial_WinCondition = 37,
+        Tutorial_DontBreak = 38,
+        Tutorial_TrySlideHere = 39,
     }
 }
