@@ -5,6 +5,7 @@ using Feature.LevelInitializeModule;
 using Feature.LevelModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
+using Feature.MainTutorialViewModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SoundModule.Scripts;
@@ -39,9 +40,15 @@ namespace Feature.GameViewModule.Scripts {
 
         public override void Initialize() {
             View.MainMenuButton.onClick.AddListener(ShowConfirmExitToMainMenu);
+            View.HelpButton.onClick.AddListener(ShowHelpView);
             View.ResetLevelButton.onClick.AddListener(ResetLevelButtonClicked);
             _moveTrackModel.OnMovesChanged += UpdateMovesChangedsText;
             _viewService.PrewarmView<ToolButtonView>(ViewType.ToolButtonView);
+        }
+
+        private void ShowHelpView() {
+            _audioService.PlaySound(AudioType.ButtonClick);
+            _viewService.ShowView<MainTutorialView>(ViewType.MainTutorialView);
         }
 
         public override void Dispose() {

@@ -40,5 +40,9 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Tutorial_WinCondition = 37,
         Tutorial_DontBreak = 38,
         Tutorial_TrySlideHere = 39,
+        Tutorial_DragStrips = 40,
+        Tutorial_SlideBetweenStrips = 41,
+        Tutorial_WinGoal = 42,
+        Tutorial_TapToContinue = 43,
     }
 }
