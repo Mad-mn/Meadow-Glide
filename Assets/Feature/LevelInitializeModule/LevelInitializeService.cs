@@ -6,6 +6,7 @@ using Feature.CircleModule.Scripts;
 using Feature.GameViewModule.Scripts;
 using Feature.InputModule.Scripts;
 using Feature.LevelModule.Scripts;
+using Feature.MainTutorialViewModule.Scripts;
 using Feature.MoveEfficiencyModule.Scripts;
 using Feature.PreGamePlacementModule.Scripts;
 using Feature.SaveDataModule.Scripts;
@@ -120,6 +121,14 @@ namespace Feature.LevelInitializeModule {
             _levelService.LevelStarted();
 
             SendAnalytics(levelData);
+
+            TryShowTutorial(levelData);
+        }
+
+        private void TryShowTutorial(LevelData levelData) {
+            if (levelData.LevelID == 1) {
+                _viewService.ShowView<MainTutorialView>(ViewType.MainTutorialView);
+            }        
         }
 
         public async UniTask Dispose() {

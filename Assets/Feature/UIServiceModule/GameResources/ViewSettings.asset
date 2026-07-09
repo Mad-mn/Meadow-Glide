@@ -61,3 +61,6 @@ MonoBehaviour:
   - ViewType: 17
     Address: MessageView
     PresenterTypeName: Feature.MessageViewModule.Scripts.MessagePresenter
+  - ViewType: 18
+    Address: MainTutorialView
+    PresenterTypeName: Feature.MainTutorialViewModule.Scripts.MainTutorialPresenter

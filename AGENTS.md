@@ -7,7 +7,7 @@ Unity 6 (6000.3.10f1) puzzle game — rotate and slide colored ring segments to 
 ## Tech Stack
 
 - **Zenject** for DI (project-scoped via `ProjectContextInstaller` → `ScriptableObjectInstaller`)
-- **UniTask** for async/await (replaces coroutines in services)
+- **UniTask** for async/await in services (coroutines still used in animation/tutorial code)
 - **DOTween** for animations (via `Assets/Plugins/Demigiant/DOTween/`, not UPM)
 - **Unity Addressables** for asset loading
 - **Unity Input System** (new) for input
@@ -24,7 +24,9 @@ Feature-based modular layout. **53 modules** under `Assets/Feature/<ModuleName>/
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**39 installer calls** (38 + 1 editor-only `AdRecordingModuleInstaller`) are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`. Notable newer modules: `ChallengeModule`, `UndoModule`, `PlayerInventoryModule`, `TransactionModule`, `DailyChallengeStartViewModule`, `LocalizationModule`.
+**39 installer calls** (38 non-editor + 1 editor-only `AdRecordingModuleInstaller`) are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`. Notable newer modules: `ChallengeModule`, `UndoModule`, `PlayerInventoryModule`, `TransactionModule`, `DailyChallengeStartViewModule`, `LocalizationModule`.
+
+Some modules (e.g. `BackgroundViewModule`, `LoseViewModule`, `WinLevelModule`, `SettingsViewModule`) are view-only and have no installer — they're loaded via Addressables and wired by `ViewService`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)
@@ -99,12 +101,13 @@ Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key poin
 
 ## Gotchas
 
-- `DestroyImmediate` used in play mode in both `CircleController.ClearCircle()` (line 145) and `StripController.ClearStrip()` (line 276) — should be `Destroy()`.
-- `FindObjectOfType<MonoBehaviour>()` called on every audio operation in `AudioService.GetMonoBehaviour()` (line 193) — no caching.
-- `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` (line 130) runs every frame during drag.
+- `DestroyImmediate` used in play mode in `CircleController.ClearCircle()` and `StripController.ClearStrip()` — should be `Destroy()`.
+- `FindObjectOfType<MonoBehaviour>()` called on every audio operation in `AudioService.GetMonoBehaviour()` — no caching.
+- `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` runs every frame during drag.
 - `SaveDataService` has an unused `using System.Runtime.Serialization.Formatters.Binary;` import — BinaryFormatter was replaced by Newtonsoft.Json. Clean it up if you touch the file.
-- LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` (line 94) and `StripRotationService` (line 119) on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` (lines 105, 177) on segment updates.
-- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` (line 21) — auto-generated, fix the Addressable address.
+- LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` and `StripRotationService` on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` on segment updates.
+- `AddressConstants` has a typo: `GircleModule` should be `CircleModule` — auto-generated, fix the Addressable address.
+- Coroutines are still actively used in `TutorialModule` hint states, `AudioService` fade logic, and animation controllers (`StripAnimationController`, `CircleAnimationController`, `SlideAreaAnimationController`). `CoroutineRunnerModule` exists as a dedicated host for coroutine execution.
 
 ## Adding a New Feature Module
 

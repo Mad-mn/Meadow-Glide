@@ -17,5 +17,6 @@ namespace Feature.UIServiceModule.Scripts {
         PerfectMapView = 15,
         BackgroundView = 16,
         MessageView = 17,
+        MainTutorialView = 18,
 }
 }
