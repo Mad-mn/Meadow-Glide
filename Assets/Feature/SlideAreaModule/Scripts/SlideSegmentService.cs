@@ -30,13 +30,18 @@ namespace Feature.SlideAreaModule.Scripts {
         private readonly IAudioService _audioService;
         private readonly IVibrationService _vibrationService;
         private readonly IUndoService _undoService;
+        private readonly IDragDirectionService _dragDirectionService;
+        private readonly DragDirectionModel _dragDirectionModel;
         private CircleParamsConfig _circleParamsConfig;
         private readonly List<StripController> _strips = new List<StripController>();
 
         private Camera _mainCamera;
         private SlideArea _activeArea;
+        private float _startX;
         private float _startY;
+        private bool _isSlideConfirmed;
         private bool _isBlockedByStatus;
+        private StripSegment _draggedSegment;
         private readonly List<StripSegment> _activeSegments = new List<StripSegment>();
         private readonly List<float> _baseIndices = new List<float>();
         private readonly List<StripSegment> _ghosts = new List<StripSegment>();
@@ -48,7 +53,8 @@ namespace Feature.SlideAreaModule.Scripts {
 
         public SlideSegmentService(IInputService inputService, IInteractionStateService interactionState, ICameraService cameraService,
             UniTask<CircleParamsConfig> circleParamsConfigTask, StripModel stripModel, SlideAreaModel slideAreaModel, MoveTrackModel moveTrackModel,
-            LevelModel levelModel, IAudioService audioService, IVibrationService vibrationService, IUndoService undoService) {
+            LevelModel levelModel, IAudioService audioService, IVibrationService vibrationService, IUndoService undoService,
+            IDragDirectionService dragDirectionService, DragDirectionModel dragDirectionModel) {
             _inputService = inputService;
             _interactionState = interactionState;
             _cameraService = cameraService;
@@ -60,11 +66,14 @@ namespace Feature.SlideAreaModule.Scripts {
             _audioService = audioService;
             _vibrationService = vibrationService;
             _undoService = undoService;
+            _dragDirectionService = dragDirectionService;
+            _dragDirectionModel = dragDirectionModel;
         }
 
         public async void Initialize() {
             _levelModel.OnLevelStart += OnLevelStart;
             _levelModel.OnLevelEnd += OnLevelEnd;
+            _dragDirectionModel.OnDirectionDetected += OnDirectionDetected;
             _circleParamsConfig = await _circleParamsConfigTask;
         }
 
@@ -76,6 +85,7 @@ namespace Feature.SlideAreaModule.Scripts {
         public void Dispose() {
             _levelModel.OnLevelStart -= OnLevelStart;
             _levelModel.OnLevelEnd -= OnLevelEnd;
+            _dragDirectionModel.OnDirectionDetected -= OnDirectionDetected;
             OnLevelEnd();
         }
 
@@ -83,6 +93,56 @@ namespace Feature.SlideAreaModule.Scripts {
             _inputService.PointerDown -= OnPointerDown;
             _inputService.PointerUp -= OnPointerUp;
             ClearGhosts();
+        }
+
+        private void OnDirectionDetected(DragDirection direction) {
+            if (_activeArea == null)
+                return;
+
+            if (direction == DragDirection.Horizontal) {
+                _dragDirectionModel.NotifyHorizontalDragFromSlide();
+                ZoomOutSlideAreaSegmentsExceptDragged();
+                ClearGhosts();
+                _activeSegments.Clear();
+                _baseIndices.Clear();
+                _slideAreaModel.ChangeSlideState(false);
+                PlaySoundAndVibrationOnInteract(false);
+                _activeArea = null;
+                _interactionState.IsSlideActive = false;
+            }
+            else if (direction == DragDirection.Vertical) {
+                ZoomOutStripSegmentsExceptDragged();
+                _isSlideConfirmed = true;
+                _interactionState.IsSlideActive = true;
+            }
+        }
+
+        private void ZoomOutSlideAreaSegmentsExceptDragged() {
+            if (_draggedSegment == null)
+                return;
+
+            foreach (StripSegment segment in _activeSegments) {
+                if (segment != _draggedSegment)
+                    segment.ZoomOut();
+            }
+
+            _draggedSegment = null;
+        }
+
+        private void ZoomOutStripSegmentsExceptDragged() {
+            if (_draggedSegment == null)
+                return;
+
+            StripController draggedStrip = _draggedSegment.GetComponentInParent<StripController>();
+            if (draggedStrip == null)
+                return;
+
+            foreach (StripSegment segment in draggedStrip.SpawnedSegments) {
+                if (segment != _draggedSegment)
+                    segment.ZoomOut();
+            }
+
+            _draggedSegment = null;
         }
 
         public void RegisterCircle(CircleController circle) {
@@ -164,9 +224,12 @@ namespace Feature.SlideAreaModule.Scripts {
             }
 
             if (_activeArea != null) {
-                _interactionState.IsSlideActive = true;
+                _startX = worldPos.x;
                 _startY = worldPos.y;
+                _isSlideConfirmed = false;
+                _dragDirectionService.StartTracking(worldPos);
                 PrepareSegments(_activeArea);
+                _draggedSegment = FindSegmentAtPointer(worldPos);
                 _slideAreaModel.ChangeSlideState(true);
                 PlaySoundAndVibrationOnInteract(true);
                 ZoomSlideSegments(true);
@@ -181,6 +244,28 @@ namespace Feature.SlideAreaModule.Scripts {
             }
 
             return null;
+        }
+
+        private StripSegment FindSegmentAtPointer(Vector3 worldPos) {
+            StripSegment closest = null;
+            float closestDist = float.MaxValue;
+
+            for (int i = 0; i < _activeSegments.Count; i++) {
+                StripSegment segment = _activeSegments[i];
+                if (segment == null) continue;
+
+                StripController strip = GetStripByIndex((int)_baseIndices[i]);
+                if (strip == null) continue;
+
+                float segmentWorldY = strip.CenterY + segment.Radius;
+                float dist = Mathf.Abs(segmentWorldY - worldPos.y);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closest = segment;
+                }
+            }
+
+            return closest;
         }
 
         private StripController GetStripByIndex(int stripIndex) {
@@ -229,6 +314,9 @@ namespace Feature.SlideAreaModule.Scripts {
 
         public void Tick() {
             if (_activeArea == null)
+                return;
+
+            if (!_isSlideConfirmed)
                 return;
 
             if (_mainCamera == null)
@@ -324,6 +412,7 @@ namespace Feature.SlideAreaModule.Scripts {
         }
 
         private void OnPointerUp() {
+            _dragDirectionService.Reset();
             SlideArea areaToSnap = _activeArea;
             if (_activeArea != null) {
                 SnapSegments(areaToSnap).Forget();
@@ -333,6 +422,7 @@ namespace Feature.SlideAreaModule.Scripts {
             else {
                 _interactionState.IsSlideActive = false;
             }
+            _isSlideConfirmed = false;
         }
 
         private async UniTaskVoid SnapSegments(SlideArea area) {

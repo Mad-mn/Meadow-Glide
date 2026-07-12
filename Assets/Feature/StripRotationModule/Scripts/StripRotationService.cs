@@ -28,6 +28,7 @@ namespace Feature.StripRotationModule.Scripts {
         private readonly ISlideSegmentService _slideSegmentService;
         private readonly ICameraService _cameraService;
         private readonly IUndoService _undoService;
+        private readonly DragDirectionModel _dragDirectionModel;
 
         private readonly List<StripController> _strips = new List<StripController>();
 
@@ -41,7 +42,7 @@ namespace Feature.StripRotationModule.Scripts {
 
         public StripRotationService(IInputService inputService, MoveTrackModel moveTrackModel, IInteractionStateService interactionStateService,
             IAudioService audioService, IVibrationService vibrationService, StripModel stripModel, ISlideSegmentService slideSegmentService,
-            ICameraService cameraService, IUndoService undoService) {
+            ICameraService cameraService, IUndoService undoService, DragDirectionModel dragDirectionModel) {
             _inputService = inputService;
             _moveTrackModel = moveTrackModel;
             _interactionStateService = interactionStateService;
@@ -51,6 +52,7 @@ namespace Feature.StripRotationModule.Scripts {
             _slideSegmentService = slideSegmentService;
             _cameraService = cameraService;
             _undoService = undoService;
+            _dragDirectionModel = dragDirectionModel;
         }
 
         public void Register(StripController strip) {
@@ -66,11 +68,17 @@ namespace Feature.StripRotationModule.Scripts {
         public void Initialize() {
             _inputService.PointerDown += OnPointerDown;
             _inputService.PointerUp += OnPointerUp;
+            _dragDirectionModel.OnHorizontalDragFromSlide += OnHorizontalDragFromSlide;
         }
 
         public void Dispose() {
             _inputService.PointerDown -= OnPointerDown;
             _inputService.PointerUp -= OnPointerUp;
+            _dragDirectionModel.OnHorizontalDragFromSlide -= OnHorizontalDragFromSlide;
+        }
+
+        private void OnHorizontalDragFromSlide() {
+            _zoomedIn = true;
         }
 
         public void Tick() {
@@ -83,8 +91,6 @@ namespace Feature.StripRotationModule.Scripts {
 
         private void OnPointerDown() {
             if (_moveTrackModel.MovesLeft <= 0)
-                return;
-            if (_interactionStateService.IsSlideActive)
                 return;
             if (_interactionStateService.InputBlocked && _interactionStateService.AllowedStripIndex < 0)
                 return;
