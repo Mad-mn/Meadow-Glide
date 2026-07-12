@@ -36,11 +36,11 @@ namespace Feature.ToolButtonViewModule.Scripts {
             
             LockIcon.SetActive(false);
             if (data.HasTool) {
-                PriceContainer.SetActive(false);
+               // PriceContainer.SetActive(false);
                 AmountContainer.SetActive(true);
                 AmountText.text = data.Amount.ToString();
             } else {
-                PriceContainer.SetActive(true);
+               // PriceContainer.SetActive(true);
                 AmountContainer.SetActive(false);
                 PriveText.text = data.Price.ToString();
             }
@@ -49,7 +49,7 @@ namespace Feature.ToolButtonViewModule.Scripts {
         private void SetupForBlocked() {
             LockIcon.SetActive(true);
             AmountContainer.SetActive(false);
-            PriceContainer.SetActive(false);
+            //PriceContainer.SetActive(false);
         }
     }
 
