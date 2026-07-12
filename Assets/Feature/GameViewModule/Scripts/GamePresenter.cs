@@ -8,6 +8,7 @@ using Feature.LocalizationModule.Scripts.Data;
 using Feature.MainTutorialViewModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
+using Feature.SettingsViewModule.Scripts;
 using Feature.SoundModule.Scripts;
 using Feature.ToolButtonViewModule.Scripts;
 using Feature.TrackMoveModule.Scripts;
@@ -42,8 +43,15 @@ namespace Feature.GameViewModule.Scripts {
             View.MainMenuButton.onClick.AddListener(ShowConfirmExitToMainMenu);
             View.HelpButton.onClick.AddListener(ShowHelpView);
             View.ResetLevelButton.onClick.AddListener(ResetLevelButtonClicked);
+            View.SettingsButton.onClick.AddListener(SettingsButtonClicked);
             _moveTrackModel.OnMovesChanged += UpdateMovesChangedsText;
             _viewService.PrewarmView<ToolButtonView>(ViewType.ToolButtonView);
+            LocalizationEvents.OnLanguageChanged += SetupText;
+        }
+
+        private void SettingsButtonClicked() {
+            _audioService.PlaySound(AudioType.ButtonClick);
+            _viewService.ShowView<SettingsView>(ViewType.SettingsView);
         }
 
         private void ShowHelpView() {
@@ -54,6 +62,7 @@ namespace Feature.GameViewModule.Scripts {
         public override void Dispose() {
             base.Dispose();
             _viewService.ReleasePrewarmedView(ViewType.ToolButtonView);
+            LocalizationEvents.OnLanguageChanged -= SetupText;
         }
 
         public override void Show() {

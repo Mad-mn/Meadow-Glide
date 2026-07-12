@@ -8,6 +8,7 @@ namespace Feature.GameViewModule.Scripts {
         [SerializeField] private Button _mainMenuButton;
         [SerializeField] private Button _helpButton;
         [field: SerializeField] public Button ResetLevelButton { get; private set; }
+        [field: SerializeField] public Button SettingsButton { get; private set; }
         [SerializeField] private TMP_Text _levelTxt;
         [SerializeField] private TMP_Text _moveCountTxt;
         

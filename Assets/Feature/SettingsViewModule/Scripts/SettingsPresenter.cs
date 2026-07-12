@@ -1,3 +1,4 @@
+using Feature.InputModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SoundModule.Scripts;
@@ -16,16 +17,18 @@ namespace Feature.SettingsViewModule.Scripts {
         private readonly IAudioService _audioService;
         private readonly IVibrationService _vibrationService;
         private readonly ILocalizationService _localizationService;
+        private readonly IInteractionStateService _interactionStateService;
 
         public SettingsPresenter(SettingsView view, SaveDataModel saveDataModel, ISaveDataService saveDataService,
             IViewService viewService, IAudioService audioService, IVibrationService vibrationService,
-            ILocalizationService localizationService): base(view) {
+            ILocalizationService localizationService, IInteractionStateService interactionStateService): base(view) {
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _viewService = viewService;
             _audioService = audioService;
             _vibrationService = vibrationService;
             _localizationService = localizationService;
+            _interactionStateService = interactionStateService;
         }
 
         public override void Initialize() {
@@ -39,10 +42,16 @@ namespace Feature.SettingsViewModule.Scripts {
         }
 
         public override void Show() {
+            _interactionStateService.BlockInput();
             PlayerSettingsData playerSettingsData = _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings);
             View.SoundsToggle.isOn = playerSettingsData.SoundsEnabled;
             View.VibrationToggle.isOn = playerSettingsData.VibrationEnabled;
             View.Language.SetValueWithoutNotify((int)playerSettingsData.SelectedLanguage);
+        }
+
+        public override void Hide() {
+            base.Hide();
+            _interactionStateService.UnblockInput();
         }
 
         private void PopulateLanguageDropdown() {
