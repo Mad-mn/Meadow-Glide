@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Feature.CircleModule.Scripts.CircleParamsConfig
   _minRadius: 0.4
   _distanceBetweenCircles: 0.05
-  _segmentWidth: 0.45
+  _segmentWidth: 0.6
   _widthExpansionCoefficient: 0
