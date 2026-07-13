@@ -24,6 +24,7 @@ namespace Feature.SaveDataModule.Scripts.SavedData {
         public bool SoundsEnabled = true;
         public bool MusicEnabled = true;
         public bool VibrationEnabled = true;
+        public bool NotificationsEnabled = true;
         public Language SelectedLanguage = Language.English;
     }
 }

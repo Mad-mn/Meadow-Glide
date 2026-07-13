@@ -9,6 +9,7 @@ namespace Feature.SettingsViewModule.Scripts {
         [field: SerializeField] public Toggle SoundsToggle { get; private set; }
         [field: SerializeField] public Toggle MusicToggle { get; private set; }
         [field: SerializeField] public Toggle VibrationToggle { get; private set; }
+        [field: SerializeField] public Toggle NotificationsToggle { get; private set; }
         [field: SerializeField] public TMP_Dropdown Language { get; private set; }
     }
 }

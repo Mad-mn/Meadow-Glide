@@ -30,6 +30,10 @@ namespace Feature.NotificationModule.Scripts {
         }
 
         public void Initialize() {
+            PlayerSettingsData settings = _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings);
+            if (settings != null && !settings.NotificationsEnabled)
+                return;
+
             NotificationSaveData data = GetOrCreateData();
             if (!data.HasUnlockedDailyChallenge)
                 return;
@@ -48,6 +52,10 @@ namespace Feature.NotificationModule.Scripts {
         }
 
         public void OnDailyChallengeUnlocked() {
+            PlayerSettingsData settings = _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings);
+            if (settings != null && !settings.NotificationsEnabled)
+                return;
+
             NotificationSaveData data = GetOrCreateData();
             if (data.HasUnlockedDailyChallenge)
                 return;
@@ -60,6 +68,26 @@ namespace Feature.NotificationModule.Scripts {
                 return;
 
             ScheduleDailyChallengeForTomorrow();
+        }
+
+        public void SetNotificationsEnabled(bool enabled) {
+            if (enabled) {
+                Initialize();
+            } else {
+                CancelAllNotifications();
+            }
+        }
+
+        private void CancelAllNotifications() {
+            _scheduler.CancelAll();
+
+            NotificationSaveData data = GetOrCreateData();
+            data.HasScheduledNotification = false;
+            data.DailyChallengeScheduledTimestamp = 0;
+            data.LastScheduledDate = "";
+            SaveData(data);
+
+            Debug.Log("[Notification] All notifications cancelled");
         }
 
         private void ScheduleDailyChallengeForTomorrow() {

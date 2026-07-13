@@ -46,5 +46,6 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Tutorial_TapToContinue = 43,
         Notification_DailyChallenge_Title = 44,
         Notification_DailyChallenge_Body = 45,
+        Notifications = 46,
     }
 }

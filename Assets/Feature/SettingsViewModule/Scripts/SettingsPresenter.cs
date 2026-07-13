@@ -1,4 +1,5 @@
 using Feature.InputModule.Scripts;
+using Feature.NotificationModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
 using Feature.SoundModule.Scripts;
@@ -18,10 +19,12 @@ namespace Feature.SettingsViewModule.Scripts {
         private readonly IVibrationService _vibrationService;
         private readonly ILocalizationService _localizationService;
         private readonly IInteractionStateService _interactionStateService;
+        private readonly INotificationService _notificationService;
 
         public SettingsPresenter(SettingsView view, SaveDataModel saveDataModel, ISaveDataService saveDataService,
             IViewService viewService, IAudioService audioService, IVibrationService vibrationService,
-            ILocalizationService localizationService, IInteractionStateService interactionStateService): base(view) {
+            ILocalizationService localizationService, IInteractionStateService interactionStateService,
+            INotificationService notificationService): base(view) {
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _viewService = viewService;
@@ -29,6 +32,7 @@ namespace Feature.SettingsViewModule.Scripts {
             _vibrationService = vibrationService;
             _localizationService = localizationService;
             _interactionStateService = interactionStateService;
+            _notificationService = notificationService;
         }
 
         public override void Initialize() {
@@ -36,6 +40,7 @@ namespace Feature.SettingsViewModule.Scripts {
             View.SoundsToggle.onValueChanged.AddListener(SoundsToggle);
             View.MusicToggle.onValueChanged.AddListener(MusicToggle);
             View.VibrationToggle.onValueChanged.AddListener(VibrationToggle);
+            View.NotificationsToggle.onValueChanged.AddListener(NotificationsToggle);
             View.Language.onValueChanged.AddListener(OnLanguageChanged);
 
             PopulateLanguageDropdown();
@@ -46,6 +51,7 @@ namespace Feature.SettingsViewModule.Scripts {
             PlayerSettingsData playerSettingsData = _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings);
             View.SoundsToggle.isOn = playerSettingsData.SoundsEnabled;
             View.VibrationToggle.isOn = playerSettingsData.VibrationEnabled;
+            View.NotificationsToggle.isOn = playerSettingsData.NotificationsEnabled;
             View.Language.SetValueWithoutNotify((int)playerSettingsData.SelectedLanguage);
         }
 
@@ -101,6 +107,14 @@ namespace Feature.SettingsViewModule.Scripts {
             else {
                 _audioService.StopMusic();
             }
+        }
+
+        private void NotificationsToggle(bool enabled) {
+            _saveDataModel.Get<PlayerSettingsData>(SaveDataType.Settings)
+                .NotificationsEnabled = enabled;
+            SaveSettings();
+            _notificationService.SetNotificationsEnabled(enabled);
+            _audioService.PlaySound(AudioType.ButtonClick);
         }
 
         private void SaveSettings() {
