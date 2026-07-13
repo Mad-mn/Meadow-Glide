@@ -5,6 +5,7 @@ using Feature.GameStateModule.Scripts;
 using Feature.GameStateModule.Scripts.States;
 using Feature.LevelModule.Scripts;
 using Feature.LocalizationModule.Scripts;
+using Feature.NotificationModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
 using Feature.MessageViewModule.Scripts;
 using Feature.PerfectMapViewModule.Scripts;
@@ -33,10 +34,12 @@ namespace Feature.MainMenuViewModule.Scripts {
         private readonly IPerfectMapService _perfectMapService;
         private readonly PerfectMapModel _perfectMapModel;
         private readonly ILevelService _levelService;
+        private readonly INotificationService _notificationService;
 
         public MainMenuPresenter(MainMenuView view, IGameStateMachine gameStateMachine, SaveDataModel saveDataModel, IViewService viewService,
             IAudioService audioService, [CanBeNull] IPlayerInventoryService playerInventoryService, ILocalizationService localizationService,
-            IMessageService messageService, IPerfectMapService perfectMapService, PerfectMapModel perfectMapModel, ILevelService levelService) : base(view) {
+            IMessageService messageService, IPerfectMapService perfectMapService, PerfectMapModel perfectMapModel, ILevelService levelService,
+            INotificationService notificationService) : base(view) {
             _gameStateMachine = gameStateMachine;
             _saveDataModel = saveDataModel;
             _viewService = viewService;
@@ -47,6 +50,7 @@ namespace Feature.MainMenuViewModule.Scripts {
             _perfectMapService = perfectMapService;
             _perfectMapModel = perfectMapModel;
             _levelService = levelService;
+            _notificationService = notificationService;
         }
 
         public override void Initialize() {
@@ -106,6 +110,7 @@ namespace Feature.MainMenuViewModule.Scripts {
                 _messageService.Show(LocalizationKey.DailyChallenge_Locked);
                 return;
             }
+            _notificationService.OnDailyChallengeUnlocked();
             _viewService.ShowView<DailyChallengeStartView>(ViewType.DailyChallengeStartView);
         }
 

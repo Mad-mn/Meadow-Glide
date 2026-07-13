@@ -13,10 +13,11 @@ Unity 6 (6000.3.10f1) puzzle game — rotate and slide colored ring segments to 
 - **Unity Input System** (new) for input
 - **TextMeshPro** for UI text
 - **Firebase** for analytics/remote config
+- **Unity Mobile Notifications** for local push notifications (Android)
 
 ## Architecture
 
-Feature-based modular layout. **54 modules** under `Assets/Feature/<ModuleName>/`, each containing:
+Feature-based modular layout. **55 modules** under `Assets/Feature/<ModuleName>/`, each containing:
 - Service interfaces (`I*Service`) and implementations
 - Models (plain C# data holders, not MonoBehaviours)
 - MonoBehaviours for view/visual components
@@ -24,9 +25,9 @@ Feature-based modular layout. **54 modules** under `Assets/Feature/<ModuleName>/
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**39 installer calls** (38 non-editor + 1 editor-only `AdRecordingModuleInstaller`) are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`. Notable newer modules: `ChallengeModule`, `UndoModule`, `PlayerInventoryModule`, `TransactionModule`, `DailyChallengeStartViewModule`, `LocalizationModule`.
+**41 installer calls** (40 non-editor + 1 editor-only `AdRecordingModuleInstaller`) are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`. Notable newer modules: `ChallengeModule`, `UndoModule`, `PlayerInventoryModule`, `TransactionModule`, `DailyChallengeStartViewModule`, `LocalizationModule`, `NotificationModule`.
 
-Some modules (e.g. `BackgroundViewModule`, `LoseViewModule`, `WinLevelModule`, `SettingsViewModule`) are view-only and have no installer — they're loaded via Addressables and wired by `ViewService`.
+13 view-only modules have no installer — they're loaded via Addressables and wired by `ViewService`: `BackgroundViewModule`, `ConfirmBuyViewModule`, `ConfirmExitToMainMenuViewModule`, `DailyChallengeCompleteViewModule`, `DebugViewModule`, `GameViewModule`, `LoadingViewModule`, `LoseViewModule`, `MainMenuViewModule`, `MainTutorialViewModule`, `SettingsViewModule`, `ToolButtonViewModule`, `TutorialViewModule`.
 
 ### Scenes (build order)
 1. `Assets/Scenes/InitScene.unity` — Bootstrap (loads first, runs `GameStateMachine`)
@@ -40,9 +41,9 @@ Some modules (e.g. `BackgroundViewModule`, `LoseViewModule`, `WinLevelModule`, `
 - `GameSceneInstaller.cs` exists at `Assets/Feature/Bootstrap/Scripts/` but is currently empty (no-op).
 
 ### Level Data
-- `Assets/ScriptableObjects/Levels/` — hand-crafted level configs (newBalance)
-- `Assets/ScriptableObjects/GeneratedLevels/` — procedurally generated levels (A* solver)
-- Level configs loaded via Addressables as `UniTask<LevelConfigProvider>` (lazy)
+- `Assets/ScriptableObjects/Levels/` — 153 hand-crafted level configs (loaded via Addressables as `UniTask<LevelConfigProvider>`)
+- `Assets/ScriptableObjects/DayliChallangeLevels/` — 35 daily challenge level configs (note: typo "DayliChallange" is in the actual directory name)
+- Level generator tool saves to `Assets/ScriptableObjects/Levels/` — no separate generated directory
 
 ## Editor Tools
 

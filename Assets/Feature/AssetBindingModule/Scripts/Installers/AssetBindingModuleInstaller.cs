@@ -5,6 +5,7 @@ using Feature.ColorServiceModule.Scripts;
 using Feature.DailyChallengeStartViewModule.Scripts;
 using Feature.LevelModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
+using Feature.NotificationModule.Scripts;
 using Feature.PerfectMapViewModule.Scripts.Configs;
 using Feature.PlayerInventoryModule.Configs;
 using Feature.WinLevelModule.Scripts;
@@ -40,6 +41,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<ResourceInfoConfig>(AddressConstants.ResourceInfoConfig);
             Container.BindAddressableAsset<PerfectMapRewardConfigs>(AddressConstants.PerfectMapRewardConfigs);
             Container.BindAddressableAsset<UnlockProgressConfig>(AddressConstants.UnlockProgressConfig);
+            Container.BindAddressableAsset<NotificationConfig>(AddressConstants.NotificationConfig);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
 

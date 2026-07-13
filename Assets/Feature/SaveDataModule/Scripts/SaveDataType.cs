@@ -6,6 +6,7 @@ namespace Feature.SaveDataModule.Scripts
         Settings = 2,
         Statistics = 3,
         PlayerInventory = 4,
-        DailyChallenge = 5
+        DailyChallenge = 5,
+        Notifications = 6
     }
 }

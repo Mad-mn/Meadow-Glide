@@ -44,5 +44,7 @@ namespace Feature.LocalizationModule.Scripts.Data {
         Tutorial_SlideBetweenStrips = 41,
         Tutorial_WinGoal = 42,
         Tutorial_TapToContinue = 43,
+        Notification_DailyChallenge_Title = 44,
+        Notification_DailyChallenge_Body = 45,
     }
 }

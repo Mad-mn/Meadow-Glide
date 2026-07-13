@@ -21,6 +21,7 @@ using Feature.LevelResultModule.Scripts.Installers;
 using Feature.LocalizationModule.Scripts.Installers;
 using Feature.MessageViewModule.Scripts.Installers;
 using Feature.MoveEfficiencyModule.Scripts.Installers;
+using Feature.NotificationModule.Scripts.Installers;
 using Feature.PerfectMapViewModule.Scripts.Installers;
 using Feature.PlayerInventoryModule.Scripts.Installers;
 using Feature.PreGamePlacementModule.Scripts.Installers;
@@ -76,6 +77,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         ToolModuleInstaller.Install(Container);
         TransactionModuleInstaller.Install(Container);
         MoveEfficiencyModuleInstaller.Install(Container);
+        NotificationModuleInstaller.Install(Container);
         ChallengeModuleInstaller.Install(Container);
         CoroutineRunnerInstaller.Install(Container);
         FirebaseModuleInstaller.Install(Container);

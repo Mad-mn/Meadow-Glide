@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 02b31a69185aeef40a10e2e67d15dfc6
+    m_Address: NotificationConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 119a361cf26bef5419ddeb2ff38cb0e1
     m_Address: UnlockProgressConfig
     m_ReadOnly: 0

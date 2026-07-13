@@ -10,6 +10,7 @@ using Feature.LevelModule.Scripts;
 using Feature.LoadingViewModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.MainMenuViewModule.Scripts;
+using Feature.NotificationModule.Scripts;
 using Feature.PerfectMapViewModule.Scripts.Configs;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SaveDataModule.Scripts;
@@ -45,6 +46,8 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IPerfectMapRewardConfigProvider _perfectMapRewardConfigProvider;
         private readonly IByteBrewInitializeService _byteBrewInitializeService;
         private readonly IUnlockProgressConfigProvider _unlockProgressConfigProvider;
+        private readonly INotificationConfigProvider _notificationConfigProvider;
+        private readonly INotificationService _notificationService;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
@@ -52,7 +55,8 @@ namespace Feature.GameStateModule.Scripts.States {
             IAudioDataProvider audioDataProvider, IAudioService audioService, IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
             IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider, IChallengeConfigProvider challengeConfigProvider,
             IResourceInfoProvider resourceInfoProvider, ILocalizationService localizationService, IFirebaseService firebaseService,
-            IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider, IByteBrewInitializeService byteBrewInitializeService, IUnlockProgressConfigProvider unlockProgressConfigProvider) {
+            IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider, IByteBrewInitializeService byteBrewInitializeService, IUnlockProgressConfigProvider unlockProgressConfigProvider,
+            INotificationConfigProvider notificationConfigProvider, INotificationService notificationService) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -72,6 +76,8 @@ namespace Feature.GameStateModule.Scripts.States {
             _perfectMapRewardConfigProvider = perfectMapRewardConfigProvider;
             _byteBrewInitializeService = byteBrewInitializeService;
             _unlockProgressConfigProvider = unlockProgressConfigProvider;
+            _notificationConfigProvider = notificationConfigProvider;
+            _notificationService = notificationService;
         }
 
         public void Enter() {
@@ -85,6 +91,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _firebaseService.Initialize();
             _byteBrewInitializeService.Initialize();
             _saveDataService.LoadAll();
+            _notificationService.Initialize();
             _localizationService.Initialize();
             await _cameraService.Initialize();
             await _viewService.Initialize();
@@ -119,6 +126,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _resourceInfoProvider.Initialize();
             await _perfectMapRewardConfigProvider.Initialize();
             await _unlockProgressConfigProvider.Initialize();
+            await _notificationConfigProvider.Initialize();
         }
     }
 }
