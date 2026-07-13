@@ -38,6 +38,7 @@ using Feature.TutorialModule.Scripts.Installers;
 using Feature.UIServiceModule.Scripts.Installers;
 using Feature.UndoModule.Scripts.Installers;
 using Feature.VibrationModule.Scripts.Installers;
+using Feature.WinLevelModule.Scripts.Installers;
 using UnityEngine;
 using Zenject;
 
@@ -84,6 +85,7 @@ public class ProjectContextInstaller : ScriptableObjectInstaller<ProjectContextI
         PerfectMapViewModuleInstaller.Install(Container);
         MessageViewModuleInstaller.Install(Container);
         ByteBrewModuleInstaller.Install(Container);
+        WinLevelModuleInstaller.Install(Container);
 #if UNITY_EDITOR
         AdRecordingModuleInstaller.Install(Container);
 #endif

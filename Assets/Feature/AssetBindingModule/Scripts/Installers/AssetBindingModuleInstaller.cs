@@ -7,6 +7,7 @@ using Feature.LevelModule.Scripts;
 using Feature.LocalizationModule.Scripts.Data;
 using Feature.PerfectMapViewModule.Scripts.Configs;
 using Feature.PlayerInventoryModule.Configs;
+using Feature.WinLevelModule.Scripts;
 using Feature.PlayerInventoryModule.Scripts;
 using Feature.SlideAreaModule.Scripts;
 using Feature.SoundModule.Scripts;
@@ -38,6 +39,7 @@ namespace Feature.AssetBindingModule.Scripts.Installers {
             Container.BindAddressableAsset<ChallengeConfigs>(AddressConstants.DailyChallengeConfigs);
             Container.BindAddressableAsset<ResourceInfoConfig>(AddressConstants.ResourceInfoConfig);
             Container.BindAddressableAsset<PerfectMapRewardConfigs>(AddressConstants.PerfectMapRewardConfigs);
+            Container.BindAddressableAsset<UnlockProgressConfig>(AddressConstants.UnlockProgressConfig);
 
             Container.BindAddressableComponent<UIRoot>(AddressConstants.UIRoot);
 

@@ -21,6 +21,7 @@ using Feature.StatusModule.Scripts.SlideAreas;
 using Feature.ToolModule.Scripts;
 using Feature.TransactionModule.Scripts;
 using Feature.UIServiceModule.Scripts;
+using Feature.WinLevelModule.Scripts;
 using UnityEngine;
 
 namespace Feature.GameStateModule.Scripts.States {
@@ -43,6 +44,7 @@ namespace Feature.GameStateModule.Scripts.States {
         private readonly IFirebaseService _firebaseService;
         private readonly IPerfectMapRewardConfigProvider _perfectMapRewardConfigProvider;
         private readonly IByteBrewInitializeService _byteBrewInitializeService;
+        private readonly IUnlockProgressConfigProvider _unlockProgressConfigProvider;
         public event Action<Type> ChangeState;
 
         public BootstrapState(IViewService viewService, ICameraService cameraService, ISaveDataService saveDataService,
@@ -50,7 +52,7 @@ namespace Feature.GameStateModule.Scripts.States {
             IAudioDataProvider audioDataProvider, IAudioService audioService, IVibrationService vibrationService, IEconomyDataProvider economyDataProvider,
             IToolConfigProvider toolConfigProvider, ITransactionConfigsProvider transactionConfigsProvider, IChallengeConfigProvider challengeConfigProvider,
             IResourceInfoProvider resourceInfoProvider, ILocalizationService localizationService, IFirebaseService firebaseService,
-            IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider, IByteBrewInitializeService byteBrewInitializeService) {
+            IPerfectMapRewardConfigProvider perfectMapRewardConfigProvider, IByteBrewInitializeService byteBrewInitializeService, IUnlockProgressConfigProvider unlockProgressConfigProvider) {
             _viewService = viewService;
             _cameraService = cameraService;
             _saveDataService = saveDataService;
@@ -69,6 +71,7 @@ namespace Feature.GameStateModule.Scripts.States {
             _firebaseService = firebaseService;
             _perfectMapRewardConfigProvider = perfectMapRewardConfigProvider;
             _byteBrewInitializeService = byteBrewInitializeService;
+            _unlockProgressConfigProvider = unlockProgressConfigProvider;
         }
 
         public void Enter() {
@@ -115,6 +118,7 @@ namespace Feature.GameStateModule.Scripts.States {
             await _challengeConfigProvider.Initialize();
             await _resourceInfoProvider.Initialize();
             await _perfectMapRewardConfigProvider.Initialize();
+            await _unlockProgressConfigProvider.Initialize();
         }
     }
 }

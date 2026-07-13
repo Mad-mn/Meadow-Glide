@@ -16,7 +16,7 @@ Unity 6 (6000.3.10f1) puzzle game — rotate and slide colored ring segments to 
 
 ## Architecture
 
-Feature-based modular layout. **53 modules** under `Assets/Feature/<ModuleName>/`, each containing:
+Feature-based modular layout. **54 modules** under `Assets/Feature/<ModuleName>/`, each containing:
 - Service interfaces (`I*Service`) and implementations
 - Models (plain C# data holders, not MonoBehaviours)
 - MonoBehaviours for view/visual components
@@ -88,7 +88,7 @@ Some modules (e.g. `BackgroundViewModule`, `LoseViewModule`, `WinLevelModule`, `
 
 Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key points:
 - Views inherit from `ViewBase`, Presenters from `PresenterBase<TView>`
-- All views registered in `ViewSettings` ScriptableObject with ViewType enum
+- All views registered in `ViewSettings` ScriptableObject with ViewType enum (18 view types)
 - Use `_viewService.ShowView<T>(ViewType)` / `_viewService.HideView(ViewType)`
 - View creation and Presenter lifecycle managed by `ViewService`
 - Business logic goes in Presenter, UI logic stays in View

@@ -50,6 +50,7 @@ public static class AddressConstants
     public const string TutorialAssetsConfig = "TutorialAssetsConfig";
     public const string TutorialView = "TutorialView";
     public const string UIRoot = "UIRoot";
+    public const string UnlockProgressConfig = "UnlockProgressConfig";
     public const string ViewSettings = "ViewSettings";
     public const string WinLevel = "WinLevel";
 }

@@ -9,5 +9,7 @@ namespace Feature.WinLevelModule.Scripts {
         [field: SerializeField] public Button NextButton{get; private set;}
         [field: SerializeField] public Button MainMenuButton{get; private set;}
         [field: SerializeField] public TMP_Text MovesCount{get; private set;}
+        [field: SerializeField] public UnlockProgressBar UnlockProgressBar{get; private set;}
+        
     }
 }
