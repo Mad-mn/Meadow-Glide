@@ -48,6 +48,7 @@ namespace Feature.NotificationModule.Scripts {
                     return;
             }
 
+            _scheduler.Initialize();
             ScheduleDailyChallengeForTomorrow();
         }
 
