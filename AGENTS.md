@@ -25,7 +25,7 @@ Feature-based modular layout. **55 modules** under `Assets/Feature/<ModuleName>/
 - A Zenject installer (`Installers/*ModuleInstaller.cs`)
 - Presenters (MVP pattern for UI views)
 
-**41 installer calls** (40 non-editor + 1 editor-only `AdRecordingModuleInstaller`) are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`. Notable newer modules: `ChallengeModule`, `UndoModule`, `PlayerInventoryModule`, `TransactionModule`, `DailyChallengeStartViewModule`, `LocalizationModule`, `NotificationModule`.
+**41 installer calls** (40 non-editor + 1 editor-only `AdRecordingModuleInstaller`) are registered in `Assets/Feature/Bootstrap/Scripts/ProjectContextInstaller.cs`. Notable newer modules: `ChallengeModule`, `UndoModule`, `PlayerInventoryModule`, `TransactionModule`, `DailyChallengeStartViewModule`, `LocalizationModule`, `NotificationModule`, `ByteBrewModule`, `CoroutineRunnerModule`, `MessageViewModule`, `PerfectMapViewModule`, `WinLevelModule`, `LevelResultModule`.
 
 13 view-only modules have no installer — they're loaded via Addressables and wired by `ViewService`: `BackgroundViewModule`, `ConfirmBuyViewModule`, `ConfirmExitToMainMenuViewModule`, `DailyChallengeCompleteViewModule`, `DebugViewModule`, `GameViewModule`, `LoadingViewModule`, `LoseViewModule`, `MainMenuViewModule`, `MainTutorialViewModule`, `SettingsViewModule`, `ToolButtonViewModule`, `TutorialViewModule`.
 
@@ -41,7 +41,7 @@ Feature-based modular layout. **55 modules** under `Assets/Feature/<ModuleName>/
 - `GameSceneInstaller.cs` exists at `Assets/Feature/Bootstrap/Scripts/` but is currently empty (no-op).
 
 ### Level Data
-- `Assets/ScriptableObjects/Levels/` — 153 hand-crafted level configs (loaded via Addressables as `UniTask<LevelConfigProvider>`)
+- `Assets/ScriptableObjects/Levels/` — 150 hand-crafted level configs (loaded via Addressables as `UniTask<LevelConfigProvider>`)
 - `Assets/ScriptableObjects/DayliChallangeLevels/` — 35 daily challenge level configs (note: typo "DayliChallange" is in the actual directory name)
 - Level generator tool saves to `Assets/ScriptableObjects/Levels/` — no separate generated directory
 
@@ -81,6 +81,7 @@ Feature-based modular layout. **55 modules** under `Assets/Feature/<ModuleName>/
 
 - **`AddressConstants.cs` is auto-generated** — never edit manually. Run `Tools/GenerateAdresablesNames` after changing Addressable addresses.
 - **Assets loaded via Addressables** — injected as `UniTask<T>` constructor params (lazy promises).
+- **Config providers** — many modules use `I*ConfigProvider` interfaces to load ScriptableObject configs via Addressables. Examples: `LevelConfigProvider`, `ChallengeConfigProvider`, `ToolConfigProvider`.
 - **Services bound as `AsSingle()`** with `BindInterfacesAndSelfTo`.
 - **Models are plain C#** — no MonoBehaviour inheritance, no DI dependencies.
 - **UI is global** — `UIRoot` uses `DontDestroyOnLoad` across all scenes.
@@ -106,7 +107,7 @@ Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key poin
 - `FindObjectOfType<MonoBehaviour>()` called on every audio operation in `AudioService.GetMonoBehaviour()` — no caching.
 - `FindObjectsByType<Camera>()` fallback in `CircleRotationService.RotateCircle()` runs every frame during drag.
 - `SaveDataService` has an unused `using System.Runtime.Serialization.Formatters.Binary;` import — BinaryFormatter was replaced by Newtonsoft.Json. Clean it up if you touch the file.
-- LINQ allocates in hot paths: `OrderBy().FirstOrDefault()` in `CircleRotationService` and `StripRotationService` on every pointer down, and `FirstOrDefault()` in `SlideSegmentService` on segment updates.
+- LINQ `FirstOrDefault()` in hot paths: `CircleRotationService` and `StripRotationService` on every pointer down, `SlideSegmentService` on segment updates.
 - `AddressConstants` has a typo: `GircleModule` should be `CircleModule` — auto-generated, fix the Addressable address.
 - Coroutines are still actively used in `TutorialModule` hint states, `AudioService` fade logic, and animation controllers (`StripAnimationController`, `CircleAnimationController`, `SlideAreaAnimationController`). `CoroutineRunnerModule` exists as a dedicated host for coroutine execution.
 
@@ -119,4 +120,4 @@ Detailed rules in `Assets/Feature/UIServiceModule/ViewServiceRules.md`. Key poin
 
 ## Further Reference
 
-- `PROJECT_ANALYSIS.md` — detailed architecture diagrams, dependency graphs, and performance/refactoring notes for the full codebase. Note: some figures are stale (e.g., says "20 module installers" — actual count is 39).
+- `PROJECT_ANALYSIS.md` — detailed architecture diagrams, dependency graphs, and performance/refactoring notes for the full codebase. Note: some figures are stale (e.g., says "20 module installers" — actual count is 41 installer calls).

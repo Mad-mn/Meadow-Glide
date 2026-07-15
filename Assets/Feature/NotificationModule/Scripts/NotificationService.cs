@@ -1,5 +1,4 @@
 using System;
-using Feature.ChallengeModule.Scripts;
 using Feature.LocalizationModule.Scripts;
 using Feature.SaveDataModule.Scripts;
 using Feature.SaveDataModule.Scripts.SavedData;
@@ -7,9 +6,11 @@ using UnityEngine;
 
 namespace Feature.NotificationModule.Scripts {
     public class NotificationService : INotificationService {
+        private const int DAILY_CHALLENGE_UNLOCK_LEVEL = 12;
+        private const int NOTIFICATION_HOUR = 10;
+
         private readonly INotificationConfigProvider _configProvider;
         private readonly INotificationScheduler _scheduler;
-        private readonly IChallengeService _challengeService;
         private readonly ISaveDataModel _saveDataModel;
         private readonly ISaveDataService _saveDataService;
         private readonly ILocalizationService _localizationService;
@@ -17,13 +18,11 @@ namespace Feature.NotificationModule.Scripts {
         public NotificationService(
             INotificationConfigProvider configProvider,
             INotificationScheduler scheduler,
-            IChallengeService challengeService,
             ISaveDataModel saveDataModel,
             ISaveDataService saveDataService,
             ILocalizationService localizationService) {
             _configProvider = configProvider;
             _scheduler = scheduler;
-            _challengeService = challengeService;
             _saveDataModel = saveDataModel;
             _saveDataService = saveDataService;
             _localizationService = localizationService;
@@ -35,21 +34,21 @@ namespace Feature.NotificationModule.Scripts {
                 return;
 
             NotificationSaveData data = GetOrCreateData();
-            if (!data.HasUnlockedDailyChallenge)
-                return;
 
-            string today = DateTime.Today.ToString("yyyy-MM-dd");
-            if (data.LastScheduledDate == today)
-                return;
-
-            if (data.HasScheduledNotification) {
-                DateTime scheduledTime = DateTimeOffset.FromUnixTimeSeconds(data.DailyChallengeScheduledTimestamp).LocalDateTime;
-                if (scheduledTime > DateTime.Now)
+            if (!data.HasUnlockedDailyChallenge) {
+                CheckAndUnlockDailyChallenge(data);
+                if (!data.HasUnlockedDailyChallenge)
                     return;
             }
 
+            string today = DateTime.Today.ToString("yyyy-MM-dd");
+            if (data.LastLaunchDate != today) {
+                data.LastLaunchDate = today;
+                SaveData(data);
+            }
+
             _scheduler.Initialize();
-            ScheduleDailyChallengeForTomorrow();
+            EnsureTomorrowNotificationScheduled(data);
         }
 
         public void OnDailyChallengeUnlocked() {
@@ -64,14 +63,8 @@ namespace Feature.NotificationModule.Scripts {
                 SaveData(data);
             }
 
-            if (data.HasScheduledNotification) {
-                _scheduler.CancelAll();
-                data.HasScheduledNotification = false;
-                data.DailyChallengeScheduledTimestamp = 0;
-            }
-
             _scheduler.Initialize();
-            ScheduleDailyChallengeForTomorrow();
+            EnsureTomorrowNotificationScheduled(data);
         }
 
         public void SetNotificationsEnabled(bool enabled) {
@@ -82,49 +75,61 @@ namespace Feature.NotificationModule.Scripts {
             }
         }
 
+        private void CheckAndUnlockDailyChallenge(NotificationSaveData data) {
+            PlayerProgressData progress = _saveDataModel.Get<PlayerProgressData>(SaveDataType.PlayerProgress);
+            if (progress != null && progress.Level >= DAILY_CHALLENGE_UNLOCK_LEVEL) {
+                data.HasUnlockedDailyChallenge = true;
+                SaveData(data);
+                Debug.Log("[Notification] Daily Challenge auto-unlocked");
+            }
+        }
+
+        private void EnsureTomorrowNotificationScheduled(NotificationSaveData data) {
+            NotificationEntry entry = _configProvider.GetEntry(NotificationType.DailyChallenge);
+            if (entry == null || !entry.Enabled)
+                return;
+
+            DateTime tomorrow10AM = DateTime.Today.AddDays(1).AddHours(NOTIFICATION_HOUR);
+
+            if (data.ScheduledNotificationTimestamp > 0) {
+                DateTime scheduledTime = DateTimeOffset.FromUnixTimeSeconds(data.ScheduledNotificationTimestamp).LocalDateTime;
+
+                if (scheduledTime >= tomorrow10AM && scheduledTime < tomorrow10AM.AddDays(1))
+                    return;
+            }
+
+            ScheduleNotification(entry, tomorrow10AM, data);
+        }
+
+        private void ScheduleNotification(NotificationEntry entry, DateTime fireTime, NotificationSaveData data) {
+            string title = _localizationService.Get(entry.TitleKey);
+            string body = _localizationService.Get(entry.BodyKey);
+
+            int notificationId = GenerateNotificationId();
+
+            _scheduler.Schedule(notificationId, title, body, fireTime);
+
+            data.ScheduledNotificationId = notificationId;
+            data.ScheduledNotificationTimestamp = new DateTimeOffset(fireTime).ToUnixTimeSeconds();
+            SaveData(data);
+
+            Debug.Log($"[Notification] Scheduled Daily Challenge at {fireTime} (ID: {notificationId})");
+        }
+
         private void CancelAllNotifications() {
             _scheduler.CancelAll();
 
             NotificationSaveData data = GetOrCreateData();
-            data.HasScheduledNotification = false;
-            data.DailyChallengeScheduledTimestamp = 0;
-            data.LastScheduledDate = "";
+            data.ScheduledNotificationId = 0;
+            data.ScheduledNotificationTimestamp = 0;
+            data.LastLaunchDate = "";
             SaveData(data);
 
             Debug.Log("[Notification] All notifications cancelled");
         }
 
-        private void ScheduleDailyChallengeForTomorrow() {
-            NotificationEntry entry = _configProvider.GetEntry(NotificationType.DailyChallenge);
-            if (entry == null || !entry.Enabled)
-                return;
-
-            DateTime baseTime = DateTime.Now.AddHours(entry.DelayHours);
-            DateTime validTime = ApplyDeliveryWindow(baseTime, entry.DeliveryWindowStartHour, entry.DeliveryWindowEndHour);
-
-            string title = _localizationService.Get(entry.TitleKey);
-            string body = _localizationService.Get(entry.BodyKey);
-            _scheduler.Schedule(entry.NotificationId, title, body, validTime);
-
-            NotificationSaveData data = GetOrCreateData();
-            data.DailyChallengeScheduledTimestamp = new DateTimeOffset(validTime).ToUnixTimeSeconds();
-            data.HasScheduledNotification = true;
-            data.LastScheduledDate = DateTime.Today.ToString("yyyy-MM-dd");
-            SaveData(data);
-
-            Debug.Log($"[Notification] Scheduled Daily Challenge at {validTime}");
-        }
-
-        private static DateTime ApplyDeliveryWindow(DateTime baseTime, int startHour, int endHour) {
-            if (baseTime.Hour >= startHour && baseTime.Hour < endHour) {
-                return baseTime;
-            }
-
-            if (baseTime.Hour < startHour) {
-                return baseTime.Date.AddHours(startHour);
-            }
-
-            return baseTime.Date.AddDays(1).AddHours(startHour);
+        private int GenerateNotificationId() {
+            return (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % int.MaxValue);
         }
 
         private NotificationSaveData GetOrCreateData() {
