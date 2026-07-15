@@ -58,16 +58,19 @@ namespace Feature.NotificationModule.Scripts {
                 return;
 
             NotificationSaveData data = GetOrCreateData();
-            if (data.HasUnlockedDailyChallenge)
-                return;
 
-            data.HasUnlockedDailyChallenge = true;
-            SaveData(data);
+            if (!data.HasUnlockedDailyChallenge) {
+                data.HasUnlockedDailyChallenge = true;
+                SaveData(data);
+            }
 
-            string today = DateTime.Today.ToString("yyyy-MM-dd");
-            if (data.LastScheduledDate == today)
-                return;
+            if (data.HasScheduledNotification) {
+                _scheduler.CancelAll();
+                data.HasScheduledNotification = false;
+                data.DailyChallengeScheduledTimestamp = 0;
+            }
 
+            _scheduler.Initialize();
             ScheduleDailyChallengeForTomorrow();
         }
 

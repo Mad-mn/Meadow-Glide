@@ -91,13 +91,13 @@ namespace Feature.GameStateModule.Scripts.States {
             await _firebaseService.Initialize();
             _byteBrewInitializeService.Initialize();
             _saveDataService.LoadAll();
-            _notificationService.Initialize();
             _localizationService.Initialize();
             await _cameraService.Initialize();
             await _viewService.Initialize();
             _viewService.ShowView<BackgroundView>(ViewType.BackgroundView);
             _viewService.ShowView<LoadingView>(ViewType.LoadingView);
             await InitializeDataProviders();
+            _notificationService.Initialize();
             _audioService.Initialize();
             _vibrationService.Initialize();
             await _levelService.Initialize();
